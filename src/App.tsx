@@ -1,9 +1,11 @@
 import React from 'react';
 import logo from './logo.svg';
 import styles from './App.module.scss';
+import {myAction} from "./reducer";
+import { useDispatch } from 'react-redux'
 
 function App() {
-    console.log(styles)
+    const dispatch = useDispatch()
     return (
         <div className={styles.app}>
             <header className={styles.appHeader}>
@@ -19,6 +21,7 @@ function App() {
                 >
                     Learn React
                 </a>
+                <button style={{width: '100px', height: '100px'}} onClick={() => dispatch(myAction())}/>
             </header>
         </div>
     );
