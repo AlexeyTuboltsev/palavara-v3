@@ -1,6 +1,8 @@
 import {pathToRegexp, Key, compile} from "path-to-regexp";
-import {BrowserHistory} from "history";
+import {BrowserHistory, createBrowserHistory} from "history";
 import {ERoute, routeDefs, TRoute, TRouteDef} from "../router";
+import {setRoute} from "../reducer";
+import { Dispatch } from "@reduxjs/toolkit";
 
 function compilePath(path: string, options: {}) {
   const keys: Key[] = [];
@@ -51,7 +53,7 @@ export function setLocation(history: BrowserHistory, routes:TRouteDef[], route: 
   }
 }
 
-export function getInitialRoute(location: Location): TRoute {
+export function getRoute(location: Location): TRoute {
   let routeMatch = null
   for (const routeObject of routeDefs) {
     const result = matchRoute(routeObject.routePattern, location.pathname)
@@ -73,4 +75,17 @@ export function getInitialRoute(location: Location): TRoute {
       ? { routeName: ERoute.HOME , params: {} }
       : { routeName: routeMatch.route.routeName, params: parseResult} as TRoute
   }
+}
+
+export function setupHistory(dispatch: Dispatch) {
+  const history = createBrowserHistory()
+
+
+  const unlisten = history.listen(({action, location}) => {
+    if (action === "POP") {
+      const route = getRoute(location as any) //todo getRoute has a fallback, here we need an explicit notFound
+      dispatch(setRoute(route))
+    }
+  })
+  return [history, unlisten]
 }

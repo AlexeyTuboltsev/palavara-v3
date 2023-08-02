@@ -10,7 +10,7 @@ export function* locationWatcherSaga(history: BrowserHistory, initialRoute: TRou
   yield call(setLocation, history, routeDefs, initialRoute)
   while (true) {
     // const cancel = yield take() //TODO
-    const routeAction: PayloadAction<TRoute> = yield take(setRoute.type)
+    const routeAction: PayloadAction<TRoute> = yield take([setRoute.type])
     yield call(setLocation,  history, routeDefs,routeAction.payload)
   }
 }
