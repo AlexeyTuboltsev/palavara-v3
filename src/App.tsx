@@ -1,30 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
-import styles from './App.module.scss';
-import {myAction} from "./reducer";
-import { useDispatch } from 'react-redux'
+import React, {FC} from 'react';
+import {useSelector} from 'react-redux'
+import {TStore} from "./store";
+import {ERoute} from "./router";
+import {EAppState, TReadyAppState} from "./reducer";
+import {Home} from "./routes/home/home";
+import { OtherRoute } from './routes/otherRoute/otherRoute';
+import { RouteThree } from './routes/routeThree/routeThree';
 
 function App() {
-    const dispatch = useDispatch()
-    return (
-        <div className={styles.app}>
-            <header className={styles.appHeader}>
-                <img src={logo} className={styles.appLogo} alt="logo"/>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to reload.
-                </p>
-                <a
-                    className={styles.appLink}
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Learn React
-                </a>
-                <button style={{width: '100px', height: '100px'}} onClick={() => dispatch(myAction())}/>
-            </header>
-        </div>
-    );
+    const state = useSelector((store: TStore) => store.ui)
+    switch (state.appState){
+        case EAppState.NOT_STARTED:
+            return <AppNotStarted />
+        case EAppState.IN_PROGRESS:
+            return <AppInProgress />
+        case EAppState.READY:
+            return <AppReady {...state} />
+        case EAppState.ERROR:
+            return <AppError />
+    }
 }
 
 export default App;
+
+export const AppNotStarted = () => <div>starting</div>
+export const AppInProgress = () => <div>starting...</div>
+export const AppError = () => <div>error</div>
+
+export const AppReady:FC<TReadyAppState> = (state) => {
+    switch (state.route.routeName) {
+        case ERoute.HOME:
+            return <Home/>;
+        case ERoute.OTHER_ROUTE:
+            return <OtherRoute/>;
+        case ERoute.ROUTE_TREE:
+            return <RouteThree/>;
+    }
+}

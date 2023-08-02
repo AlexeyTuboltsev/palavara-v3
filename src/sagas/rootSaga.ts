@@ -1,12 +1,7 @@
-import {put, fork} from "redux-saga/effects";
-import {myAction} from "../reducer";
-import {actions} from '../actions'
+import {fork,} from "redux-saga/effects";
 
-function* initSaga(){
-  yield put(actions.initStarted())
-  const location = window.location
-  put(myAction())
-}
+import {initSaga} from "./initSaga";
+
 
 export function* rootSaga() {
   yield fork(initSaga);

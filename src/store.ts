@@ -3,14 +3,15 @@ import {uiReducer} from "./reducer";
 import createSagaMiddleware from "redux-saga";
 import {rootSaga} from "./sagas/rootSaga";
 
+export type TStore = ReturnType<typeof store.getState>
 
 let sagaMiddleware = createSagaMiddleware();
-const middleware = [...getDefaultMiddleware({ thunk: false }), sagaMiddleware];
+const middleware = [...getDefaultMiddleware({thunk: false}), sagaMiddleware];
 
 export const store = configureStore({
-    devTools: true,
-    middleware,
-    reducer: {ui:uiReducer}
+  devTools: true,
+  middleware,
+  reducer: {ui: uiReducer}
 })
 
 sagaMiddleware.run(rootSaga);
