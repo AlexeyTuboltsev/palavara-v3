@@ -2,7 +2,7 @@ import {pathToRegexp, Key, compile} from "path-to-regexp";
 import {BrowserHistory, createBrowserHistory} from "history";
 import {ERoute, routeDefs, TRoute, TRouteDef} from "../router";
 import {setRoute} from "../reducer";
-import { Dispatch } from "@reduxjs/toolkit";
+import {Dispatch} from "@reduxjs/toolkit";
 
 function compilePath(path: string, options: {}) {
   const keys: Key[] = [];
@@ -35,14 +35,14 @@ export function matchRoute(route: string, pathname: string) {
   };
 }
 
-function getRoutePattern(routes:TRouteDef[], route: TRoute) {
+function getRoutePattern(routes: TRouteDef[], route: TRoute) {
   return routes.find(r => r.routeName === route.routeName)
 }
 
-export function setLocation(history: BrowserHistory, routes:TRouteDef[], route: TRoute) {
+export function setLocation(history: BrowserHistory, routes: TRouteDef[], route: TRoute) {
   const routeDef = getRoutePattern(routes, route)
   if (routeDef) {
-    const toPath = compile(routeDef.routePattern, { encode: encodeURIComponent });
+    const toPath = compile(routeDef.routePattern, {encode: encodeURIComponent});
     const path = toPath(route.params)
 
     if (path !== window.location.pathname) {
@@ -53,13 +53,12 @@ export function setLocation(history: BrowserHistory, routes:TRouteDef[], route: 
   }
 }
 
-export function getRoute(location: Location): TRoute {
+export function getRoute(location: {pathname:string}): TRoute {
   let routeMatch = null
-  for (const routeObject of routeDefs) {
-    const result = matchRoute(routeObject.routePattern, location.pathname)
-    console.log("result", result)
+  for (const routeDef of routeDefs) {
+    const result = matchRoute(routeDef.routePattern, location.pathname)
     if (result) {
-      routeMatch = {match: result, route: routeObject}
+      routeMatch = {match: result, routeDef}
       break;
     }
   }
@@ -67,13 +66,13 @@ export function getRoute(location: Location): TRoute {
   if (!routeMatch) {
     return {routeName: ERoute.HOME, params: {}}
   } else {
-    const parseResult = routeMatch.route.paramsParser
-      ? routeMatch.route.paramsParser(routeMatch.match.params)
+    const parseResult = routeMatch.routeDef.paramsParser
+      ? routeMatch.routeDef.paramsParser(routeMatch.match.params)
       : {}
 
     return parseResult === null
-      ? { routeName: ERoute.HOME , params: {} }
-      : { routeName: routeMatch.route.routeName, params: parseResult} as TRoute
+      ? {routeName: ERoute.HOME, params: {}}
+      : {routeName: routeMatch.routeDef.routeName, params: parseResult} as TRoute
   }
 }
 
@@ -83,7 +82,7 @@ export function setupHistory(dispatch: Dispatch) {
 
   const unlisten = history.listen(({action, location}) => {
     if (action === "POP") {
-      const route = getRoute(location as any) //todo getRoute has a fallback, here we need an explicit notFound
+      const route = getRoute(location) //todo getRoute has a fallback, here we need an explicit notFound
       dispatch(setRoute(route))
     }
   })
