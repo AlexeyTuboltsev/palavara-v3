@@ -12,7 +12,7 @@ export type TAppState =
   | TNotStartedAppState
   | TInProgressAppState
   | TReadyAppState
-  | { appState: EAppState.ERROR, error: string }
+  | TErrorAppState
 
 export type TReadyAppState = {
   appState: EAppState.READY
@@ -21,6 +21,7 @@ export type TReadyAppState = {
 
 export type TNotStartedAppState = { appState: EAppState.NOT_STARTED }
 export type TInProgressAppState = { appState: EAppState.IN_PROGRESS }
+export type TErrorAppState = { appState: EAppState.ERROR, errorMessage: string }
 
 function isReadyAppState(state: any): state is TReadyAppState {
   return state.appState === EAppState.READY

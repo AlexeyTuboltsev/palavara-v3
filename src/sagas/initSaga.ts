@@ -6,8 +6,9 @@ import {locationWatcherSaga} from "./locationWatcherSaga";
 import {getRoute, setupHistory} from "../utils/routerUtils";
 import {Dispatch} from "@reduxjs/toolkit";
 import {setupResizeObserver} from "../services/resizeObserver";
+import {langWatcherSaga} from "./langWatcherSaga";
 
-export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement) {
+export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n:any) {
   yield put(setAppState({appState: EAppState.IN_PROGRESS}))
   const [history, stopHistoryListener]: [BrowserHistory, () => void] = yield call(setupHistory, dispatch)
   const stopResizeObserver: () => void = yield call(setupResizeObserver, rootElement, dispatch)
@@ -17,5 +18,18 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement) {
   yield fork(locationWatcherSaga, history, initialRoute)
   yield put(setAppState({appState: EAppState.READY, route: initialRoute}))
 
-  //TODO teardown (unlisten)
+  yield call(i18n.init,{
+    fallbackLng: 'en',
+    debug: true,
+
+    ns:['translation'],
+    interpolation: {
+      escapeValue: false,
+    },
+  })
+
+  yield fork(langWatcherSaga, i18n)
+
+  //TODO teardown (stopHistoryListener, stopResizeObserver, langWatcher)
 }
+

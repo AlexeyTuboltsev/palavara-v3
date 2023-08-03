@@ -9,7 +9,7 @@ export enum EHttpMethod {
     HEAD = "HEAD",
 }
 
-function createRequest(method:EHttpMethod, url:string) {
+export function createRequest(method:EHttpMethod, url:string) {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = axios.request({
         method,

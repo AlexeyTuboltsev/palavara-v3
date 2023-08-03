@@ -14,7 +14,7 @@ const store = configureStore({
   reducer: {ui: uiReducer}
 })
 
-export function initStore(rootElement:HTMLElement){
-  sagaMiddleware.run(rootSaga, store.dispatch, rootElement);
+export function initStore(rootElement:HTMLElement, i18n:any){
+  sagaMiddleware.run(rootSaga, store.dispatch, rootElement, i18n);
   return store
 }

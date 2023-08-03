@@ -1,3 +1,5 @@
+// import { resources, defaultNS } from "./i18n";
+
 /// <reference types="node" />
 /// <reference types="react" />
 /// <reference types="react-dom" />

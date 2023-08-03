@@ -3,6 +3,6 @@ import { Dispatch } from "@reduxjs/toolkit";
 import {initSaga} from "./initSaga";
 
 
-export function* rootSaga(dispatch: Dispatch, rootElement: HTMLElement) {
-  yield fork(initSaga, dispatch, rootElement);
+export function* rootSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n:any) {
+  yield fork(initSaga, dispatch, rootElement, i18n);
 }
