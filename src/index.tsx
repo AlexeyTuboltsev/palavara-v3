@@ -1,14 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import {initStore} from './store'
 import {Provider} from 'react-redux'
 import {I18nextProvider} from 'react-i18next';
 import {i18n} from "./services/i18n"
 import {initSentry} from "./services/sentry";
-import { ErrorBoundary } from './components/ErrorBoundary';
-
+import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
+import {App} from './components/App/App'
 initSentry()
 
 export const rootElement = document.getElementById('root') as HTMLElement
@@ -19,7 +18,7 @@ root.render(
   <ErrorBoundary>
     <Provider store={initStore(rootElement, i18n)}>
       <I18nextProvider i18n={i18n} defaultNS={'translation'}>
-        <App/>
+        <App />
       </I18nextProvider>
     </Provider>
   </ErrorBoundary>

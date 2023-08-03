@@ -1,4 +1,4 @@
-import styles from "../../App.module.scss";
+import styles from "../../components/App/App.module.scss";
 import logo from "../../logo.svg";
 import {useDispatch} from 'react-redux'
 import {setRoute} from "../../reducer";

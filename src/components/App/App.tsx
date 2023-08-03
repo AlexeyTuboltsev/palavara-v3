@@ -1,15 +1,14 @@
 import React, {FC} from 'react';
 import {useSelector} from 'react-redux'
-import {TStore} from "./store";
-import {ERoute} from "./router";
-import {EAppState, TReadyAppState} from "./reducer";
-import {Home} from "./routes/home/home";
-import { OtherRoute } from './routes/otherRoute/otherRoute';
-import { RouteThree } from './routes/routeThree/routeThree';
+import {EAppState, TReadyAppState} from "../../reducer";
+import {TStore} from "../../store";
+import {ERoute} from "../../router";
+import {Home} from "../../routes/home/home";
+import {OtherRoute} from "../../routes/otherRoute/otherRoute";
+import {RouteThree} from "../../routes/routeThree/routeThree";
 
 
-
-function App() {
+export const App = () => {
     const state = useSelector((store: TStore) => store.ui)
     switch (state.appState){
         case EAppState.NOT_STARTED:
@@ -22,8 +21,6 @@ function App() {
             return <AppError />
     }
 }
-
-export default App;
 
 export const AppNotStarted = () => <div>starting</div>
 export const AppInProgress = () => <div>starting...</div>
