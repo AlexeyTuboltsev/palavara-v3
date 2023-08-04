@@ -8,14 +8,12 @@ export enum ELang {
   RU = 'ru',
 }
 
-i18n
+function initI18n(i18n:I18n, lng: ELang){
+  return i18n
     .use(Backend)
     .use(LanguageDetector)
     .use(initReactI18next)
-
-
-function initI18n(i18n:I18n, lng: ELang){
-  return i18n.init({
+    .init({
     fallbackLng: 'en',
     debug: true,
     lng,
