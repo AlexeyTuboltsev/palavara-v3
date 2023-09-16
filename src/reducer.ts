@@ -16,8 +16,18 @@ export type TAppState =
 
 export type TReadyAppState = {
   appState: EAppState.READY
-  route: TRoute
+  route: TRoute,
+  sectionMenu: TSectionMenuItem[],
+  menu: TMenuItem[]
 }
+
+export enum EMenuType {
+  SIMPLE = "simple",
+  PARENT = "parent",
+}
+
+export type TSectionMenuItem = {id: string, label: string, isActive: boolean}
+export type TMenuItem = {id: string, label: string, isActive: boolean} & ({type: EMenuType.SIMPLE} | {type: EMenuType.PARENT, children: TMenuItem[] })
 
 export type TNotStartedAppState = { appState: EAppState.NOT_STARTED }
 export type TInProgressAppState = { appState: EAppState.IN_PROGRESS }

@@ -1,37 +1,41 @@
-import React from 'react'
+import React, {FC} from 'react'
 import styles from "../../components/App/App.module.scss";
-import logo from "../../logo.svg";
+import {ReactComponent as Logo} from "../../assets/logo.svg";
 import {useDispatch} from 'react-redux'
-import {setRoute} from "../../reducer";
-import {ERoute} from "../../router";
+import {TReadyAppState} from "../../reducer";
 import {useTranslation} from 'react-i18next';
-import {actions} from "../../actions";
-import {ELang} from "../../services/i18n";
 
-export const Home = () => {
+export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
   const dispatch = useDispatch()
   const {t} = useTranslation();
 
-  return <div className={styles.app}>
-    <header className={styles.appHeader}>
-      <img src={logo} className={styles.appLogo} alt="logo"/>
-      <p>
-        {t('home')}
-      </p>
-      <a
-        className={styles.appLink}
-        href="https://reactjs.org"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Learn React
-      </a>
-      <button style={{width: '100px', height: '100px'}}
-              onClick={() => dispatch(setRoute({routeName: ERoute.ROUTE_TREE, params: {id: '2dgfjf'}}))}/>
-      <button style={{width: '100px', height: '100px'}} onClick={() => dispatch(actions.changeLanguage(ELang.RU))}>ru
-      </button>
-      <button style={{width: '100px', height: '100px'}} onClick={() => dispatch(actions.changeLanguage(ELang.EN))}>en
-      </button>
-    </header>
+  return <div className={styles.appContainer}>
+    <div className={styles.header}>
+      <div className={styles.logo}>
+        <Logo/>
+      </div>
+      <div className={styles.title}>
+        Pottery classes <br/> for kids and adults
+      </div>
+      <div className={styles.sectionHeader}>
+        <div className={styles.links}>
+          <a href="saf">palavara_studio</a>
+          <a href="asdewg">palavara_ceramics</a>
+        </div>
+        <div className={styles.sectionMenu}>
+          {state.sectionMenu.map(menuItem =>
+            <div className={styles.sectionMenuItem}>{menuItem.label}</div>
+          )}
+        </div>
+      </div>
+
+
+    </div>
+    <div className={styles.content}>
+      <div className={styles.menu}>{
+        state.menu.map(menuItem =>
+          <div className={styles.menuItem}>{menuItem.label}</div>)
+      }</div>
+    </div>
   </div>
 }

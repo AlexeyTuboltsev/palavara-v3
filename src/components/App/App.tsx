@@ -29,7 +29,7 @@ export const AppError = () => <div>error</div>
 export const AppReady:FC<TReadyAppState> = (state) => {
     switch (state.route.routeName) {
         case ERoute.HOME:
-            return <Home/>;
+            return <Home state={state}/>;
         case ERoute.OTHER_ROUTE:
             return <OtherRoute/>;
         case ERoute.ROUTE_TREE:
