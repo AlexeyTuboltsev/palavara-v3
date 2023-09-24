@@ -3,6 +3,13 @@ export enum ERoute {
   HOME = "home",
   OTHER_ROUTE = 'otherRoute',
   ROUTE_TREE = 'routeTree',
+  KIDS_CLASS = "kidsClass",
+  WHEEL_THROWING = "wheelThrowing",
+  FAMILY_SATURDAY = "familySaturday",
+  OPEN_STUDIO = "openStudio",
+  FIRING_SERVICE = "firingService",
+  GIFT_CERTIFICATE = "giftCertificate",
+  MEMBERSHIP = "membership"
 }
 
 export type TRouteDef = {
@@ -12,8 +19,15 @@ export type TRouteDef = {
 }
 
 export type TRoute =
-  | ({ routeName: ERoute.HOME } & { params: {} })
-  | ({ routeName: ERoute.OTHER_ROUTE } & { params: {} })
+  | ({ routeName: ERoute.HOME } )
+  | ({ routeName: ERoute.KIDS_CLASS} )
+  | ({ routeName: ERoute.WHEEL_THROWING } )
+  | ({ routeName: ERoute.FAMILY_SATURDAY } )
+  | ({ routeName: ERoute.OPEN_STUDIO } )
+  | ({ routeName: ERoute.FIRING_SERVICE } )
+  | ({ routeName: ERoute.GIFT_CERTIFICATE } )
+  | ({ routeName: ERoute.MEMBERSHIP } )
+
   | ({ routeName: ERoute.ROUTE_TREE } & { params: { id: string } })
 
 export const routeDefs = [

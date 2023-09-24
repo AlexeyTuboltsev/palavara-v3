@@ -9,6 +9,7 @@
     "i18next": "^23.4.1",
     "i18next-browser-languagedetector": "^7.1.0",
     "i18next-http-backend": "^2.2.1",
+    "immer": "^10.0.2",
     "react-i18next": "^13.0.3",
     "serve": "^14.2.0",
     "yarn": "^1.22.19"
@@ -79,7 +80,7 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "scripts": {
-    "start": "node scripts/start.js",
+    "start": "BROWSER='google-chrome' node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js"
   },

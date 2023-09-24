@@ -43,7 +43,8 @@ export function setLocation(history: BrowserHistory, routes: TRouteDef[], route:
   const routeDef = getRoutePattern(routes, route)
   if (routeDef) {
     const toPath = compile(routeDef.routePattern, {encode: encodeURIComponent});
-    const path = toPath(route.params)
+
+    const path = toPath((route as any).params || {})
 
     if (path !== window.location.pathname) {
       history.push(path)
@@ -64,14 +65,14 @@ export function getRoute(location: {pathname:string}): TRoute {
   }
 
   if (!routeMatch) {
-    return {routeName: ERoute.HOME, params: {}}
+    return {routeName: ERoute.HOME}
   } else {
     const parseResult = routeMatch.routeDef.paramsParser
       ? routeMatch.routeDef.paramsParser(routeMatch.match.params)
       : {}
 
     return parseResult === null
-      ? {routeName: ERoute.HOME, params: {}}
+      ? {routeName: ERoute.HOME }
       : {routeName: routeMatch.routeDef.routeName, params: parseResult} as TRoute
   }
 }

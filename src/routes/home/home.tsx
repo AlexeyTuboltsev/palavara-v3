@@ -4,6 +4,8 @@ import {ReactComponent as Logo} from "../../assets/logo.svg";
 import {useDispatch} from 'react-redux'
 import {TReadyAppState} from "../../reducer";
 import {useTranslation} from 'react-i18next';
+import {SectionMenuItem} from "../../components/SectionMenuItem";
+import {Menu} from "../../components/Menu";
 
 export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
   const dispatch = useDispatch()
@@ -24,7 +26,7 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
         </div>
         <div className={styles.sectionMenu}>
           {state.sectionMenu.map(menuItem =>
-            <div className={styles.sectionMenuItem}>{menuItem.label}</div>
+            <SectionMenuItem key={menuItem.id} {...menuItem} />
           )}
         </div>
       </div>
@@ -32,10 +34,7 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
     </div>
     <div className={styles.content}>
-      <div className={styles.menu}>{
-        state.menu.map(menuItem =>
-          <div className={styles.menuItem}>{menuItem.label}</div>)
-      }</div>
+      <Menu {...state.menu}/>
     </div>
   </div>
 }

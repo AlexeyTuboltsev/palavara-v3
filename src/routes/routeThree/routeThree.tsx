@@ -22,7 +22,6 @@ export const RouteThree = () => {
       </a>
       <button style={{width: '100px', height: '100px'}} onClick={() => dispatch(setRoute({
         routeName: ERoute.HOME,
-        params: {}
       }))}/>
     </header>
   </div>
