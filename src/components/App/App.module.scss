@@ -1,5 +1,6 @@
 $container-padding: 20px;
 $logo-size: 124px;
+$instagram-logo-size: 25px;
 
 $color-yellow: #ffff00;
 $color-white: #ffffff;
@@ -54,18 +55,56 @@ $color-blue: #0054CF;
 .links {
   justify-self: flex-end;
   align-content: flex-start;
+  justify-items: flex-end;
   display: grid;
-  grid-auto-flow: row;
+  grid-template: auto / 1fr #{$instagram-logo-size};
+  grid-column-gap: 10px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.instagram-logo {
+
+  svg {
+    width: $instagram-logo-size;
+    height: $instagram-logo-size;
+
+    fill: $color-yellow;
+    stroke: $color-yellow;
+  }
 }
 
 .section-menu {
   display: grid;
   grid-auto-flow: column;
-  justify-items: flex-end;
+  justify-content: flex-end;
 }
 
 .section-menu-item {
+  position: relative;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 10px;
 
+  cursor: pointer;
+
+  &:after {
+    content: "|";
+    position: absolute;
+    right: -7px;
+    width: 0;
+    cursor: default;
+
+  }
+
+  &:last-child {
+    padding-right: 0;
+
+    &:after {
+      content: "";
+      right: 0;
+    }
+  }
 }
 
 .content {
@@ -89,14 +128,24 @@ $color-blue: #0054CF;
 }
 
 .menu-item {
-  padding: 7px 10px;
+  padding: 5px 10px;
   border-bottom: 1px solid $color-white;
+  line-height: 1;
 
   &:last-child {
     border-bottom: none;
   }
 
   cursor: pointer;
+}
+
+.parent-menu-item-wrapper {
+  border-bottom: 1px solid $color-white;
+
+}
+
+.parent-menu-item-wrapper-active {
+    border-bottom: none;
 }
 
 .parent-menu-item {
@@ -108,7 +157,8 @@ $color-blue: #0054CF;
 
 .child-menu-item {
   color: $color-white;
-  padding: 5px 60px;
+  padding: 5px 57px;
+  line-height: 1;
   font-weight: 300;
   text-transform: lowercase;
   position: relative;
@@ -121,9 +171,9 @@ $color-blue: #0054CF;
     border-style: solid;
     border-width: 1px 0 0 0;
     height: 10px;
-    top: 18px;
-    left: -10px;
-    width: 60px;
+    top: 11px;
+    left: 0;
+    width: 47px;
 
   }
 }

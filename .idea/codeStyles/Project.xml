@@ -4,6 +4,7 @@
       <option name="USE_CHAINED_CALLS_GROUP_INDENTS" value="true" />
     </TypeScriptCodeStyleSettings>
     <codeStyleSettings language="TypeScript">
+      <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
       <indentOptions>
         <option name="INDENT_SIZE" value="2" />
         <option name="CONTINUATION_INDENT_SIZE" value="2" />
