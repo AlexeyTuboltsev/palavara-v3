@@ -1,0 +1,40 @@
+@import "../styles/global.module";
+
+$instagram-logo-size: 25px;
+
+.links {
+  justify-self: flex-end;
+  align-content: flex-start;
+  justify-items: flex-end;
+  display: grid;
+  grid-template: auto / 1fr #{$instagram-logo-size};
+  grid-column-gap: 10px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.links-blue {
+  color: $color-black
+}
+
+.links-yellow {
+  color: $color-yellow
+}
+
+.instagram-logo {
+  svg {
+    width: $instagram-logo-size;
+    height: $instagram-logo-size;
+
+
+  }
+
+  &.links-blue {
+    fill: $color-black;
+    stroke: $color-black;  }
+
+  &.links-yellow {
+    fill: $color-yellow;
+    stroke: $color-yellow;
+  }
+}

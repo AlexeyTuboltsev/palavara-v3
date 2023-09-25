@@ -2,12 +2,9 @@
 
 $container-padding: 20px;
 
-$instagram-logo-size: 25px;
-
 .app-container {
   width: 100%;
   min-height: 100%;
-  background: gray;
 
   display: grid;
   grid-template: auto / 1fr;
@@ -17,12 +14,17 @@ $instagram-logo-size: 25px;
   align-items: flex-start;
 }
 
+.background {
+  height: 100%;
+  background: gray;
+}
+
 .header {
-  width: calc(100% - 20px*2);
+  width: calc(100%);
   display: grid;
   grid-template: 1fr / #{$logo-size} minmax(324px, 20%) 1fr;
   grid-gap: 20px;
-  margin: 20px 20px 0 20px;
+  padding: 20px 20px 0 20px;
 
 }
 
@@ -52,69 +54,54 @@ $instagram-logo-size: 25px;
 
 .section-header {
   display: grid;
+  grid-template: auto 1fr / 1fr;
   color: $color-yellow;
+  height: $logo-size;
+  align-items: flex-end;
 }
 
-.links {
-  justify-self: flex-end;
-  align-content: flex-start;
-  justify-items: flex-end;
-  display: grid;
-  grid-template: auto / 1fr #{$instagram-logo-size};
-  grid-column-gap: 10px;
-  font-weight: 500;
-  font-size: 16px;
-}
 
-.instagram-logo {
-
-  svg {
-    width: $instagram-logo-size;
-    height: $instagram-logo-size;
-
-    fill: $color-yellow;
-    stroke: $color-yellow;
-  }
-}
-
-.section-menu {
-  display: grid;
-  grid-auto-flow: column;
-  justify-content: flex-end;
-}
-
-.section-menu-item {
-  position: relative;
-  font-size: 20px;
-  font-weight: 500;
-  margin: 0 10px;
-
-  cursor: pointer;
-
-  &:after {
-    content: "|";
-    position: absolute;
-    right: -7px;
-    width: 0;
-    cursor: default;
-
-  }
-
-  &:last-child {
-    padding-right: 0;
-
-    &:after {
-      content: "";
-      right: 0;
-    }
-  }
-}
 
 .content {
-  width: calc(100% - 20px*2);
   display: grid;
-  grid-template: 1fr / #{$logo-size} minmax(324px, 20%) 1fr;
+  grid-template: 1fr / calc(#{$logo-size} ) minmax(324px, 20%) 1fr;
   grid-gap: 20px;
-  margin: 0 20px 20px 20px;
+  padding: 0 20px 20px 20px;
+}
 
+.section-content {
+  height: (100%);
+  display: grid;
+  grid-template: 1fr / minmax(calc(324px + #{$logo-size} + #{$container-padding}), 20%) 1fr;
+  grid-gap: 70px;
+  padding-top: 15px;
+}
+
+.visual {
+  height: 100%;
+  background-color: gray;
+}
+
+.text {
+  padding-right: 100px;
+  h1 {
+    font-weight: 700;
+    line-height: 1.5;
+    margin: 0;
+    font-size: 15px;
+    text-transform: uppercase;
+  }
+  h2{
+    font-weight: 700;
+    line-height: 1.5;
+    margin: 0;
+    font-size: 15px;
+  }
+
+  p {
+    line-height: 1.5;
+
+    margin: 0;
+    font-size: 15px;
+  }
 }

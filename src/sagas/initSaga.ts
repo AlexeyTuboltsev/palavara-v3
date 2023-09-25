@@ -12,6 +12,7 @@ import {actions, TAction} from "../actions";
 import {produce} from 'immer';
 import {home} from "./home";
 import {kidsClass} from "./kidsClass";
+import {wheelThrowing} from "./wheelThrowing";
 
 
 function generateRouteData(route: TRoute): TReadyAppState {
@@ -21,12 +22,13 @@ function generateRouteData(route: TRoute): TReadyAppState {
       return home();
     case ERoute.KIDS_CLASS:
       return kidsClass()
+    case ERoute.WHEEL_THROWING:
+      return wheelThrowing()
     case ERoute.FAMILY_SATURDAY:
     case ERoute.FIRING_SERVICE:
     case ERoute.GIFT_CERTIFICATE:
     case ERoute.MEMBERSHIP:
     case ERoute.OPEN_STUDIO:
-    case ERoute.WHEEL_THROWING:
       return home()
   }
 

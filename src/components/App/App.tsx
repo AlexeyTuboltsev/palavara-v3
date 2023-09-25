@@ -5,6 +5,7 @@ import {TStore} from "../../store";
 import {ERoute} from "../../router";
 import {Home} from "../../routes/Home";
 import {KidsClass} from "../../routes/KidsClass";
+import {WheelThrowing} from "../../routes/WheelThrowing";
 
 
 export const App = () => {
@@ -31,6 +32,8 @@ export const AppReady:FC<TReadyAppState> = (state) => {
             return <Home state={state}/>;
         case ERoute.KIDS_CLASS:
             return <KidsClass state={state} />
+        case ERoute.WHEEL_THROWING:
+            return <WheelThrowing state={state}/>
         default:
             return null
     }
