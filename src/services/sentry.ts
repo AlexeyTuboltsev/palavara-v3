@@ -4,6 +4,7 @@ import {config} from "../config";
 export function initSentry(){
   Sentry.init({
     dsn: config.sentry,
+    environment: process.env.NODE_ENV,
     integrations: [
       new Sentry.BrowserTracing({
         // See docs for support of different versions of variation of react router
