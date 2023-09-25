@@ -67,7 +67,7 @@ export function getRoute(location: {pathname:string}): TRoute {
   if (!routeMatch) {
     return {routeName: ERoute.HOME}
   } else {
-    const parseResult = routeMatch.routeDef.paramsParser
+    const parseResult = routeMatch.routeDef.paramsParser !== undefined
       ? routeMatch.routeDef.paramsParser(routeMatch.match.params)
       : {}
 

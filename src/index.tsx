@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './styles/index.css';
 import {initStore} from './store'
 import {Provider} from 'react-redux'
 import {I18nextProvider} from 'react-i18next';

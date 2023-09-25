@@ -1,6 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit'
 import {TRoute} from "./router";
 import {actions, TAction} from "./actions";
+import exp from "constants";
 
 export enum EAppState {
   NOT_STARTED = "notStarted",
@@ -25,19 +26,27 @@ export type TReadyAppState = {
 export enum EMenuType {
   SIMPLE = "simple",
   PARENT = "parent",
+  CHILD = "child",
   ROOT = 'root'
 }
 
 export type TSectionMenuItem = { id: string, label: string, isActive: boolean, action: TAction }
-export type TRootMenuItem = { id: 'root', type: EMenuType.ROOT, children: string[] }
-export type TMenuItem =
-  | TRootMenuItem
-  | {
+
+type TMenuItemCommonProps = {
   id: string,
   label: string,
   isActive: boolean,
   action: TAction
-} & ({ type: EMenuType.SIMPLE } | { type: EMenuType.PARENT, children: string[] })
+}
+export type TRootMenuItem = { id: 'root', type: EMenuType.ROOT, children: string[] }
+export type TParentMenuItem = { type: EMenuType.PARENT, children: string[] } & TMenuItemCommonProps
+export type TChildMenuItem = { type: EMenuType.CHILD, children: string[] } & TMenuItemCommonProps
+export type TSimpleMenuItem = { type: EMenuType.SIMPLE } & TMenuItemCommonProps
+export type TMenuItem =
+  | TRootMenuItem
+  | TChildMenuItem
+  | TParentMenuItem
+  | TSimpleMenuItem
 
 export type TNotStartedAppState = { appState: EAppState.NOT_STARTED }
 export type TInProgressAppState = { appState: EAppState.IN_PROGRESS }

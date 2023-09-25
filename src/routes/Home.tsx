@@ -1,10 +1,10 @@
 import React, {FC} from 'react'
-import styles from "../../components/App/App.module.scss";
-import {ReactComponent as Logo} from "../../assets/logo.svg";
-import {TReadyAppState} from "../../reducer";
-import {SectionMenuItem} from "../../components/SectionMenuItem";
-import {Menu} from "../../components/Menu";
-import {ReactComponent as InstagramLogo} from "../../assets/instagram-logo.svg";
+import styles from "../components/App/App.module.scss";
+import {TReadyAppState} from "../reducer";
+import {SectionMenuItem} from "../components/SectionMenuItem";
+import {MenuYellow} from "../components/Menu";
+import {ReactComponent as InstagramLogo} from "../assets/instagram-logo.svg";
+import { LogoYellow} from "../components/Logo";
 
 export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
   // const dispatch = useDispatch()
@@ -12,9 +12,7 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
   return <div className={styles.appContainer}>
     <div className={styles.header}>
-      <div className={styles.logo}>
-        <Logo/>
-      </div>
+      <LogoYellow />
       <div className={styles.title}>
         Pottery classes <br/> for kids and adults
       </div>
@@ -34,7 +32,7 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
     </div>
     <div className={styles.content}>
-      <Menu {...state.menu}/>
+      <MenuYellow {...state.menu}/>
     </div>
   </div>
 }

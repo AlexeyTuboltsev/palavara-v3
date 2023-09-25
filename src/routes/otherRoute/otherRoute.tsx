@@ -20,7 +20,7 @@ export const OtherRoute = ( ) => {
             >
                 Learn React
             </a>
-            <button style={{width: '100px', height: '100px'}} onClick={() => dispatch(setRoute({routeName:ERoute.ROUTE_TREE, params: {id:"23rw"}}))}/>
+            {/*<button style={{width: '100px', height: '100px'}} onClick={() => dispatch(setRoute({routeName:ERoute.ROUTE_TREE, params: {id:"23rw"}}))}/>*/}
         </header>
     </div>
 }

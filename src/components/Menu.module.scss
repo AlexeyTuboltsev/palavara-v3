@@ -1,0 +1,136 @@
+@import "../styles/global.module";
+
+.menu-yellow{
+}
+
+.menu-blue {
+}
+
+.menu {
+  align-self: flex-start;
+  grid-column: 2;
+  min-width: 324px;
+
+  padding: 20px 20px 20px 0;
+  color: $color-white;
+  font-size: 20px;
+  text-transform: uppercase;
+
+  &.menu-blue{
+    background-color: transparent;
+  }
+  &.menu-yellow {
+    background-color: rgba($color-blue, 0.7);
+  }
+}
+
+
+
+.menu-item {
+  padding: 5px 10px;
+  line-height: 1;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  cursor: pointer;
+
+  &.menu-blue {
+    color: $color-black;
+    border-bottom: 1px solid $color-black;
+  }
+  &.menu-yellow {
+    color: $color_white;
+    border-bottom: 1px solid $color-white;
+  }
+}
+
+.menu-item-active {
+  cursor: default;
+
+  &.menu-blue {
+    color: $color-blue
+  }
+  &.menu-yellow {
+    color: $color-yellow
+  }
+}
+
+
+.parent-menu-item-wrapper {
+  border-bottom: 1px solid $color-white;
+}
+
+.parent-menu-item-wrapper-active {
+  border-bottom: none;
+
+  &.menu-blue{
+    color: $color-blue;
+
+  }
+  &.menu-yellow{
+    color: $color-yellow;
+  }
+}
+
+
+.parent-menu-item {
+  font-weight: 500;
+  padding: 0 10px;
+  cursor: pointer;
+
+  &.menu-blue{
+    color: $color-blue;
+
+  }
+  &.menu-yellow{
+    color: $color-yellow;
+  }
+}
+
+.child-menu-item {
+  padding: 5px 57px;
+  line-height: 1;
+  font-weight: 300;
+  text-transform: lowercase;
+  position: relative;
+  cursor: pointer;
+
+  &.menu-blue{
+    color: $color-black;
+  }
+  &.menu-yellow {
+    color: $color-white;
+  }
+
+  &:before {
+    content: "";
+    position: absolute;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+    height: 10px;
+    top: 11px;
+    left: 0;
+    width: 47px;
+
+    &.menu-blue {
+      border-color: $color-black;
+    }
+    &.menu-yellow {
+      border-color: $color-white;
+    }
+  }
+}
+
+.child-menu-item-active {
+  font-weight: 500;
+
+  &.menu-blue {
+    color: $color-blue;
+  }
+
+  &.menu-yellow {
+    color: $color-yellow;
+  }
+}

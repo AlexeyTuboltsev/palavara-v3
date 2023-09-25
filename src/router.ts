@@ -1,8 +1,8 @@
 
 export enum ERoute {
   HOME = "home",
-  OTHER_ROUTE = 'otherRoute',
-  ROUTE_TREE = 'routeTree',
+  // OTHER_ROUTE = 'otherRoute',
+  // ROUTE_TREE = 'routeTree',
   KIDS_CLASS = "kidsClass",
   WHEEL_THROWING = "wheelThrowing",
   FAMILY_SATURDAY = "familySaturday",
@@ -15,7 +15,7 @@ export enum ERoute {
 export type TRouteDef = {
   routeName: ERoute,
   routePattern: string,
-  paramsParser?: (params:{[key:string]:any}) => {[key:string]:string} | null //todo
+  paramsParser?: ((params:{[key:string]:any}) => {[key:string]:string} | null) //todo
 }
 
 export type TRoute =
@@ -28,19 +28,26 @@ export type TRoute =
   | ({ routeName: ERoute.GIFT_CERTIFICATE } )
   | ({ routeName: ERoute.MEMBERSHIP } )
 
-  | ({ routeName: ERoute.ROUTE_TREE } & { params: { id: string } })
+  // | ({ routeName: ERoute.ROUTE_TREE } & { params: { id: string } })
 
-export const routeDefs = [
+export const routeDefs:TRouteDef[] = [
   {routeName: ERoute.HOME, routePattern: '/'},
-  {routeName: ERoute.OTHER_ROUTE, routePattern: '/asd'},
-  {
-    routeName: ERoute.ROUTE_TREE, routePattern: '/asd/:id', paramsParser: (params: {[key:string]:any}) => {
-      if (params.id && typeof params.id === 'string') {
-        return {id: params.id} as {id: string}
-      } else {
-        return null
-      }
-    }
-  }
+  {routeName: ERoute.KIDS_CLASS, routePattern: '/kids-class'},
+  {routeName: ERoute.WHEEL_THROWING, routePattern: '/wheel-throwing'},
+  {routeName: ERoute.FAMILY_SATURDAY, routePattern: '/family-saturday'},
+  {routeName: ERoute.OPEN_STUDIO, routePattern: '/open-studio'},
+  {routeName: ERoute.FIRING_SERVICE, routePattern: '/firing-service'},
+  {routeName: ERoute.GIFT_CERTIFICATE, routePattern: '/gift-certificate'},
+  {routeName: ERoute.MEMBERSHIP, routePattern: '/membership'},
+
+  // {
+  //   routeName: ERoute.ROUTE_TREE, routePattern: '/asd/:id', paramsParser: (params: {[key:string]:any}) => {
+  //     if (params.id && typeof params.id === 'string') {
+  //       return {id: params.id} as {id: string}
+  //     } else {
+  //       return null
+  //     }
+  //   }
+  // }
 ]
 

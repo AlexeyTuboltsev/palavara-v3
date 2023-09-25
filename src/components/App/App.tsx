@@ -3,9 +3,8 @@ import {useSelector} from 'react-redux'
 import {EAppState, TReadyAppState} from "../../reducer";
 import {TStore} from "../../store";
 import {ERoute} from "../../router";
-import {Home} from "../../routes/home/home";
-import {OtherRoute} from "../../routes/otherRoute/otherRoute";
-import {RouteThree} from "../../routes/routeThree/routeThree";
+import {Home} from "../../routes/Home";
+import {KidsClass} from "../../routes/KidsClass";
 
 
 export const App = () => {
@@ -30,9 +29,8 @@ export const AppReady:FC<TReadyAppState> = (state) => {
     switch (state.route.routeName) {
         case ERoute.HOME:
             return <Home state={state}/>;
-
-        case ERoute.ROUTE_TREE:
-            return <RouteThree/>;
+        case ERoute.KIDS_CLASS:
+            return <KidsClass state={state} />
         default:
             return null
     }
