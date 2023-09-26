@@ -1,4 +1,4 @@
-import styles from "./App/App.module.scss";
+import styles from "./App.module.scss";
 import {HeaderLinksBlue} from "./HeaderLinks";
 import {SectionMenuBlue} from "./SectionMenu";
 import React, {FC} from "react";

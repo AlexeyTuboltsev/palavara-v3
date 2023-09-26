@@ -1,16 +1,16 @@
 import React, {FC} from 'react';
 import {useSelector} from 'react-redux'
-import {EAppState, TReadyAppState} from "../../reducer";
-import {TStore} from "../../store";
-import {ERoute} from "../../router";
-import {Home} from "../../routes/home/Home";
-import {KidsClass} from "../../routes/kidsClass/KidsClass";
-import {WheelThrowing} from "../../routes/wheelThrowing/WheelThrowing";
-import {FamilySaturday} from "../../routes/familySaturday/FamilySaturday";
-import {FiringService} from "../../routes/firingService/FiringService";
-import {GiftCertificate} from "../../routes/giftCerificate/GiftCertificate";
-import {Membership} from "../../routes/membership/Membership";
-import {OpenStudio} from "../../routes/openStudio/OpenStudio";
+import {EAppState, TReadyAppState} from "../reducer";
+import {TStore} from "../store";
+import {ERoute} from "../router";
+import {Home} from "../routes/home/Home";
+import {KidsClass} from "../routes/kidsClass/KidsClass";
+import {WheelThrowing} from "../routes/wheelThrowing/WheelThrowing";
+import {FamilySaturday} from "../routes/familySaturday/FamilySaturday";
+import {FiringService} from "../routes/firingService/FiringService";
+import {GiftCertificate} from "../routes/giftCerificate/GiftCertificate";
+import {Membership} from "../routes/membership/Membership";
+import {OpenStudio} from "../routes/openStudio/OpenStudio";
 
 
 export const App = () => {

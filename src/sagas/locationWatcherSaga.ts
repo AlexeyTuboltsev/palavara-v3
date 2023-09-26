@@ -1,17 +1,20 @@
-import {TRoute} from "../router";
-import {setRoute} from "../reducer";
+import {routeDefs, TRoute} from "../router";
+import {setAppState, TReadyAppState} from "../reducer";
 import {BrowserHistory} from "history";
-import {take, call} from "redux-saga/effects";
+import {call, select, take} from "redux-saga/effects";
 import {PayloadAction} from "@reduxjs/toolkit";
 import {setLocation} from "../utils/routerUtils";
-import {routeDefs} from "../router";
+import isEqual from 'lodash.isequal';
 
 export function* locationWatcherSaga(history: BrowserHistory, initialRoute: TRoute) {
 
   yield call(setLocation, history, routeDefs, initialRoute)
   while (true) {
     // const cancel = yield take() // TODO teardown
-    const routeAction: PayloadAction<TRoute> = yield take([setRoute.type])
-    yield call(setLocation,  history, routeDefs,routeAction.payload)
+    const route: TRoute = yield select(state => state.ui.route)
+    const {payload: newState}: PayloadAction<TReadyAppState> = yield take([setAppState.type])
+    if (isEqual(newState.route, route)) {
+      yield call(setLocation, history, routeDefs, newState.route)
+    }
   }
 }

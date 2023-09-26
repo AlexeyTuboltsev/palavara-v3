@@ -1,5 +1,5 @@
 import React, {FC} from 'react'
-import styles from "../../components/App/App.module.scss";
+import styles from "../../components/App.module.scss";
 import {TReadyAppState} from "../../reducer";
 import {MenuYellow} from "../../components/Menu";
 import {LogoYellow} from "../../components/Logo";

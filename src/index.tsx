@@ -6,8 +6,8 @@ import {Provider} from 'react-redux'
 import {I18nextProvider} from 'react-i18next';
 import {i18n} from "./services/i18n"
 import {initSentry} from "./services/sentry";
-import {ErrorBoundary} from './components/ErrorBoundary/ErrorBoundary';
-import {App} from './components/App/App'
+import {ErrorBoundary} from './components/ErrorBoundary';
+import {App} from './components/App'
 
 initSentry()
 

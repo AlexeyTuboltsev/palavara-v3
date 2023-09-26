@@ -1,0 +1,44 @@
+@import "../styles/global.module";
+
+.background {
+  height: 100%;
+  background: gray;
+}
+
+.header {
+  width: calc(100%);
+  display: grid;
+  grid-template: 1fr / #{$logo-size} minmax(324px, 20%) 1fr;
+  grid-gap: 20px;
+  padding: 20px 20px 0 20px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  background-color: rgba($color-blue, 0.7);
+  min-width: 324px;
+  padding: 20px;
+  color: $color-yellow;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.section-header {
+  display: grid;
+  grid-template: auto 1fr / 1fr;
+  color: $color-yellow;
+  height: $logo-size;
+  align-items: flex-end;
+}
+
+.content {
+  display: grid;
+  grid-template: 1fr / calc(#{$logo-size} ) minmax(324px, 20%) 1fr;
+  grid-gap: 20px;
+  padding: 0 20px 20px 20px;
+}
+
+
+
+

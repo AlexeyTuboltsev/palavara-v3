@@ -48,6 +48,7 @@
 
 .menu-item-active {
   cursor: default;
+  font-weight: 500;
 
   &.menu-blue {
     color: $color-blue
