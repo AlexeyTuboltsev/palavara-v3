@@ -1,0 +1,31 @@
+import {ERoute, TRoute} from "../../router";
+import {TReadyAppState} from "../../reducer";
+import {home} from "../home/home";
+import {kidsClass} from "../kidsClass/kidsClass";
+import {wheelThrowing} from "../wheelThrowing/wheelThrowing";
+import {familySaturday} from "../familySaturday/familySaturday";
+import {firingService} from "../firingService/firingService";
+import {giftCertificate} from "../giftCerificate/giftCertificate";
+import {membership} from "../membership/membership";
+import {openStudio} from "../openStudio/openStudio";
+
+export function generateRouteData(route: TRoute): TReadyAppState {
+  switch (route.routeName){
+    case ERoute.HOME:
+      return home();
+    case ERoute.KIDS_CLASS:
+      return kidsClass()
+    case ERoute.WHEEL_THROWING:
+      return wheelThrowing()
+    case ERoute.FAMILY_SATURDAY:
+      return familySaturday()
+    case ERoute.FIRING_SERVICE:
+      return firingService()
+    case ERoute.GIFT_CERTIFICATE:
+      return giftCertificate()
+    case ERoute.MEMBERSHIP:
+      return membership()
+    case ERoute.OPEN_STUDIO:
+      return openStudio()
+  }
+}

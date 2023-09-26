@@ -1,7 +1,7 @@
 import {BrowserHistory} from "history";
 import {call, fork, put, select, take} from "redux-saga/effects";
 import {EAppState, EMenuType, setAppState, setRoute, TMenuItem, TReadyAppState} from "../reducer";
-import {ERoute, TRoute} from "../router";
+import {TRoute} from "../router";
 import {locationWatcherSaga} from "./locationWatcherSaga";
 import {getRoute, setupHistory} from "../utils/routerUtils";
 import {Dispatch} from "@reduxjs/toolkit";
@@ -10,29 +10,8 @@ import {langWatcherSaga} from "./langWatcherSaga";
 import {ELang, initI18n} from "../services/i18n";
 import {actions, TAction} from "../actions";
 import {produce} from 'immer';
-import {home} from "./home";
-import {kidsClass} from "./kidsClass";
-import {wheelThrowing} from "./wheelThrowing";
+import {generateRouteData} from "../routes/common/routeData";
 
-
-function generateRouteData(route: TRoute): TReadyAppState {
-
-  switch (route.routeName){
-    case ERoute.HOME:
-      return home();
-    case ERoute.KIDS_CLASS:
-      return kidsClass()
-    case ERoute.WHEEL_THROWING:
-      return wheelThrowing()
-    case ERoute.FAMILY_SATURDAY:
-    case ERoute.FIRING_SERVICE:
-    case ERoute.GIFT_CERTIFICATE:
-    case ERoute.MEMBERSHIP:
-    case ERoute.OPEN_STUDIO:
-      return home()
-  }
-
-}
 
 export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: any) {
   yield put(setAppState({appState: EAppState.IN_PROGRESS}))

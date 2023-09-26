@@ -1,10 +1,10 @@
 import React, {FC} from 'react'
-import styles from "../components/App/App.module.scss";
-import {TReadyAppState} from "../reducer";
-import {MenuYellow} from "../components/Menu";
-import {LogoYellow} from "../components/Logo";
-import {SectionMenuYellow} from "../components/SectionMenu";
-import {HeaderLinksYellow} from "../components/HeaderLinks";
+import styles from "../../components/App/App.module.scss";
+import {TReadyAppState} from "../../reducer";
+import {MenuYellow} from "../../components/Menu";
+import {LogoYellow} from "../../components/Logo";
+import {SectionMenuYellow} from "../../components/SectionMenu";
+import {HeaderLinksYellow} from "../../components/HeaderLinks";
 
 export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
   // const dispatch = useDispatch()

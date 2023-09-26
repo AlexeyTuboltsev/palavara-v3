@@ -1,6 +1,6 @@
-import {EMenuType, TMenuItem} from "../reducer";
-import {actions} from "../actions";
-import {ERoute} from "../router";
+import {EMenuType, TMenuItem} from "../../reducer";
+import {actions} from "../../actions";
+import {ERoute} from "../../router";
 
 export function menu(activeMenuId?: string): {
   root: TMenuItem
