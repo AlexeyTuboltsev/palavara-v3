@@ -11,13 +11,14 @@ export const Logo: FC<{
 }> = ({className}) => {
   const dispatch = useDispatch()
 
-  return <div className={cn(styles.logo, className)}
-              onClick={() => dispatch(actions.requestRouteChange({routeName: ERoute.HOME}))}>
+  return <div
+    className={cn(styles.logo, className)}
+    onClick={() => dispatch(actions.requestRouteChange({routeName: ERoute.HOME}))}
+  >
     <PalavaraLogo/>
   </div>
 }
 
 export const LogoYellow = () => <Logo className={styles.logoYellow}/>
-
 
 export const LogoBlue = () => <Logo className={styles.logoBlue}/>

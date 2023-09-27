@@ -1,4 +1,4 @@
-import {EMenuType, TMenuItem} from "../../reducer";
+import {EMenuType, TMenuItem} from "../../types";
 import {actions} from "../../actions";
 import {ERoute} from "../../router";
 

@@ -1,6 +1,6 @@
 import styles from "./Menu.module.scss";
 import React, {FC} from "react";
-import {EMenuType, TChildMenuItem, TMenuItem, TRootMenuItem, TSimpleMenuItem} from "../reducer";
+import {EMenuType, TChildMenuItem, TMenuItem, TRootMenuItem, TSimpleMenuItem} from "../types";
 import {useDispatch} from "react-redux";
 import cn from 'classnames'
 
@@ -9,14 +9,10 @@ const MenuItem: FC<{
     [key: string]: TMenuItem
   },
   menuItemId: string,
-  className?: string,
-  activeClassName?: string
   type: 'blue' | 'yellow'
 }> = ({
   menu,
   menuItemId,
-  className,
-  activeClassName = '',
   type
 }) => {
   const dispatch = useDispatch()

@@ -1,7 +1,5 @@
 import {ERoute} from "../../router";
-import {EAppState, TReadyAppState} from "../../reducer";
-import {generateRandomString} from "../../utils/utils";
-import {actions} from "../../actions";
+import {EAppState, TReadyAppState} from "../../types";
 import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
 

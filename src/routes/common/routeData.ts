@@ -1,5 +1,5 @@
 import {ERoute, TRoute} from "../../router";
-import {TReadyAppState} from "../../reducer";
+import {TReadyAppState} from "../../types";
 import {home} from "../home/home";
 import {kidsClass} from "../kidsClass/kidsClass";
 import {wheelThrowing} from "../wheelThrowing/wheelThrowing";

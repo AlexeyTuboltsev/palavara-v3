@@ -1,6 +1,6 @@
 import React, {FC} from 'react'
 import styles from "../../components/App.module.scss";
-import {TReadyAppState} from "../../reducer";
+import {TReadyAppState} from "../../types";
 import {MenuYellow} from "../../components/Menu";
 import {LogoYellow} from "../../components/Logo";
 import {SectionMenuYellow} from "../../components/SectionMenu";

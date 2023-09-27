@@ -15,7 +15,9 @@ export enum EActionType {
   CHANGE_LANGUAGE = 'CHANGE_LANGUAGE',
   REQUEST_ROUTE_CHANGE = 'REQUEST_ROUTE_CHANGE',
   NOOP = "NOOP",
-  TOGGLE_OPEN = "TOGGLE_OPEN"
+  TOGGLE_OPEN = "TOGGLE_OPEN",
+  NEXT_IMAGE = 'NEXT_IMAGE',
+  PREVIOUS_IMAGE = 'PREVIOUS_IMAGE',
 }
 
 export type TAction = ReturnType<typeof actions[keyof typeof actions]>
@@ -30,6 +32,8 @@ export const actions = {
   screenResize: createAction(EActionType.SCREEN_RESIZE, withPayloadType<TResizeEventPayload>()),
   changeLanguage: createAction(EActionType.CHANGE_LANGUAGE, withPayloadType<ELang>()),
   requestRouteChange: createAction(EActionType.REQUEST_ROUTE_CHANGE, withPayloadType<TRoute>()),
-  toggleOpen: createAction(EActionType.TOGGLE_OPEN, withPayloadType<string>())
+  toggleOpen: createAction(EActionType.TOGGLE_OPEN, withPayloadType<string>()),
+  nextImage: createAction(EActionType.NEXT_IMAGE),
+  previousImage: createAction(EActionType.PREVIOUS_IMAGE),
 }
 

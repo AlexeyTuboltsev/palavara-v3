@@ -1,5 +1,5 @@
 import React, {FC} from 'react'
-import {TReadyAppState} from "../../reducer";
+import {TReadyAppState} from "../../types";
 import {Section} from "../../components/Section";
 
 export const FamilySaturday: FC<{

@@ -1,5 +1,5 @@
 import React, {FC} from 'react'
-import {TReadyAppState} from "../../reducer";
+import {TReadyAppState} from "../../types";
 import {Section} from "../../components/Section";
 
 export const KidsClass: FC<{
@@ -24,6 +24,18 @@ export const KidsClass: FC<{
     <p>If you for any reason miss a class, unfortunately we will not be able to reimburse you.</p>
     <h2>How to pay:</h2>
     <p>Paypal varya@palavara.com</p>
+    <p>Please add a comment with the name of the child and the name of this course</p>
+    <h2>How to book</h2>
+    <p>palavarastudio+kp@gmail.com</p>
+    <p>We can reserve a place for you only after we receive proof of payment. This way we can better predict how many
+      people are going to attend and ensure that those who are interested get a place.</p>
+    <p>Please send us the proof of booking to palavarastudio+kp@gmail.com</p>
+
+    <p>Teacher — Varvara Polyakova</p>
+    <p>The class is taught in Russian</p>
+
+
+<>--</>
     <p>Please add a comment with the name of the child and the name of this course</p>
     <h2>How to book</h2>
     <p>palavarastudio+kp@gmail.com</p>

@@ -1,6 +1,6 @@
 import styles from "./SectionMenu.module.scss";
 import React, {FC} from "react";
-import {TSectionMenuItem} from "../reducer";
+import {TSectionMenuItem} from "../types";
 import cn from 'classnames';
 import {useDispatch} from "react-redux";
 

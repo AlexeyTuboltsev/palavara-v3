@@ -1,6 +1,6 @@
 import React, {FC} from 'react';
 import {useSelector} from 'react-redux'
-import {EAppState, TReadyAppState} from "../reducer";
+import {EAppState, TReadyAppState} from "../types";
 import {TStore} from "../store";
 import {ERoute} from "../router";
 import {Home} from "../routes/home/Home";

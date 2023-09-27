@@ -1,5 +1,5 @@
 import {ERoute} from "../../router";
-import {EAppState, TReadyAppState} from "../../reducer";
+import {EAppState, TReadyAppState} from "../../types";
 import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
 

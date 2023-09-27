@@ -1,8 +1,6 @@
 
 export enum ERoute {
   HOME = "home",
-  // OTHER_ROUTE = 'otherRoute',
-  // ROUTE_TREE = 'routeTree',
   KIDS_CLASS = "kidsClass",
   WHEEL_THROWING = "wheelThrowing",
   FAMILY_SATURDAY = "familySaturday",
@@ -27,8 +25,6 @@ export type TRoute =
   | ({ routeName: ERoute.FIRING_SERVICE } )
   | ({ routeName: ERoute.GIFT_CERTIFICATE } )
   | ({ routeName: ERoute.MEMBERSHIP } )
-
-  // | ({ routeName: ERoute.ROUTE_TREE } & { params: { id: string } })
 
 export const routeDefs:TRouteDef[] = [
   {routeName: ERoute.HOME, routePattern: '/'},

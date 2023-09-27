@@ -1,8 +1,9 @@
 import {actions, TAction} from "../actions";
 import {call, put, select, take} from "redux-saga/effects";
-import {EMenuType, setAppState, setRoute, TMenuItem, TReadyAppState} from "../reducer";
+import {EMenuType, TMenuItem, TReadyAppState} from "../types";
 import {produce} from "immer";
 import {generateRouteData} from "../routes/common/routeData";
+import {setAppState} from "../store";
 
 export function* uiSaga() {
   while (true) {
@@ -26,7 +27,6 @@ export function* uiSaga() {
         const route = action.payload
         const nextUiState:TReadyAppState = yield call(generateRouteData, route)
 
-        yield put(setRoute(nextUiState.route))
         yield put(setAppState(nextUiState))
         break;
       }

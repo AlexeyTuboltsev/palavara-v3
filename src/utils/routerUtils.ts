@@ -1,8 +1,8 @@
-import {pathToRegexp, Key, compile} from "path-to-regexp";
+import {compile, Key, pathToRegexp} from "path-to-regexp";
 import {BrowserHistory, createBrowserHistory} from "history";
 import {ERoute, routeDefs, TRoute, TRouteDef} from "../router";
-import {setRoute} from "../reducer";
 import {Dispatch} from "@reduxjs/toolkit";
+import {actions} from "../actions";
 
 function compilePath(path: string, options: {}) {
   const keys: Key[] = [];
@@ -84,7 +84,7 @@ export function setupHistory(dispatch: Dispatch) {
   const unlisten = history.listen(({action, location}) => {
     if (action === "POP") {
       const route = getRoute(location) //todo getRoute has a fallback, here we need an explicit notFound
-      dispatch(setRoute(route))
+      dispatch(actions.requestRouteChange(route))
     }
   })
   return [history, unlisten]

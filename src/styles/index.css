@@ -12,6 +12,8 @@ body {
 
   font-family: 'Outfit', sans-serif;
   font-weight: 300;
+
+  overflow: hidden;
 }
 
 #root {
@@ -19,6 +21,7 @@ body {
   width: 100vw;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 a {
