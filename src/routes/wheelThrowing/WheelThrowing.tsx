@@ -8,7 +8,49 @@ export const WheelThrowing: FC<{
   // const {t} = useTranslation();
 
   return <Section state={state}>
-    bla
+    <h1>Wheel-Throwing class</h1>
+    <p>A 4 weeks small group course (up to 3 participants in a group).</p>
+
+    <p>The course covers preparing pottery clay, wedging and centring, pulling of walls, trimming, bisque firing,
+      glazing and glaze firing. In 4 weeks you will go through all these basic steps of pottery making and afterwards
+      will be able to take home a unique and at the same time functional ceramic objects.</p>
+    <p>If after this introductory course you will find yourself unable to stop and will want to learn more, you will be
+      able to continue taking classes in our studio.</p>
+    <br/>
+    <p>Only limited places are available!</p>
+    <br/>
+    <p>Where? 13359, Steegerstr. 1A, Berlin</p>
+    <h2>When?</h2>
+    <p>On Mondays 18:00—20:00</p>
+    <p>Wednesday 18:30 — 20:30</p>
+    <h2>Cost</h2>
+    <p>1 Course (4 weeks, once weekly) - 160 €</p>
+    <p>Trial class - 35 €</p>
+    <p>(If you for any reason miss a class, unfortunately, we will not be able to reimburse you. The classes also cannot
+      be rescheduled)</p>
+
+    <p>Usually there are no classes during school holidays.</p>
+
+    <h2>Who is this course intended for?</h2>
+    <p>This course is intended for everyone, who wants to learn the basics of pottery wheel throwing and explore the
+      process of creating ceramics. No previous experience is necessary.</p>
+
+      <h2>How to book</h2>
+      <p></p>varya@palavara.com
+
+    <p>You can join the class on any given Monday/Wednesday if there are places available.</p>
+
+    <p>Teacher Varvara Polyakova</p>
+
+    <p>The class can be taught in Russian, German</p>
+
+    <h2>FAQ</h2>
+
+    <p>Are there any additional fees?</p>
+    <p>No. The cost of classes includes firing and all the materials.</p>
+
+    <p>When can I pick up the pieces?</p>
+    <p>After the piece is finished, it will be fired, and you will be able to pick it up as the course progresses.</p>
 
   </Section>
 }
