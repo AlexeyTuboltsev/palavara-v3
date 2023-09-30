@@ -7,10 +7,10 @@ import {Dispatch} from "@reduxjs/toolkit";
 import {setupResizeObserver} from "../services/resizeObserver";
 import {langWatcherSaga} from "./langWatcherSaga";
 import {ELang, initI18n} from "../services/i18n";
-import {generateRouteData} from "../routes/common/routeData";
 import {uiSaga} from "./uiSaga";
 import {setAppState} from "../store";
 import {EAppState} from "../types";
+import {actions} from "../actions";
 
 
 export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: any) {
@@ -25,11 +25,11 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: an
 
   const stopResizeObserver: () => void = yield call(setupResizeObserver, rootElement, dispatch)
 
+  yield fork(uiSaga)
+  yield put(actions.requestRouteChange(initialRoute))
 
-  yield put(setAppState(generateRouteData(initialRoute)))
 
   //TODO teardown (stopHistoryListener, stopResizeObserver, langWatcher)
-  yield fork(uiSaga)
 }
 
 

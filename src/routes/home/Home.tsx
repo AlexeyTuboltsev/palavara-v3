@@ -1,24 +1,58 @@
-import React, {FC} from 'react'
+import React, {FC, ReactNode, RefObject, useEffect, useRef, useState} from 'react'
 import styles from "../../components/App.module.scss";
 import {TReadyAppState} from "../../types";
 import {MenuYellow} from "../../components/Menu";
 import {LogoYellow} from "../../components/Logo";
 import {SectionMenuYellow} from "../../components/SectionMenu";
 import {HeaderLinksYellow} from "../../components/HeaderLinks";
+import cn from 'classnames';
 
-export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
-  // const dispatch = useDispatch()
-  // const {t} = useTranslation();
+
+const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}) => {
+  const [loaded, setLoaded] = useState(false)
+  const imgRef = useRef<HTMLImageElement | null>(null)
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setLoaded(true);
+    }
+  }, []);
+
+  return <>
+    <img alt="" src={imgLqipUrl} aria-hidden={true} className={styles.backgroundImgLowRes}/>
+    <img
+      aria-hidden={true}
+      loading="lazy"
+      className={cn(styles.backgroundImg, {[styles.backgroundImgVisible]: loaded})}
+      src={imgUrl}
+      alt=""
+      ref={imgRef}
+      onLoad={() => setLoaded(true)}
+    />
+  </>
+}
+
+const Background: FC<{ children: ReactNode, url: string }> = ({children, url}) => {
+  const imgUrl = `img/home/${url}`
+  const imgLqipUrl = `img/home/lr/${url}`
 
   return <div className={styles.background}>
+    <Images imgUrl={imgUrl} imgLqipUrl={imgLqipUrl}/>
+    {children}
+  </div>
+}
+
+
+export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
+
+  return <Background url={(state as any).url}>
     <div className={styles.header}>
-      <LogoYellow />
+      <LogoYellow/>
       <div className={styles.title}>
         Pottery classes <br/> for kids and adults
       </div>
       <div className={styles.sectionHeader}>
-        <HeaderLinksYellow />
-        <SectionMenuYellow sectionMenu={state.sectionMenu} />
+        <HeaderLinksYellow/>
+        <SectionMenuYellow sectionMenu={state.sectionMenu}/>
       </div>
 
 
@@ -26,5 +60,5 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
     <div className={styles.content}>
       <MenuYellow {...state.menu}/>
     </div>
-  </div>
+  </Background>
 }

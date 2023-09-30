@@ -8,24 +8,25 @@ import {firingService} from "../firingService/firingService";
 import {giftCertificate} from "../giftCerificate/giftCertificate";
 import {membership} from "../membership/membership";
 import {openStudio} from "../openStudio/openStudio";
+import {call, fork} from "redux-saga/effects";
 
-export function generateRouteData(route: TRoute): TReadyAppState {
+export function generateRouteData(route: TRoute):any {
   switch (route.routeName){
     case ERoute.HOME:
-      return home();
+      return home;
     case ERoute.KIDS_CLASS:
-      return kidsClass()
+      return  kidsClass;
     case ERoute.WHEEL_THROWING:
-      return wheelThrowing()
+      return  wheelThrowing;
     case ERoute.FAMILY_SATURDAY:
-      return familySaturday()
+      return  familySaturday;
     case ERoute.FIRING_SERVICE:
-      return firingService()
+      return  firingService;
     case ERoute.GIFT_CERTIFICATE:
-      return giftCertificate()
+      return  giftCertificate;
     case ERoute.MEMBERSHIP:
-      return membership()
+      return  membership;
     case ERoute.OPEN_STUDIO:
-      return openStudio()
+      return  openStudio;
   }
 }
