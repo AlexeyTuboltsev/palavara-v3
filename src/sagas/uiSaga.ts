@@ -31,7 +31,9 @@ export function* uiSaga() {
   }
 }
 
-export const toggleMenuOpen:{[key in EActionType]?:(state: TReadyAppState, action:any)=>TReadyAppState} = {
+export type TActionMap = { [key in EActionType]?: (state: TReadyAppState, action: any) => TReadyAppState }
+
+export const toggleMenuOpen: TActionMap = {
   [EActionType.TOGGLE_OPEN]: function (state: TReadyAppState, action: ReturnType<typeof actions["toggleOpen"]>) {
     return produce(state, (nextState: TReadyAppState) => {
       const menuItem: TMenuItem | undefined = nextState.menu[action.payload]
@@ -43,20 +45,53 @@ export const toggleMenuOpen:{[key in EActionType]?:(state: TReadyAppState, actio
   }
 }
 
+export const imageChanger = (urls: string[], lqipUrls:string[]): TActionMap => {
+  return {
+    [EActionType.NEXT_IMAGE]:
+      (state: TReadyAppState, action: ReturnType<typeof actions["nextImage"]>) => {
+        return produce(state, (nextState: TReadyAppState) => {
+          const imageUrl = (state as any).imageUrl
+          const i = urls.findIndex(url => imageUrl === url)
+          if(i !== undefined){
+            (nextState as any).imageUrl = urls[i + 1 <= urls.length - 1 ? i + 1 : 0];
+            (nextState as any).imageLqipUrl = lqipUrls[i + 1 <= urls.length - 1 ? i + 1 : 0];
+          } else {
+            (nextState as any).imageUrl = urls[0];
+            (nextState as any).imageLqipUrl = lqipUrls[0];
+          }
+        })
+      },
+    [EActionType.PREVIOUS_IMAGE]:
+      (state: TReadyAppState, action: ReturnType<typeof actions["previousImage"]>) => {
+        return produce(state, (nextState: TReadyAppState) => {
+          const imageUrl = (state as any).imageUrl
+          const i = urls.findIndex(url => imageUrl === url)
+          if(i !== undefined){
+            (nextState as any).imageUrl = urls[i > 0 ? i - 1 : urls.length - 1];
+            (nextState as any).imageLqipUrl = lqipUrls[i > 0 ? i - 1 : urls.length - 1]
+          } else {
+            (nextState as any).imageUrl = urls[urls.length - 1];
+            (nextState as any).imageLqipUrl = lqipUrls[urls.length - 1]
+          }
+        })
+      },
+  }
+}
+
 
 export function findStateGenerator(actionType: EActionType, actionMap: any) {
   return Object.keys(actionMap).find(key => key === actionType)
 }
 
-export function* actionListenerLoop(actionMap: { [key in EActionType]?:(state: TReadyAppState, action:any)=>TReadyAppState }) {
+export function* actionListenerLoop(actionMap: TActionMap) {
 
   while (true) {
     const action: TAction = yield take(Object.keys(actionMap))
 
-    const stateGeneratorKey:EActionType = yield call(findStateGenerator, action.type, actionMap)
+    const stateGeneratorKey: EActionType = yield call(findStateGenerator, action.type, actionMap)
     if (stateGeneratorKey !== undefined) {
       const state: Readonly<TReadyAppState> = yield select(state => state.ui)
-      const nextUiState:TReadyAppState = yield call((actionMap as any)[stateGeneratorKey], state, action)
+      const nextUiState: TReadyAppState = yield call((actionMap as any)[stateGeneratorKey], state, action)
       yield put(setAppState(nextUiState))
     }
   }

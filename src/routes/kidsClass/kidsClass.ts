@@ -4,17 +4,30 @@ import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
-import {actionListenerLoop, toggleMenuOpen} from "../../sagas/uiSaga";
+import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
 
-export function* kidsClass(): Generator<any,void,any> {
+export function* kidsClass(): Generator<any, void, any> {
+  const imageUrlBase = "kidsClass"
+  const imageLqipUrlBase = "kidsClass/lr"
+  const urls = [
+    "01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg", "06.jpg", "07.jpg", "08.jpg", "09.jpg", "10.jpg", "11.jpg",
+    "12.jpg",
+    "13.jpg"]
+
+  const imageUrls = urls.map(url => `img/${imageUrlBase}/${url}`);
+  const imageLqipUrls = urls.map(url => `img/${imageLqipUrlBase}/${url}`)
 
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: ERoute.KIDS_CLASS},
     sectionMenu: sectionMenu(),
-    menu:menu( ERoute.KIDS_CLASS)
+    menu: menu(ERoute.KIDS_CLASS),
+    imageUrl: imageUrls[0],
+    imageLqipUrl: imageLqipUrls[0]
   }
   yield put(setAppState(initialState))
 
-  yield fork(actionListenerLoop, toggleMenuOpen)
+  yield fork(actionListenerLoop, {
+    ...toggleMenuOpen, ...imageChanger(imageUrls, imageLqipUrls)
+  })
 }

@@ -1,13 +1,45 @@
 import styles from "./Section.module.scss";
 import {LogoBlue} from "./Logo";
 import {MenuBlue} from "./Menu";
-import React, {FC, ReactNode} from "react";
+import React, {FC, ReactNode, useEffect, useRef, useState} from "react";
 import {TReadyAppState} from "../types";
 import {SectionHeader} from "./SectionHeader";
 import {ReactComponent as Plus} from "../assets/plus.svg";
 import {ReactComponent as Minus} from "../assets/minus.svg";
 import {useDispatch} from "react-redux";
 import {actions} from "../actions";
+import cn from "classnames";
+
+const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}) => {
+  const [loaded, setLoaded] = useState(false)
+  const imgRef = useRef<HTMLImageElement | null>(null)
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setLoaded(true);
+    }
+  }, []);
+
+  return <>
+    <img
+      aria-hidden={true}
+      loading="lazy"
+      // className={cn(styles.backgroundImg, {[styles.backgroundImgVisible]: loaded})}
+      src={imgUrl}
+      alt=""
+      ref={imgRef}
+      onLoad={() => setLoaded(true)}
+    />
+    <img alt="" src={imgLqipUrl} aria-hidden={true}
+         // className={styles.backgroundImgLowRes}
+    />
+  </>
+}
+
+export const SectionVisual:FC<{url:string, lqipUrl:string}> = ({url, lqipUrl}) => {
+  return <div className={styles.visual}>
+    <Images imgUrl={url} imgLqipUrl={lqipUrl} />
+  </div>
+}
 
 export const Section: FC<{ state: TReadyAppState, children: ReactNode }> = ({state, children}) => {
   const dispatch = useDispatch();
@@ -23,7 +55,7 @@ export const Section: FC<{ state: TReadyAppState, children: ReactNode }> = ({sta
       <Plus className={styles.plus} onClick={() => dispatch(actions.nextImage())}/>
     </div>
     <div className={styles.sectionContent}>
-      <div className={styles.visual}/>
+      <SectionVisual url={(state as any).imageUrl} lqipUrl={(state as any).imageLqipUrl} />
       <div className={styles.text}>
         {children}
       </div>
