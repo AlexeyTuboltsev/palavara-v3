@@ -3,6 +3,7 @@ import {config} from "../config";
 
 export function initSentry(){
   Sentry.init({
+    enabled: process.env.NODE_ENV !== 'development',
     dsn: config.sentry,
     environment: process.env.NODE_ENV,
     integrations: [

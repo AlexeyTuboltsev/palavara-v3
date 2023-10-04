@@ -2,28 +2,37 @@ import {ERoute} from "../../router";
 import {EAppState, TReadyAppState} from "../../types";
 import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
-import {put, delay} from "redux-saga/effects";
+import {all, delay, fork, put, select} from "redux-saga/effects";
 import {setAppState} from "../../store";
+import {actionListenerLoop, toggleMenuOpen} from "../../sagas/uiSaga";
 
 export function* home(): Generator<any, void, TReadyAppState> {
-
   const urls = ['home-1.jpg', 'home-2.jpg', 'home-3.jpg', 'home-4.jpg', 'home-5.jpg', 'home-6.jpg', 'home-7.jpg']
-  const state = {
+
+  const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: ERoute.HOME},
     sectionMenu: sectionMenu(),
     menu: menu(ERoute.HOME),
+    url: urls[0]
   }
+  yield put(setAppState(initialState))
 
-  let i = 0
-  // while (true) {
-  //   yield put(setAppState({...state, url: urls[i]} as any))
-  //
-  //   i = (i === urls.length - 1) ? 0 : i + 1
-  //
-  //   yield delay(3000)
-  // }
+  yield all([
+    fork(cyclePictures, urls),
+    fork(actionListenerLoop, toggleMenuOpen)
+  ])
 
-  yield put(setAppState({...state, url: urls[i]} as any))
+}
 
+function* cyclePictures(urls:string[]){
+  let i = 1
+
+  while(true){
+    yield delay(3000)
+
+    i = (i === urls.length - 1) ? 0 : i + 1
+    const state: Readonly<TReadyAppState> = yield select(state => state.ui)
+    yield put(setAppState({...state, url: urls[i]} as any))
+  }
 }
