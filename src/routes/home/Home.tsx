@@ -1,4 +1,4 @@
-import React, {FC, ReactNode, RefObject, useEffect, useRef, useState} from 'react'
+import React, {FC, ReactNode, useEffect, useRef, useState} from 'react'
 import styles from "../../components/App.module.scss";
 import {TReadyAppState} from "../../types";
 import {MenuYellow} from "../../components/Menu";
@@ -31,12 +31,10 @@ const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}
   </>
 }
 
-const Background: FC<{ children: ReactNode, url: string }> = ({children, url}) => {
-  const imgUrl = `img/home/${url}`
-  const imgLqipUrl = `img/home/lr/${url}`
+const Background: FC<{ children: ReactNode, url: string,lqipUrl:string }> = ({children, url,lqipUrl}) => {
 
   return <div className={styles.background}>
-    <Images imgUrl={imgUrl} imgLqipUrl={imgLqipUrl}/>
+    <Images imgUrl={url} imgLqipUrl={lqipUrl}/>
     {children}
   </div>
 }
@@ -44,7 +42,7 @@ const Background: FC<{ children: ReactNode, url: string }> = ({children, url}) =
 
 export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
-  return <Background url={(state as any).url}>
+  return <Background url={(state as any).url} lqipUrl={(state as any).lqipUrl}>
     <div className={styles.header}>
       <LogoYellow/>
       <div className={styles.title}>

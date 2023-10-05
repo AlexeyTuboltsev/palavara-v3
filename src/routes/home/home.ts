@@ -5,34 +5,40 @@ import {sectionMenu} from "../common/sectionMenu";
 import {all, delay, fork, put, select} from "redux-saga/effects";
 import {setAppState} from "../../store";
 import {actionListenerLoop, toggleMenuOpen} from "../../sagas/uiSaga";
+import {config} from "../../config";
 
 export function* home(): Generator<any, void, TReadyAppState> {
   const urls = ['home-1.jpg', 'home-2.jpg', 'home-3.jpg', 'home-4.jpg', 'home-5.jpg', 'home-6.jpg', 'home-7.jpg']
+  const imageUrlBase = "home"
+  const imageLqipUrlBase = "lqip/home"
+  const imageUrls = urls.map(url => `${config.imgPrefix}/${imageUrlBase}/${url}`)
+  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
 
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: ERoute.HOME},
     sectionMenu: sectionMenu(),
     menu: menu(ERoute.HOME),
-    url: urls[0]
+    url: imageUrls[0],
+    lqipUrl: imageLqipUrls[0]
   }
   yield put(setAppState(initialState))
 
   yield all([
-    fork(cyclePictures, urls),
+    fork(cyclePictures, imageUrls,imageLqipUrls),
     fork(actionListenerLoop, toggleMenuOpen)
   ])
 
 }
 
-function* cyclePictures(urls:string[]){
+function* cyclePictures(imageUrls:string[],imageLqipUrls:string[]){
   let i = 1
 
   while(true){
     yield delay(3000)
 
-    i = (i === urls.length - 1) ? 0 : i + 1
+    i = (i === imageUrls.length - 1) ? 0 : i + 1
     const state: Readonly<TReadyAppState> = yield select(state => state.ui)
-    yield put(setAppState({...state, url: urls[i]} as any))
+    yield put(setAppState({...state, url: imageUrls[i], lqipUrl: imageLqipUrls[i]} as any))
   }
 }
