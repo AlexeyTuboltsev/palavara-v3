@@ -11,6 +11,9 @@ import {FiringService} from "../routes/firingService/FiringService";
 import {GiftCertificate} from "../routes/giftCerificate/GiftCertificate";
 import {Membership} from "../routes/membership/Membership";
 import {OpenStudio} from "../routes/openStudio/OpenStudio";
+import {About} from "../routes/about/About";
+import {RentASpace} from "../routes/rentASpace/RentASpace";
+import {Contact} from "../routes/contact/Contact";
 
 
 export const App = () => {
@@ -49,5 +52,11 @@ export const AppReady: FC<TReadyAppState> = (state) => {
       return <Membership state={state}/>
     case ERoute.OPEN_STUDIO:
       return <OpenStudio state={state}/>
+    case ERoute.ABOUT:
+      return <About state={state} />
+    case ERoute.RENT_A_SPACE:
+      return <RentASpace state={state} />
+    case ERoute.CONTACT:
+      return <Contact state={state} />
   }
 }

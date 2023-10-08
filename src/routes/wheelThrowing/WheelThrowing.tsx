@@ -19,7 +19,8 @@ export const WheelThrowing: FC<{
     <br/>
     <p>Only limited places are available!</p>
     <br/>
-    <p>Where? 13359, Steegerstr. 1A, Berlin</p>
+    <h2>Where?</h2>
+    <p>13359, Steegerstr. 1A, Berlin</p>
     <h2>When?</h2>
     <p>On Mondays 18:00—20:00</p>
     <p>Wednesday 18:30 — 20:30</p>
@@ -35,8 +36,8 @@ export const WheelThrowing: FC<{
     <p>This course is intended for everyone, who wants to learn the basics of pottery wheel throwing and explore the
       process of creating ceramics. No previous experience is necessary.</p>
 
-      <h2>How to book</h2>
-      <p></p>varya@palavara.com
+    <h2>How to book</h2>
+    <p><a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
 
     <p>You can join the class on any given Monday/Wednesday if there are places available.</p>
 

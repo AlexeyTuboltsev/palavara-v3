@@ -7,7 +7,10 @@ export enum ERoute {
   OPEN_STUDIO = "openStudio",
   FIRING_SERVICE = "firingService",
   GIFT_CERTIFICATE = "giftCertificate",
-  MEMBERSHIP = "membership"
+  MEMBERSHIP = "membership",
+  ABOUT = "about",
+  RENT_A_SPACE = "rentASpace",
+  CONTACT = "contact",
 }
 
 export type TRouteDef = {
@@ -25,6 +28,9 @@ export type TRoute =
   | ({ routeName: ERoute.FIRING_SERVICE } )
   | ({ routeName: ERoute.GIFT_CERTIFICATE } )
   | ({ routeName: ERoute.MEMBERSHIP } )
+  | ({ routeName: ERoute.ABOUT } )
+  | ({ routeName: ERoute.RENT_A_SPACE } )
+  | ({ routeName: ERoute.CONTACT } )
 
 export const routeDefs:TRouteDef[] = [
   {routeName: ERoute.HOME, routePattern: '/'},
@@ -35,6 +41,9 @@ export const routeDefs:TRouteDef[] = [
   {routeName: ERoute.FIRING_SERVICE, routePattern: '/firing-service'},
   {routeName: ERoute.GIFT_CERTIFICATE, routePattern: '/gift-certificate'},
   {routeName: ERoute.MEMBERSHIP, routePattern: '/membership'},
+  {routeName: ERoute.ABOUT, routePattern: '/about-me'},
+  {routeName: ERoute.RENT_A_SPACE, routePattern: '/rent-a-space'},
+  {routeName: ERoute.CONTACT, routePattern: '/contact'},
 
   // {
   //   routeName: ERoute.ROUTE_TREE, routePattern: '/asd/:id', paramsParser: (params: {[key:string]:any}) => {

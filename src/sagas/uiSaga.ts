@@ -27,6 +27,9 @@ export function* uiSaga() {
 
         break;
       }
+      case "EXTERNAL_LINK": {
+
+      }
     }
   }
 }

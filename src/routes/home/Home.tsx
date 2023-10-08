@@ -9,7 +9,6 @@ import cn from 'classnames';
 
 
 const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}) => {
-  console.log(imgLqipUrl)
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement | null>(null)
   useEffect(() => {

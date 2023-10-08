@@ -5,9 +5,9 @@ import cn from 'classnames';
 
 const HeaderLinks:FC<{className:string}> = ({className}) => {
   return <div className={cn(styles.links, className)}>
-    <a href="saf">palavara_studio</a>
+    <a href="https://www.instagram.com/palavara_ceramics/">palavara_studio</a>
     <div className={cn(styles.instagramLogo,className)}><InstagramLogo/></div>
-    <a href="asdewg">palavara_ceramics</a>
+    <a href="https://www.instagram.com/palavara_studio/">palavara_ceramics</a>
   </div>
 }
 
