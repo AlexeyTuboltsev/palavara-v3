@@ -8,14 +8,12 @@ import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSa
 import {config} from "../../config";
 
 export function* kidsClass(): Generator<any, void, any> {
-  const imageUrlBase = "kidsClass"
-  const imageLqipUrlBase = "lqip/kidsClass"
+  const imageLqipUrlBase = "lqip"
   const urls = [
-    "01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg", "06.jpg", "07.jpg", "08.jpg", "09.jpg", "10.jpg", "11.jpg",
-    "12.jpg",
-    "13.jpg"]
+    "02-01.jpg", "02-02.jpg", "02-03.jpg", "02-04.jpg", "02-05.jpg", "02-06.jpg", "02-07.jpg", "02-08.jpg", "02-09.jpg", "02-10.jpg", "02-11.jpg",
+    "02-12.jpg", "02-13.jpg"]
 
-  const imageUrls = urls.map(url => `${config.imgPrefix}/${imageUrlBase}/${url}`);
+  const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
 
   const initialState = {

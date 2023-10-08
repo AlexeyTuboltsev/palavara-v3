@@ -8,11 +8,10 @@ import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSa
 import {config} from "../../config";
 
 export function* openStudio(): Generator<any, void, TReadyAppState> {
-  const imageUrlBase = "openStudio"
   const imageLqipUrlBase = "lqip/openStudio"
-  const urls = ["01.jpg"]
+  const urls = ["03-01.jpg"]
 
-  const imageUrls = urls.map(url => `${config.imgPrefix}/${imageUrlBase}/${url}`);
+  const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
 
   const initialState = {

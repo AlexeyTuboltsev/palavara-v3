@@ -13,24 +13,23 @@ import cn from "classnames";
 const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}) => {
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement | null>(null)
+
   useEffect(() => {
-    if (imgRef.current && imgRef.current.complete) {
-      setLoaded(true);
-    }
-  }, []);
+    setLoaded(false);
+  }, [imgUrl]);
 
   return <>
+    <img alt="" src={imgLqipUrl} aria-hidden={true}
+         className={styles.imgLowRes}
+    />
     <img
       aria-hidden={true}
       loading="lazy"
-      // className={cn(styles.backgroundImg, {[styles.backgroundImgVisible]: loaded})}
+      className={cn(styles.img, {[styles.imgVisible]: loaded})}
       src={imgUrl}
       alt=""
       ref={imgRef}
       onLoad={() => setLoaded(true)}
-    />
-    <img alt="" src={imgLqipUrl} aria-hidden={true}
-         // className={styles.backgroundImgLowRes}
     />
   </>
 }

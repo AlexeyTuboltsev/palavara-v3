@@ -8,11 +8,10 @@ import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSa
 import {config} from "../../config";
 
 export function* wheelThrowing(): Generator<any, void, TReadyAppState> {
-  const imageUrlBase = "wheelThrowing"
   const imageLqipUrlBase = "lqip/wheelThrowing"
-  const urls = ["01.jpg"]
+  const urls = ["04-01.jpg","04-02.jpg","04-03.jpg"]
 
-  const imageUrls = urls.map(url => `${config.imgPrefix}/${imageUrlBase}/${url}`);
+  const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
 
   const initialState = {

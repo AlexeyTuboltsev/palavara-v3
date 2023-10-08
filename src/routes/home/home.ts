@@ -8,10 +8,12 @@ import {actionListenerLoop, toggleMenuOpen} from "../../sagas/uiSaga";
 import {config} from "../../config";
 
 export function* home(): Generator<any, void, TReadyAppState> {
-  const urls = ['home-1.jpg', 'home-2.jpg', 'home-3.jpg', 'home-4.jpg', 'home-5.jpg', 'home-6.jpg', 'home-7.jpg']
-  const imageUrlBase = "home"
-  const imageLqipUrlBase = "lqip/home"
-  const imageUrls = urls.map(url => `${config.imgPrefix}/${imageUrlBase}/${url}`)
+  const urls = [
+    'home-1.jpg',
+    'home-2.jpg', 'home-3.jpg', 'home-4.jpg', 'home-5.jpg', 'home-6.jpg', 'home-7.jpg'
+  ]
+  const imageLqipUrlBase = "lqip"
+  const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`)
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
 
   const initialState = {
@@ -32,12 +34,13 @@ export function* home(): Generator<any, void, TReadyAppState> {
 }
 
 function* cyclePictures(imageUrls:string[],imageLqipUrls:string[]){
-  let i = 1
+  let i = 0
 
   while(true){
     yield delay(3000)
 
     i = (i === imageUrls.length - 1) ? 0 : i + 1
+    console.log(imageUrls.length,i)
     const state: Readonly<TReadyAppState> = yield select(state => state.ui)
     yield put(setAppState({...state, url: imageUrls[i], lqipUrl: imageLqipUrls[i]} as any))
   }

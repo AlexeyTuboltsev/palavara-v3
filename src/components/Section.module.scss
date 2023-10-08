@@ -36,7 +36,7 @@
   position: relative;
   height: 100%;
   width: calc(100% + 20px);
-  background-color: gray;
+  background-color: #ffffff;
   grid-column: 1 / span 2;
   left: -20px;
   overflow: hidden;
@@ -46,6 +46,31 @@
     height: 100%;
     object-fit: cover;
   }
+}
+
+.img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  top: 0;
+  left: 0;
+  opacity: 0;
+
+  &.img-visible {
+    opacity: 1;
+    transition: opacity 1s ease-out;
+  }
+}
+
+
+.img-low-res {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  top: 0;
+  left: 0;
 }
 
 .text {

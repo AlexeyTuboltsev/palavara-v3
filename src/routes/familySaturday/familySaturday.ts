@@ -8,12 +8,11 @@ import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSa
 import {config} from "../../config";
 
 export function* familySaturday(): Generator<any, void, any> {
-  const imageUrlBase = "familySaturday"
-  const imageLqipUrlBase = "lqip/familySaturday"
+  const imageLqipUrlBase = "lqip"
   const urls = [
-    "01.jpg", "02.jpg", "03.jpg", "04.jpg", "05.jpg", "06.jpg"]
+    "01-01.jpg", "01-02.jpg", "01-03.jpg", "01-04.jpg", "01-05.jpg", "01-06.jpg"]
 
-  const imageUrls = urls.map(url => `${config.imgPrefix}/${imageUrlBase}/${url}`);
+  const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
 
   const initialState = {
