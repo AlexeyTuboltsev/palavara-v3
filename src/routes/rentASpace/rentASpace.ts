@@ -9,7 +9,11 @@ import {config} from "../../config";
 
 export function* rentASpace(): Generator<any, void, any> {
   const imageLqipUrlBase = "lqip"
-  const urls = ["02-01.jpg"]
+  const urls = [
+    "09-01.jpg",
+    "09-02.jpg",
+    "09-03.jpg",
+  ]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)

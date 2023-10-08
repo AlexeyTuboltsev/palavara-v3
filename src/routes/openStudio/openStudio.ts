@@ -9,7 +9,14 @@ import {config} from "../../config";
 
 export function* openStudio(): Generator<any, void, TReadyAppState> {
   const imageLqipUrlBase = "lqip/openStudio"
-  const urls = ["03-01.jpg"]
+  const urls = [
+    "08-01.jpg",
+    "08-02.jpg",
+    "08-03.jpg",
+    "08-04.jpg",
+    "08-05.jpg",
+    "08-06.jpg",
+  ]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)

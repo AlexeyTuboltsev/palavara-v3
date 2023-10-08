@@ -9,7 +9,18 @@ import {config} from "../../config";
 
 export function* about(): Generator<any, void, any> {
   const imageLqipUrlBase = "lqip"
-  const urls = ["02-01.jpg"]
+  const urls = [
+    "05-01.jpg",
+    "05-02.jpg",
+    "05-03.jpg",
+    "05-04.jpg",
+    "05-05.jpg",
+    "05-06.jpg",
+    "05-07.jpg",
+    "05-08.jpg",
+    "05-09.jpg",
+    "05-10.jpg",
+  ]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)

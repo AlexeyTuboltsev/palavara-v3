@@ -18,25 +18,27 @@ const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}
     setLoaded(false);
   }, [imgUrl]);
 
-  return <>
-    <img alt="" src={imgLqipUrl} aria-hidden={true}
-         className={styles.imgLowRes}
-    />
-    <img
-      aria-hidden={true}
-      loading="lazy"
-      className={cn(styles.img, {[styles.imgVisible]: loaded})}
-      src={imgUrl}
-      alt=""
-      ref={imgRef}
-      onLoad={() => setLoaded(true)}
-    />
-  </>
+  return imgUrl && imgLqipUrl
+    ? <>
+      <img alt="" src={imgLqipUrl} aria-hidden={true}
+           className={styles.imgLowRes}
+      />
+      <img
+        aria-hidden={true}
+        loading="lazy"
+        className={cn(styles.img, {[styles.imgVisible]: loaded})}
+        src={imgUrl}
+        alt=""
+        ref={imgRef}
+        onLoad={() => setLoaded(true)}
+      />
+    </>
+    : null
 }
 
-export const SectionVisual:FC<{url:string, lqipUrl:string}> = ({url, lqipUrl}) => {
+export const SectionVisual: FC<{ url: string, lqipUrl: string }> = ({url, lqipUrl}) => {
   return <div className={styles.visual}>
-    <Images imgUrl={url} imgLqipUrl={lqipUrl} />
+    <Images imgUrl={url} imgLqipUrl={lqipUrl}/>
   </div>
 }
 
@@ -50,11 +52,14 @@ export const Section: FC<{ state: TReadyAppState, children: ReactNode }> = ({sta
       <SectionHeader state={state}/>
     </div>
     <div className={styles.buttons}>
-      <Minus className={styles.minus} onClick={() => dispatch(actions.previousImage())}/>
+      {(state as any).imageUrl && <>
+        <Minus className={styles.minus} onClick={() => dispatch(actions.previousImage())}/>
       <Plus className={styles.plus} onClick={() => dispatch(actions.nextImage())}/>
+      </>
+      }
     </div>
     <div className={styles.sectionContent}>
-      <SectionVisual url={(state as any).imageUrl} lqipUrl={(state as any).imageLqipUrl} />
+      {(state as any).imageUrl && <SectionVisual url={(state as any).imageUrl} lqipUrl={(state as any).imageLqipUrl}/>}
       <div className={styles.text}>
         {children}
       </div>
