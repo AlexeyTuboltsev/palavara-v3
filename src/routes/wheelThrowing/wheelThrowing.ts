@@ -6,13 +6,13 @@ import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
 import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
 import {config} from "../../config";
+import {actions} from "../../actions";
 
 export function* wheelThrowing(): Generator<any, void, TReadyAppState> {
-  const imageLqipUrlBase = "lqip/wheelThrowing"
   const urls = ["04-01.jpg","04-02.jpg","04-03.jpg"]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
-  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
+  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
 
   const initialState = {
     appState: EAppState.READY as const,
@@ -25,4 +25,5 @@ export function* wheelThrowing(): Generator<any, void, TReadyAppState> {
   yield put(setAppState(initialState))
 
   yield fork(actionListenerLoop, {...toggleMenuOpen,...imageChanger(imageUrls, imageLqipUrls)})
+  yield put(actions.nextImage())
 }

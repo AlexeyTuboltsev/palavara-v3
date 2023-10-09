@@ -1,5 +1,5 @@
 import {CANCEL} from 'redux-saga';
-import axios from "axios";
+import axios, {ResponseType} from "axios";
 
 export enum EHttpMethod {
     GET = "GET",
@@ -9,10 +9,11 @@ export enum EHttpMethod {
     HEAD = "HEAD",
 }
 
-export function createRequest(method:EHttpMethod, url:string) {
+export function createRequest(method:EHttpMethod, url:string, type:ResponseType) {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = axios.request({
         method,
+        responseType:type,
         url,
         cancelToken: cancelTokenSource.token
     });

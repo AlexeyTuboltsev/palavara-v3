@@ -6,9 +6,9 @@ import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
 import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
 import {config} from "../../config";
+import {actions} from "../../actions";
 
 export function* openStudio(): Generator<any, void, TReadyAppState> {
-  const imageLqipUrlBase = "lqip/openStudio"
   const urls = [
     "08-01.jpg",
     "08-02.jpg",
@@ -19,7 +19,7 @@ export function* openStudio(): Generator<any, void, TReadyAppState> {
   ]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
-  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
+  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
 
   const initialState = {
     appState: EAppState.READY as const,
@@ -32,4 +32,6 @@ export function* openStudio(): Generator<any, void, TReadyAppState> {
   yield put(setAppState(initialState))
 
   yield fork(actionListenerLoop, {...toggleMenuOpen,...imageChanger(imageUrls, imageLqipUrls)})
+  yield put(actions.nextImage())
+
 }

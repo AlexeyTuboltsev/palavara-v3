@@ -6,9 +6,9 @@ import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
 import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
 import {config} from "../../config";
+import {actions} from "../../actions";
 
 export function* rentASpace(): Generator<any, void, any> {
-  const imageLqipUrlBase = "lqip"
   const urls = [
     "09-01.jpg",
     "09-02.jpg",
@@ -16,7 +16,7 @@ export function* rentASpace(): Generator<any, void, any> {
   ]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
-  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
+  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
 
   const initialState = {
     appState: EAppState.READY as const,
@@ -31,4 +31,6 @@ export function* rentASpace(): Generator<any, void, any> {
   yield fork(actionListenerLoop, {
     ...toggleMenuOpen, ...imageChanger(imageUrls, imageLqipUrls)
   })
+  yield put(actions.nextImage())
+
 }

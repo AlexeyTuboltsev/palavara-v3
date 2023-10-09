@@ -1,7 +1,7 @@
 import styles from "./Section.module.scss";
 import {LogoBlue} from "./Logo";
 import {MenuBlue} from "./Menu";
-import React, {FC, ReactNode, useEffect, useRef, useState} from "react";
+import React, {FC, ReactNode} from "react";
 import {TReadyAppState} from "../types";
 import {SectionHeader} from "./SectionHeader";
 import {ReactComponent as Plus} from "../assets/plus.svg";
@@ -10,35 +10,30 @@ import {useDispatch} from "react-redux";
 import {actions} from "../actions";
 import cn from "classnames";
 
-const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}) => {
-  const [loaded, setLoaded] = useState(false)
-  const imgRef = useRef<HTMLImageElement | null>(null)
+const Images: FC<{ imageData: string, imageLqipData: string }> = ({imageLqipData, imageData}) => {
+  return <>
 
-  useEffect(() => {
-    setLoaded(false);
-  }, [imgUrl]);
-
-  return imgUrl && imgLqipUrl
-    ? <>
-      <img alt="" src={imgLqipUrl} aria-hidden={true}
-           className={styles.imgLowRes}
-      />
-      <img
+    {imageData && <img
         aria-hidden={true}
         loading="lazy"
-        className={cn(styles.img, {[styles.imgVisible]: loaded})}
-        src={imgUrl}
+        className={styles.img}
+        src={imageData}
         alt=""
-        ref={imgRef}
-        onLoad={() => setLoaded(true)}
-      />
-    </>
-    : null
+    />}
+
+    {imageLqipData && <img
+        alt=""
+        src={imageLqipData}
+        aria-hidden={true}
+        className={cn(styles.imgLowRes, {[styles.lqipVisible]:imageData})}
+    />}
+  </>
+
 }
 
-export const SectionVisual: FC<{ url: string, lqipUrl: string }> = ({url, lqipUrl}) => {
+export const SectionVisual: FC<{ imageData: string, imageLqipData: string }> = ({imageData, imageLqipData}) => {
   return <div className={styles.visual}>
-    <Images imgUrl={url} imgLqipUrl={lqipUrl}/>
+    <Images imageData={imageData} imageLqipData={imageLqipData}/>
   </div>
 }
 
@@ -52,14 +47,15 @@ export const Section: FC<{ state: TReadyAppState, children: ReactNode }> = ({sta
       <SectionHeader state={state}/>
     </div>
     <div className={styles.buttons}>
-      {(state as any).imageUrl && <>
-        <Minus className={styles.minus} onClick={() => dispatch(actions.previousImage())}/>
-      <Plus className={styles.plus} onClick={() => dispatch(actions.nextImage())}/>
+      {((state as any).imageUrl || (state as any).imageLqipUrl) && <>
+          <Minus className={styles.minus} onClick={() => dispatch(actions.previousImage())}/>
+          <Plus className={styles.plus} onClick={() => dispatch(actions.nextImage())}/>
       </>
       }
     </div>
     <div className={styles.sectionContent}>
-      {(state as any).imageUrl && <SectionVisual url={(state as any).imageUrl} lqipUrl={(state as any).imageLqipUrl}/>}
+      {((state as any).imageUrl || (state as any).imageLqipUrl) &&
+          <SectionVisual imageData={(state as any).imageData} imageLqipData={(state as any).imageLqipData}/>}
       <div className={styles.text}>
         {children}
       </div>

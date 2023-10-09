@@ -18,7 +18,9 @@ export enum EActionType {
   TOGGLE_OPEN = "TOGGLE_OPEN",
   NEXT_IMAGE = 'NEXT_IMAGE',
   PREVIOUS_IMAGE = 'PREVIOUS_IMAGE',
-  EXTERNAL_LINK = 'EXTERNAL_LINK'
+  EXTERNAL_LINK = 'EXTERNAL_LINK',
+  IMG = 'IMG',
+  LQIP = 'LQIP'
 }
 
 export type TAction = ReturnType<typeof actions[keyof typeof actions]>
@@ -36,6 +38,8 @@ export const actions = {
   toggleOpen: createAction(EActionType.TOGGLE_OPEN, withPayloadType<string>()),
   nextImage: createAction(EActionType.NEXT_IMAGE),
   previousImage: createAction(EActionType.PREVIOUS_IMAGE),
-  externalLink: createAction(EActionType.EXTERNAL_LINK, withPayloadType<string>())
+  externalLink: createAction(EActionType.EXTERNAL_LINK, withPayloadType<string>()),
+  image: createAction(EActionType.IMG, withPayloadType<{data:string, status:number, statusText:string}>()),
+  lqip: createAction(EActionType.LQIP, withPayloadType<{data:string, status:number, statusText:string}>()),
 }
 
