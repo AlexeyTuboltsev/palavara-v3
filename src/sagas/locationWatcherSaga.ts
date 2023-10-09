@@ -14,14 +14,14 @@ export function* locationWatcherSaga(history: BrowserHistory, initialRoute: TRou
   yield call(setLocation, history, routeDefs, initialRoute)
   while (true) {
     // const cancel = yield take() // TODO teardown
+    const oldRoute: TRoute = yield select(state => state.ui.route)
     const action: PayloadAction<TReadyAppState> | PayloadAction<string> = yield take([setAppState.type,actions.externalLink.type])
 
     if(action.type === setAppState.type){
-      const newState = action.payload as TReadyAppState
-      const route: TRoute = yield select(state => state.ui.route)
+      const newRoute: TRoute = yield select(state => state.ui.route)
 
-      if (!isEqual(newState.route, route)) {
-        yield call(setLocation, history, routeDefs, newState.route)
+      if (!isEqual(newRoute, oldRoute)) {
+        yield call(setLocation, history, routeDefs, newRoute)
       }
     }
 
