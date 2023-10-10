@@ -9,15 +9,14 @@ export enum EHttpMethod {
     HEAD = "HEAD",
 }
 
-export function createRequest(method:EHttpMethod, url:string, type:ResponseType) {
+export function createRequest(method:EHttpMethod, url:string, responseType:ResponseType) {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = axios.request({
         method,
-        responseType:type,
+        responseType,
         url,
-        cancelToken: cancelTokenSource.token
+        cancelToken: cancelTokenSource.token,
     });
     (promise as any)[CANCEL] = cancelTokenSource.cancel;
     return promise;
 }
-
