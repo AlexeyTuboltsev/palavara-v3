@@ -1,6 +1,7 @@
 import React, {FC} from 'react'
 import {TReadyAppState} from "../../types";
 import {Section} from "../../components/Section";
+import styles from "../../components/Section.module.scss";
 
 export const FamilySaturday: FC<{
   state: TReadyAppState
@@ -8,16 +9,18 @@ export const FamilySaturday: FC<{
   // const {t} = useTranslation();
 
   return <Section state={state}>
-    <h1>FAMILY SATURDAYS</h1>
+    <div className={styles.mainText}>
 
-    <p>We find that a ceramic workshop is a great Saturday entertainment for the whole family!</p>
+      <h1>FAMILY SATURDAYS</h1>
 
-    <p>Here you get a chance to work independently on your own project together with your kids, and we supply all the
-      necessary tools and materials, as well as of course help you bring your ideas to life.</p>
+      <p>We find that a ceramic workshop is a great Saturday entertainment for the whole family!</p>
 
-    <p>Please book in advance.</p>
-    <p>Only limited places are available!</p>
+      <p>Here you get a chance to work independently on your own project together with your kids, and we supply all the
+        necessary tools and materials, as well as of course help you bring your ideas to life.</p>
 
+      <p>Please book in advance.</p>
+      <p>Only limited places are available!</p>
+    </div>
     <h2>When</h2>
     <p>On Saturdays, the studio is open from 11 till 13.</p>
 

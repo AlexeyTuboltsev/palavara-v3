@@ -1,12 +1,20 @@
 @import "../styles/global.module";
 
-.section-menu-blue{}
-.section-menu-yellow{}
+.section-menu-blue {
+}
+
+.section-menu-yellow {
+}
 
 .section-menu {
   display: grid;
   grid-auto-flow: column;
   justify-content: flex-end;
+
+  @media (max-width: 500px) {
+    border-top: 1px solid $color-dark-grey;
+    padding-top: 4px;
+  }
 }
 
 .section-menu-item {
@@ -14,6 +22,9 @@
   font-size: 20px;
   font-weight: 500;
   margin: 0 10px;
+  color: $color-white;
+
+  mix-blend-mode: normal;
 
   cursor: pointer;
 
@@ -34,11 +45,58 @@
     }
   }
 
+  @media (max-width: 500px) {
+    color: $color-blue;
+    font-size: 16px;
+  }
 
-  &.section-menu-blue{
+  .section-menu-white {
+    color: $color-white;
+  }
+
+  &.section-menu-blue {
     color: $color-blue;
   }
-  &.section-menu-yellow{
+
+  &.section-menu-yellow {
     color: $color-yellow;
+
+    @media (max-width: 500px) {
+      color: $color-black;
+    }
+  }
+
+}
+
+.mobile-secondary-menu {
+  padding: 15px 10px 0;
+  display: grid;
+  grid-column-gap: 10px;
+  grid-auto-columns: auto;
+  grid-auto-flow: column;
+  justify-content: flex-start;
+}
+
+.section-menu-item-secondary {
+  position: relative;
+  color: $color-white;
+  font-size: 16px;
+  text-transform: none;
+
+
+  &:not(:last-child):after {
+    content: "/";
+    position: absolute;
+    right: -2px;
+    width: 0;
+    cursor: default;
+  }
+
+  &.section-menu-blue {
+    color: $color-white;
+  }
+
+  &.menu-about {
+    color: $color-blue;
   }
 }

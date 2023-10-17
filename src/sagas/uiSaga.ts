@@ -8,8 +8,9 @@ import {produce} from "immer";
 import {setAppState} from "../store";
 import {requestSaga} from "./requestSaga";
 import {EHttpMethod} from "../services/httpRequest";
+import {TResizeEventPayload} from "../services/resizeObserver";
 
-export function* uiSaga() {
+export function* uiSaga(screenSize:TResizeEventPayload) {
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
   while (true) {
     const action: TAction = yield take(Object.values(actions).map(action => action.type))
@@ -24,7 +25,7 @@ export function* uiSaga() {
             yield cancel(currentRouteDataGenerator);
           }
           const routeDataGenerator = generateRouteData(route)
-          currentRouteDataGenerator = yield fork(routeDataGenerator as any)
+          currentRouteDataGenerator = yield fork(routeDataGenerator as any,  screenSize)
         }
 
         break;
@@ -38,8 +39,8 @@ export function* uiSaga() {
 
 export type TActionMap = { [key in EActionType]?: ((state: TReadyAppState, action: any) => TReadyAppState | Generator<any, TReadyAppState, any>) }
 
-export const toggleMenuOpen: TActionMap = {
-  [EActionType.TOGGLE_OPEN]: function* (state: TReadyAppState, action: ReturnType<typeof actions["toggleOpen"]>) {
+export const toggleSubmenu: TActionMap = {
+  [EActionType.TOGGLE_SUBMENU]: function* (state: TReadyAppState, action: ReturnType<typeof actions["toggleOpen"]>) {
     return yield put(setAppState(
       produce(state, (nextState: TReadyAppState) => {
         const menuItem: TMenuItem | undefined = nextState.menu[action.payload]
@@ -47,6 +48,18 @@ export const toggleMenuOpen: TActionMap = {
         if (menuItem && menuItem.type !== EMenuType.ROOT) {
           menuItem.isActive = !menuItem.isActive
         }
+      })
+    ))
+  }
+}
+
+export const toggleMobileMenu:TActionMap = {
+  [EActionType.TOGLLE_MOBILE_MENU]: function* (state: TReadyAppState, action: ReturnType<typeof actions["toggleMobileMenu"]>){
+    return yield put(setAppState(
+      produce(state, (nextState: TReadyAppState) => {
+
+          nextState.menuIsOpen = !nextState.menuIsOpen
+
       })
     ))
   }

@@ -4,11 +4,13 @@ import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
-import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
+import {actionListenerLoop, imageChanger, toggleMobileMenu, toggleSubmenu} from "../../sagas/uiSaga";
 import {config} from "../../config";
 import {actions} from "../../actions";
+import {TResizeEventPayload} from "../../services/resizeObserver";
+import {screenSize} from "../common/screenSize";
 
-export function* giftCertificate(): Generator<any, void, any> {
+export function* giftCertificate(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = ["10-01.jpg",]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
@@ -17,6 +19,9 @@ export function* giftCertificate(): Generator<any, void, any> {
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: ERoute.GIFT_CERTIFICATE},
+    screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
+    menuIsOpen:false,
+    menuIsCollapsible:true,
     sectionMenu: sectionMenu(),
     menu: menu(ERoute.GIFT_CERTIFICATE),
     imageUrl: imageUrls[0],
@@ -24,9 +29,8 @@ export function* giftCertificate(): Generator<any, void, any> {
   }
   yield put(setAppState(initialState))
 
-  yield fork(actionListenerLoop, toggleMenuOpen)
   yield fork(actionListenerLoop, {
-    ...toggleMenuOpen, ...imageChanger(imageUrls, imageLqipUrls)
+    ...toggleSubmenu, ...imageChanger(imageUrls, imageLqipUrls), ...toggleMobileMenu
   })
   yield put(actions.nextImage())
 

@@ -13,12 +13,22 @@ $instagram-logo-size: 25px;
   font-size: 16px;
 }
 
-.links-blue {
+.hidden-on-mobile {
+  @media (max-width: 500px) {
+    display: none;
+  }
+}
+
+.links-section {
   color: $color-black
 }
 
-.links-yellow {
-  color: $color-yellow
+.links-home {
+  color: $color-yellow;
+
+  @media (max-width: 500px) {
+    color: $color-blue;
+  }
 }
 
 .instagram-logo {
@@ -26,15 +36,22 @@ $instagram-logo-size: 25px;
     width: $instagram-logo-size;
     height: $instagram-logo-size;
 
-
   }
 
-  &.links-blue {
-    fill: $color-black;
-    stroke: $color-black;  }
+  @media (max-width: 500px) {
+    fill: $color-blue;
+    stroke: $color-blue;
+  }
 
-  &.links-yellow {
-    fill: $color-yellow;
-    stroke: $color-yellow;
+  @media (min-width: 501px) {
+    &.links-blue {
+      fill: $color-black;
+      stroke: $color-black;
+    }
+
+    &.links-yellow {
+      fill: $color-yellow;
+      stroke: $color-yellow;
+    }
   }
 }

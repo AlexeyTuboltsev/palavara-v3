@@ -1,6 +1,7 @@
 import React, {FC} from 'react'
 import {TReadyAppState} from "../../types";
 import {Section} from "../../components/Section";
+import styles from '../../components/Section.module.scss'
 
 export const WheelThrowing: FC<{
   state: TReadyAppState
@@ -8,16 +9,17 @@ export const WheelThrowing: FC<{
   // const {t} = useTranslation();
 
   return <Section state={state}>
-    <h1>Wheel-Throwing class</h1>
-    <p>A 4 weeks small group course (up to 3 participants in a group).</p>
-
-    <p>The course covers preparing pottery clay, wedging and centring, pulling of walls, trimming, bisque firing,
-      glazing and glaze firing. In 4 weeks you will go through all these basic steps of pottery making and afterwards
-      will be able to take home a unique and at the same time functional ceramic objects.</p>
-    <p>If after this introductory course you will find yourself unable to stop and will want to learn more, you will be
-      able to continue taking classes in our studio.</p>
-    <br/>
-    <p>Only limited places are available!</p>
+    <div className={styles.mainText}>
+      <h1>Wheel-Throwing class</h1>
+      <p>A 4 weeks small group course (up to 3 participants in a group).</p>
+      <p>The course covers preparing pottery clay, wedging and centring, pulling of walls, trimming, bisque firing,
+        glazing and glaze firing. In 4 weeks you will go through all these basic steps of pottery making and afterwards
+        will be able to take home a unique and at the same time functional ceramic objects.</p>
+      <p>If after this introductory course you will find yourself unable to stop and will want to learn more, you will
+        be
+        able to continue taking classes in our studio.</p>
+      <p>Only limited places are available!</p>
+    </div>
     <br/>
     <h2>Where?</h2>
     <p>13359, Steegerstr. 1A, Berlin</p>

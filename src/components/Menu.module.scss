@@ -1,12 +1,7 @@
 @import "../styles/global.module";
 
-.menu-yellow{
-}
-
-.menu-blue {
-}
-
 .menu {
+  position: relative;
   align-self: flex-start;
   grid-column: 2;
   min-width: 324px;
@@ -16,14 +11,24 @@
   font-size: 20px;
   text-transform: uppercase;
 
-  &.menu-blue{
-    background-color: transparent;
+  &.menu-blue {
+    background-color: $color-blue;
   }
+
+  &.transparency {
+    opacity: 0.8;
+  }
+
   &.menu-yellow {
-    background-color: rgba($color-blue, 0.7);
+    background-color:$color-yellow;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 22px;
+    grid-column: 1 / span 2;
+    padding: 0 0 5px 0;
   }
 }
-
 
 
 .menu-item {
@@ -39,10 +44,23 @@
   &.menu-blue {
     color: $color-black;
     border-bottom: 1px solid $color-black;
+
+    @media (max-width: 500px) {
+      color: $color_white;
+      border-bottom: 1px solid $color-white;
+    }
   }
+
   &.menu-yellow {
     color: $color_white;
     border-bottom: 1px solid $color-white;
+  }
+
+  &.menu-about {
+    @media (max-width: 500px) {
+      color: $color_blue;
+      border-bottom: 1px solid $color_blue;
+    }
   }
 }
 
@@ -51,8 +69,14 @@
   font-weight: 500;
 
   &.menu-blue {
-    color: $color-blue
+    color: $color-blue;
+
+    @media (max-width: 500px) {
+      color: $color-yellow
+
+    }
   }
+
   &.menu-yellow {
     color: $color-yellow
   }
@@ -65,26 +89,30 @@
 .parent-menu-item-wrapper-active {
   border-bottom: none;
 
-  &.menu-blue{
+  &.menu-blue {
     color: $color-blue;
 
   }
-  &.menu-yellow{
+
+  &.menu-yellow {
     color: $color-yellow;
   }
 }
-
 
 .parent-menu-item {
   font-weight: 500;
   padding: 0 10px;
   cursor: pointer;
 
-  &.menu-blue{
+  &.menu-blue {
     color: $color-blue;
 
+    @media (max-width: 500px) {
+      color: $color-white;
+    }
   }
-  &.menu-yellow{
+
+  &.menu-yellow {
     color: $color-yellow;
   }
 }
@@ -97,9 +125,14 @@
   position: relative;
   cursor: pointer;
 
-  &.menu-blue{
+  &.menu-blue {
     color: $color-black;
+
+    @media (max-width: 500px) {
+      color: $color-white;
+    }
   }
+
   &.menu-yellow {
     color: $color-white;
   }
@@ -117,6 +150,7 @@
     &.menu-blue {
       border-color: $color-black;
     }
+
     &.menu-yellow {
       border-color: $color-white;
     }
@@ -128,9 +162,52 @@
 
   &.menu-blue {
     color: $color-blue;
+    @media (max-width: 500px) {
+      color: $color-yellow;
+
+    }
+
   }
 
   &.menu-yellow {
     color: $color-yellow;
+  }
+}
+
+.menu-button {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+  padding: 8px;
+  height: 28px;
+  width: 50px;
+  background: transparent;
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  & span {
+    border-bottom: 2px solid $color-white;
+    padding: 0;
+    width: 100%;
+  }
+
+  &.menuButtonBlue span {
+    border-bottom: 2px solid $color-blue;
+  }
+}
+
+.menu-hidden {
+  height: 28px;
+
+  & * {
+    display: none;
+  }
+  & .menu-button {
+    display: flex;
+
+    & * {
+      display: initial;
+    }
   }
 }

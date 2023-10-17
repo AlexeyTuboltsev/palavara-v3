@@ -5,6 +5,12 @@
   height: $logo-size;
 
   cursor: pointer;
+
+  @media (max-width: 500px) {
+    width: $logo-size-small;
+    height: $logo-size-small;
+  }
+
 }
 
 .logo-blue {
@@ -18,5 +24,12 @@
   svg {
     fill: $color-yellow;
     stroke: $color-yellow;
+  }
+
+  @media (max-width: 500px) {
+    svg {
+      fill: $color-blue;
+      stroke: $color-blue;
+    }
   }
 }

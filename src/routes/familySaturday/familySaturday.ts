@@ -4,11 +4,13 @@ import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
-import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
+import {actionListenerLoop, imageChanger, toggleMobileMenu, toggleSubmenu} from "../../sagas/uiSaga";
 import {config} from "../../config";
 import {actions} from "../../actions";
+import {TResizeEventPayload} from "../../services/resizeObserver";
+import {screenSize} from "../common/screenSize";
 
-export function* familySaturday(): Generator<any, void, any> {
+export function* familySaturday(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = [
     "01-01.jpg", "01-02.jpg", "01-03.jpg", "01-04.jpg", "01-05.jpg", "01-06.jpg"]
 
@@ -18,6 +20,9 @@ export function* familySaturday(): Generator<any, void, any> {
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: ERoute.FAMILY_SATURDAY},
+    screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
+    menuIsOpen: false,
+    menuIsCollapsible:true,
     sectionMenu: sectionMenu(),
     menu: menu(ERoute.FAMILY_SATURDAY),
     imageUrl: imageUrls[0],
@@ -26,7 +31,7 @@ export function* familySaturday(): Generator<any, void, any> {
 
   yield put(setAppState(initialState))
 
-  yield fork(actionListenerLoop, {...toggleMenuOpen,...imageChanger(imageUrls, imageLqipUrls)})
+  yield fork(actionListenerLoop, {...toggleSubmenu,...imageChanger(imageUrls, imageLqipUrls), ...toggleMobileMenu})
   yield put(actions.nextImage())
 }
 

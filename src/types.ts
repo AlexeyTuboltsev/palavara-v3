@@ -1,5 +1,6 @@
 import {TRoute} from "./router";
 import {TAction} from "./actions";
+import {EScreenSize} from "./routes/common/screenSize";
 
 export enum EAppState {
   NOT_STARTED = "notStarted",
@@ -17,6 +18,9 @@ export type TAppState =
 export type TReadyAppState = {
   appState: EAppState.READY
   route: TRoute,
+  menuIsOpen:boolean,
+  menuIsCollapsible: boolean;
+  screenSize: EScreenSize,
   sectionMenu: TSectionMenuItem[],
   menu: { root: TMenuItem } & { [id: string]: TMenuItem }
 }
@@ -28,7 +32,12 @@ export enum EMenuType {
   ROOT = 'root'
 }
 
-export type TSectionMenuItem = { id: string, label: string, isActive: boolean, action: TAction }
+export enum ESectionMenuDisplayType {
+  MAIN = "main",
+  SECONDARY = "secondary",
+}
+
+export type TSectionMenuItem = { id: string, mobileDisplayType:ESectionMenuDisplayType, label: string, isActive: boolean, action: TAction }
 
 type TMenuItemCommonProps = {
   id: string,

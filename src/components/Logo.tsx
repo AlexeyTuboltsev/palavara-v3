@@ -19,6 +19,6 @@ export const Logo: FC<{
   </div>
 }
 
-export const LogoYellow = () => <Logo className={styles.logoYellow}/>
+export const LogoHome = () => <Logo className={styles.logoYellow}/>
 
-export const LogoBlue = () => <Logo className={styles.logoBlue}/>
+export const LogoSection = () => <Logo className={styles.logoBlue}/>

@@ -4,11 +4,13 @@ import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
-import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
+import {actionListenerLoop, imageChanger, toggleMobileMenu, toggleSubmenu} from "../../sagas/uiSaga";
 import {config} from "../../config";
 import {actions} from "../../actions";
+import {TResizeEventPayload} from "../../services/resizeObserver";
+import {screenSize} from "../common/screenSize";
 
-export function* openStudio(): Generator<any, void, TReadyAppState> {
+export function* openStudio(screenDimensions: TResizeEventPayload): Generator<any, void, TReadyAppState> {
   const urls = [
     "08-01.jpg",
     "08-02.jpg",
@@ -24,6 +26,9 @@ export function* openStudio(): Generator<any, void, TReadyAppState> {
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: ERoute.OPEN_STUDIO},
+    screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
+    menuIsOpen:false,
+    menuIsCollapsible:true,
     sectionMenu: sectionMenu(),
     menu: menu(ERoute.OPEN_STUDIO),
     imageUrl: imageUrls[0],
@@ -31,7 +36,7 @@ export function* openStudio(): Generator<any, void, TReadyAppState> {
   }
   yield put(setAppState(initialState))
 
-  yield fork(actionListenerLoop, {...toggleMenuOpen,...imageChanger(imageUrls, imageLqipUrls)})
+  yield fork(actionListenerLoop, {...toggleSubmenu,...imageChanger(imageUrls, imageLqipUrls), ...toggleMobileMenu})
   yield put(actions.nextImage())
 
 }

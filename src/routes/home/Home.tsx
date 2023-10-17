@@ -1,11 +1,10 @@
 import React, {FC, ReactNode, useEffect, useRef, useState} from 'react'
 import styles from "../../components/App.module.scss";
 import {TReadyAppState} from "../../types";
-import {MenuYellow} from "../../components/Menu";
-import {LogoYellow} from "../../components/Logo";
-import {SectionMenuYellow} from "../../components/SectionMenu";
-import {HeaderLinksYellow} from "../../components/HeaderLinks";
+import {LogoHome} from "../../components/Logo";
 import cn from 'classnames';
+import {HomeHeader} from "../../components/SectionHeader";
+import {MenuHome} from "../../components/Menu";
 
 
 const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}) => {
@@ -31,7 +30,7 @@ const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}
   </>
 }
 
-const Background: FC<{ children: ReactNode, url: string,lqipUrl:string }> = ({children, url,lqipUrl}) => {
+const Background: FC<{ children: ReactNode, url: string, lqipUrl: string }> = ({children, url, lqipUrl}) => {
 
   return <div className={styles.background}>
     <Images imgUrl={url} imgLqipUrl={lqipUrl}/>
@@ -44,19 +43,16 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
   return <Background url={(state as any).url} lqipUrl={(state as any).lqipUrl}>
     <div className={styles.header}>
-      <LogoYellow/>
+      <LogoHome/>
       <div className={styles.title}>
         Pottery classes <br/> for kids and adults
       </div>
-      <div className={styles.sectionHeader}>
-        <HeaderLinksYellow/>
-        <SectionMenuYellow sectionMenu={state.sectionMenu}/>
-      </div>
+      <HomeHeader state={state}/>
 
-
+      <MenuHome state={state} />
     </div>
     <div className={styles.content}>
-      <MenuYellow {...state.menu}/>
+
     </div>
   </Background>
 }

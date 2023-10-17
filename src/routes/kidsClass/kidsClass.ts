@@ -4,11 +4,13 @@ import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
-import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
+import {actionListenerLoop, imageChanger, toggleMobileMenu, toggleSubmenu} from "../../sagas/uiSaga";
 import {config} from "../../config";
 import {actions} from "../../actions";
+import {TResizeEventPayload} from "../../services/resizeObserver";
+import {screenSize} from "../common/screenSize";
 
-export function* kidsClass(): Generator<any, void, any> {
+export function* kidsClass(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = [
     "02-01.jpg", "02-02.jpg", "02-03.jpg", "02-04.jpg", "02-05.jpg", "02-06.jpg", "02-07.jpg", "02-08.jpg", "02-09.jpg", "02-10.jpg", "02-11.jpg",
     "02-12.jpg", "02-13.jpg"]
@@ -19,6 +21,9 @@ export function* kidsClass(): Generator<any, void, any> {
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: ERoute.KIDS_CLASS},
+    screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
+    menuIsOpen:false,
+    menuIsCollapsible:true,
     sectionMenu: sectionMenu(),
     menu: menu(ERoute.KIDS_CLASS),
     imageUrl: null,
@@ -27,7 +32,7 @@ export function* kidsClass(): Generator<any, void, any> {
   yield put(setAppState(initialState))
 
   yield fork(actionListenerLoop, {
-    ...toggleMenuOpen, ...imageChanger(imageUrls, imageLqipUrls)
+    ...toggleSubmenu, ...toggleMobileMenu,...imageChanger(imageUrls, imageLqipUrls)
   })
   yield put(actions.nextImage())
 }

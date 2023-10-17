@@ -1,10 +1,10 @@
 import {BrowserHistory} from "history";
-import {call, fork, put} from "redux-saga/effects";
+import {call, fork, put, take} from "redux-saga/effects";
 import {TRoute} from "../router";
 import {locationWatcherSaga} from "./locationWatcherSaga";
 import {getRoute, setupHistory} from "../utils/routerUtils";
 import {Dispatch} from "@reduxjs/toolkit";
-import {setupResizeObserver} from "../services/resizeObserver";
+import {setupResizeObserver, TResizeEventPayload} from "../services/resizeObserver";
 import {langWatcherSaga} from "./langWatcherSaga";
 import {ELang, initI18n} from "../services/i18n";
 import {uiSaga} from "./uiSaga";
@@ -24,8 +24,8 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: an
   yield fork(langWatcherSaga, i18n)
 
   const stopResizeObserver: () => void = yield call(setupResizeObserver, rootElement, dispatch)
-
-  yield fork(uiSaga)
+  const screenSize: { payload: TResizeEventPayload } = yield take(actions.screenResize)
+  yield fork(uiSaga, screenSize.payload)
   yield put(actions.requestRouteChange(initialRoute))
 
 

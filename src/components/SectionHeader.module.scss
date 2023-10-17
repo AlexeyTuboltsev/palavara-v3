@@ -1,0 +1,19 @@
+@import "../styles/global.module";
+
+.section-header {
+  display: grid;
+  grid-template: auto 1fr / 1fr;
+  align-items: flex-start;
+  grid-row-gap: 10px;
+
+  @media (max-width: 500px) {
+    grid-row: 1 ;
+    grid-column: 2;
+    align-items: flex-start;
+    grid-row-gap: 1px;
+  }
+}
+
+.about-header {
+
+}

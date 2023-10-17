@@ -4,11 +4,13 @@ import {menu} from "../common/menu";
 import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
-import {actionListenerLoop, imageChanger, toggleMenuOpen} from "../../sagas/uiSaga";
+import {actionListenerLoop, imageChanger, toggleMobileMenu, toggleSubmenu} from "../../sagas/uiSaga";
 import {config} from "../../config";
 import {actions} from "../../actions";
+import {TResizeEventPayload} from "../../services/resizeObserver";
+import {EScreenSize, screenSize} from "../common/screenSize";
 
-export function* about(): Generator<any, void, any> {
+export function* about(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = [
     "05-01.jpg",
     "05-02.jpg",
@@ -24,10 +26,13 @@ export function* about(): Generator<any, void, any> {
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
-
+  const displayType = screenSize(screenDimensions.devicePixelContentBoxSize)
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: ERoute.ABOUT},
+    screenSize: displayType,
+    menuIsOpen: displayType !== EScreenSize.MOBILE,
+    menuIsCollapsible:true,
     sectionMenu: sectionMenu(),
     menu: menu(ERoute.HOME),
     imageUrl: imageUrls[0],
@@ -36,7 +41,7 @@ export function* about(): Generator<any, void, any> {
   yield put(setAppState(initialState))
 
   yield fork(actionListenerLoop, {
-    ...toggleMenuOpen, ...imageChanger(imageUrls, imageLqipUrls)
+    ...toggleSubmenu, ...imageChanger(imageUrls, imageLqipUrls),...toggleMobileMenu
   })
 
   yield put(actions.nextImage())
