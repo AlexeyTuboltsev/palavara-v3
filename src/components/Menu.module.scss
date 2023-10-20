@@ -12,10 +12,14 @@
   text-transform: uppercase;
 
   &.menu-blue {
+    @media (max-width: 500px) {
+
     background-color: $color-blue;
+    }
   }
 
-  &.transparency {
+  &.menuHome {
+    background-color: $color-blue;
     opacity: 0.8;
   }
 
@@ -82,9 +86,6 @@
   }
 }
 
-
-.parent-menu-item-wrapper {
-}
 
 .parent-menu-item-wrapper-active {
   border-bottom: none;
@@ -161,12 +162,10 @@
   font-weight: 500;
 
   &.menu-blue {
-    color: $color-blue;
+color: $color-blue;
     @media (max-width: 500px) {
-      color: $color-yellow;
-
+    color: $color-yellow;
     }
-
   }
 
   &.menu-yellow {

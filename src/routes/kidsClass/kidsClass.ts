@@ -8,7 +8,7 @@ import {actionListenerLoop, imageChanger, toggleMobileMenu, toggleSubmenu} from 
 import {config} from "../../config";
 import {actions} from "../../actions";
 import {TResizeEventPayload} from "../../services/resizeObserver";
-import {screenSize} from "../common/screenSize";
+import {EScreenSize, screenSize} from "../common/screenSize";
 
 export function* kidsClass(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = [
@@ -17,15 +17,17 @@ export function* kidsClass(screenDimensions: TResizeEventPayload): Generator<any
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
+  const s = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const routeName = ERoute.KIDS_CLASS
 
   const initialState = {
     appState: EAppState.READY as const,
-    route: {routeName: ERoute.KIDS_CLASS},
-    screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
-    menuIsOpen:false,
+    route: {routeName: routeName},
+    screenSize: s,
+    menuIsOpen: s !== EScreenSize.MOBILE,
     menuIsCollapsible:true,
-    sectionMenu: sectionMenu(),
-    menu: menu(ERoute.KIDS_CLASS),
+    sectionMenu: sectionMenu(routeName),
+    menu: menu(routeName),
     imageUrl: null,
     imageLqipUrl: null
   }

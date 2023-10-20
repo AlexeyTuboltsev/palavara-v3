@@ -8,22 +8,24 @@ import {actionListenerLoop, imageChanger, toggleMobileMenu, toggleSubmenu} from 
 import {config} from "../../config";
 import {actions} from "../../actions";
 import {TResizeEventPayload} from "../../services/resizeObserver";
-import {screenSize} from "../common/screenSize";
+import {EScreenSize, screenSize} from "../common/screenSize";
 
 export function* membership(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = ["07-01.jpg",]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
+  const s = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const routeName = ERoute.MEMBERSHIP
 
   const initialState = {
     appState: EAppState.READY as const,
-    route: {routeName: ERoute.MEMBERSHIP},
-    screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
-    menuIsOpen:false,
+    route: {routeName: routeName},
+    screenSize: s,
+    menuIsOpen: s !== EScreenSize.MOBILE,
     menuIsCollapsible:true,
-    sectionMenu: sectionMenu(),
-    menu: menu(ERoute.MEMBERSHIP),
+    sectionMenu: sectionMenu(routeName),
+    menu: menu(routeName),
     imageUrl: imageUrls[0],
     imageLqipUrl: imageLqipUrls[0]
   }

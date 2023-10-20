@@ -32,7 +32,8 @@
   mix-blend-mode: multiply;
   top: 0;
   left: 0;
-
+  pointer-events: none;
+  
   @media (max-width: 500px) {
     visibility: hidden;
   }

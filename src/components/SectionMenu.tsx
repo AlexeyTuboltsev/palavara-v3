@@ -9,7 +9,7 @@ const SectionMenuItem: FC<TSectionMenuItem & { className: string }> = ({classNam
   const dispatch = useDispatch()
 
   return <div
-    className={cn(styles.sectionMenuItem, className)}
+    className={cn(styles.sectionMenuItem, {[styles.active]:menuItem.isActive}, className, )}
     onClick={() => dispatch((menuItem.action))}
   >
     {menuItem.label}
@@ -20,7 +20,7 @@ const SectionMenuSecondaryItem: FC<TSectionMenuItem & { className?: string }> = 
   const dispatch = useDispatch()
 
   return <div
-    className={cn(styles.sectionMenuItemSecondary, className)}
+    className={cn(styles.sectionMenuItemSecondary, {[styles.active]:menuItem.isActive}, className, )}
     onClick={() => dispatch((menuItem.action))}
   >
     {menuItem.label}
@@ -28,7 +28,6 @@ const SectionMenuSecondaryItem: FC<TSectionMenuItem & { className?: string }> = 
 }
 
 const SectionMenu: FC<{ sectionMenu: TSectionMenuItem[], className: string, screenSize: EScreenSize}> = ({screenSize, sectionMenu, className}) => {
-  console.log('className',className)
   if(screenSize === EScreenSize.MOBILE){
     return <div className={cn(styles.sectionMenu, className)}>
       {sectionMenu.map(menuItem => {

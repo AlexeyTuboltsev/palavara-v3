@@ -23,6 +23,3 @@ export const SectionHeaderAbout:FC<{state: TReadyAppState}> = ({state}) =>
     <HeaderLinks className={cn(linkStyles.linksHome, styles.aboutHeader)} />
     <SectionMenuWhite sectionMenu={state.sectionMenu} screenSize={(state as any).screenSize}/>
   </div>
-
-  //
-  // <Header state={state}  className={cn(linkStyles.linksHome, styles.aboutHeader)}  />

@@ -11,7 +11,7 @@ import {about} from "../about/about";
 import {rentASpace} from "../rentASpace/rentASpace";
 import {contact} from "../contact/contact";
 
-export function generateRouteData(route: TRoute): any {
+export function findRouteGenerator(route: TRoute): any {
   switch (route.routeName) {
     case ERoute.HOME:
       return home;

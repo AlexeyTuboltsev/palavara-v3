@@ -8,22 +8,24 @@ import {actionListenerLoop, imageChanger, toggleMobileMenu, toggleSubmenu} from 
 import {config} from "../../config";
 import {actions} from "../../actions";
 import {TResizeEventPayload} from "../../services/resizeObserver";
-import {screenSize} from "../common/screenSize";
+import {EScreenSize, screenSize} from "../common/screenSize";
 
 export function* giftCertificate(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = ["10-01.jpg",]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
+  const s = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const routeName = ERoute.GIFT_CERTIFICATE
 
   const initialState = {
     appState: EAppState.READY as const,
-    route: {routeName: ERoute.GIFT_CERTIFICATE},
-    screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
-    menuIsOpen:false,
+    route: {routeName: routeName},
+    screenSize: s,
+    menuIsOpen: s !== EScreenSize.MOBILE,
     menuIsCollapsible:true,
-    sectionMenu: sectionMenu(),
-    menu: menu(ERoute.GIFT_CERTIFICATE),
+    sectionMenu: sectionMenu(routeName),
+    menu: menu(routeName),
     imageUrl: imageUrls[0],
     imageLqipUrl: imageLqipUrls[0]
   }

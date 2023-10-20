@@ -27,14 +27,16 @@ export function* about(screenDimensions: TResizeEventPayload): Generator<any, vo
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
   const displayType = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const routeName = ERoute.ABOUT
+
   const initialState = {
     appState: EAppState.READY as const,
-    route: {routeName: ERoute.ABOUT},
+    route: {routeName: routeName},
     screenSize: displayType,
     menuIsOpen: displayType !== EScreenSize.MOBILE,
     menuIsCollapsible:true,
-    sectionMenu: sectionMenu(),
-    menu: menu(ERoute.HOME),
+    sectionMenu: sectionMenu(routeName),
+    menu: menu(routeName),
     imageUrl: imageUrls[0],
     imageLqipUrl: imageLqipUrls[0]
   }

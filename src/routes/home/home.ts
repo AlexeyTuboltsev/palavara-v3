@@ -10,22 +10,23 @@ import {screenSize} from "../common/screenSize";
 import {TResizeEventPayload} from "../../services/resizeObserver";
 
 export function* home(screenDimensions: TResizeEventPayload): Generator<any, void, TReadyAppState> {
-  const urls = [
+    const urls = [
     'home-1.jpg',
     'home-2.jpg', 'home-3.jpg', 'home-4.jpg', 'home-5.jpg', 'home-6.jpg', 'home-7.jpg'
   ]
   const imageLqipUrlBase = "lqip"
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`)
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${imageLqipUrlBase}/${url}`)
+  const routeName = ERoute.HOME
 
   const initialState = {
     appState: EAppState.READY as const,
-    route: {routeName: ERoute.HOME},
+    route: {routeName: routeName},
     screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
     menuIsOpen:true,
     menuIsCollapsible: false,
-    sectionMenu: sectionMenu(),
-    menu: menu(ERoute.HOME),
+    sectionMenu: sectionMenu(routeName),
+    menu: menu(routeName),
     url: imageUrls[0],
     lqipUrl: imageLqipUrls[0],
   }

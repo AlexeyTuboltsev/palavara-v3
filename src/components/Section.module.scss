@@ -36,14 +36,14 @@
 .section-content {
   height: (100%);
   display: grid;
-  grid-template: 1fr /  124px minmax(324px, 20%) 30px 1fr;
+  grid-template: 1fr / 124px minmax(324px, 20%) 30px 1fr;
   grid-gap: 20px;
   padding: 0 20px;
   overflow: hidden;
 
   @media (max-width: 500px) {
     overflow: auto;
-    grid-template: auto 1fr /  1fr;
+    grid-template: auto 1fr / 1fr;
     padding: 0 10px;
   }
 }
@@ -154,11 +154,15 @@
   }
 
   .main-text {
-    background: $color-blue;
-    padding: 10px 0 5px;
+    @media (max-width: 500px) {
+      background: $color-blue;
+      padding: 10px 0 5px;
 
-    h1, h2, p {
-      color: $color-white;
+      h1,
+      h2,
+      p {
+        color: $color-white;
+      }
     }
   }
 }
@@ -167,7 +171,7 @@
   position: relative;
   display: grid;
   padding-left: 20px;
-  grid-template: 1fr /  124px minmax(324px, 20%) 30px 1fr;
+  grid-template: 1fr / 124px minmax(324px, 20%) 30px 1fr;
   grid-gap: 20px;
 }
 
