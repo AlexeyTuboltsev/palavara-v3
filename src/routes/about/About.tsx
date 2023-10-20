@@ -35,7 +35,7 @@ export const About: FC<{
       <div className={styles.text}>
         <h1>ABOUT ME</h1>
         <p>My name is Varvara Polyakova,</p>
-        <p>I’m a diverse visual artist working across the fields of graphic design, illustration and ceramics.</p>
+        <p>I am a diverse visual artist working across the fields of graphic design, illustration and ceramics.</p>
         <p>I graduated from the Moscow State University of Printing Arts. After graduation, I worked successfully for a
           long time in the field of magazine and book illustration and design.</p>
 
