@@ -16,7 +16,7 @@ export function* familySaturday(screenDimensions: TResizeEventPayload): Generato
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
-  const s = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const s = screenSize(screenDimensions)
   const routeName = ERoute.FAMILY_SATURDAY
 
   const initialState = {

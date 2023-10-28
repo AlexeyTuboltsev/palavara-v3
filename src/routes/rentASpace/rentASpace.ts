@@ -19,7 +19,7 @@ export function* rentASpace(screenDimensions: TResizeEventPayload): Generator<an
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
-  const s = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const s = screenSize(screenDimensions)
   const routeName = ERoute.RENT_A_SPACE
   
   const initialState = {

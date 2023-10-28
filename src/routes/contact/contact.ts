@@ -9,7 +9,7 @@ import { TResizeEventPayload } from "../../services/resizeObserver";
 import { EScreenSize, screenSize } from "../common/screenSize";
 
 export function* contact(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
-  const s = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const s = screenSize(screenDimensions)
   const routeName = ERoute.CONTACT
 
   const initialState = {

@@ -1,11 +1,7 @@
 import {Dispatch} from "@reduxjs/toolkit";
 import {actions} from "../actions";
 
-export type TResizeEventPayload = {
-  borderBoxSize: { height: number, width: number, },
-  contentBoxSize: { height: number, width: number, },
-  devicePixelContentBoxSize: { height: number, width: number, },
-}
+export type TResizeEventPayload = { height: number, width: number, }
 
 export function setupResizeObserver(element: HTMLElement, dispatch: Dispatch) {
   let timeout: number | null = null;
@@ -46,12 +42,8 @@ function getResizeDimensions(element: ResizeObserverEntry): TResizeEventPayload 
   } = element
 
   return {
-    borderBoxSize: {height: borderBoxSize[0].blockSize, width: borderBoxSize[0].inlineSize,},
-    contentBoxSize: {height: contentBoxSize[0].blockSize, width: contentBoxSize[0].inlineSize,},
-    devicePixelContentBoxSize: {
-      height: devicePixelContentBoxSize[0].blockSize,
-      width: devicePixelContentBoxSize[0].inlineSize,
-    },
+    height: devicePixelContentBoxSize[0]?.blockSize ?? borderBoxSize[0].blockSize,
+    width: devicePixelContentBoxSize[0]?.inlineSize ?? borderBoxSize[0].inlineSize
   }
 }
 

@@ -26,7 +26,7 @@ export function* about(screenDimensions: TResizeEventPayload): Generator<any, vo
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
-  const displayType = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const displayType = screenSize(screenDimensions)
   const routeName = ERoute.ABOUT
 
   const initialState = {

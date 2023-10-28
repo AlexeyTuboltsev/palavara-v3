@@ -17,7 +17,7 @@ export function* kidsClass(screenDimensions: TResizeEventPayload): Generator<any
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
-  const s = screenSize(screenDimensions.devicePixelContentBoxSize)
+  const s = screenSize(screenDimensions)
   const routeName = ERoute.KIDS_CLASS
 
   const initialState = {

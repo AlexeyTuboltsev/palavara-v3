@@ -22,7 +22,7 @@ export function* home(screenDimensions: TResizeEventPayload): Generator<any, voi
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: routeName},
-    screenSize: screenSize(screenDimensions.devicePixelContentBoxSize),
+    screenSize: screenSize(screenDimensions),
     menuIsOpen:true,
     menuIsCollapsible: false,
     sectionMenu: sectionMenu(routeName),
