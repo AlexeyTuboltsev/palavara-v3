@@ -9,6 +9,8 @@ import {setAppState} from "../store";
 import {requestSaga} from "./requestSaga";
 import {EHttpMethod} from "../services/httpRequest";
 import {TResizeEventPayload} from "../services/resizeObserver";
+import { screenSize } from "../routes/common/screenSize";
+import { stat } from "fs";
 
 export function* uiSaga(screenSize:TResizeEventPayload) {
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
@@ -39,6 +41,19 @@ export function* uiSaga(screenSize:TResizeEventPayload) {
 }
 
 export type TActionMap = { [key in EActionType]?: ((state: TReadyAppState, action: any) => TReadyAppState | Generator<any, TReadyAppState, any>) }
+
+export const screenResize:TActionMap = {
+  [EActionType.SCREEN_RESIZE]: function* (state: TReadyAppState, action: ReturnType<typeof actions['screenResize']>){
+    const newScreenSize = screenSize(action.payload)
+    if(newScreenSize !== state.screenSize){
+      return yield put(setAppState(
+        produce(state, (nextState)=> {
+          nextState.screenSize = newScreenSize
+        })
+      ))
+    }
+  }
+}
 
 export const toggleSubmenu: TActionMap = {
   [EActionType.TOGGLE_SUBMENU]: function* (state: TReadyAppState, action: ReturnType<typeof actions["toggleOpen"]>) {

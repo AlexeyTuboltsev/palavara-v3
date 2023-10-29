@@ -42,8 +42,8 @@ function getResizeDimensions(element: ResizeObserverEntry): TResizeEventPayload 
   } = element
 
   return {
-    height: devicePixelContentBoxSize[0]?.blockSize ?? borderBoxSize[0].blockSize,
-    width: devicePixelContentBoxSize[0]?.inlineSize ?? borderBoxSize[0].inlineSize
+    height: borderBoxSize[0].blockSize,
+    width: borderBoxSize[0].inlineSize
   }
 }
 
