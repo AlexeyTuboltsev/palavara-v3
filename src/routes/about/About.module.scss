@@ -102,10 +102,11 @@
     margin: 0;
     font-size: 15px;
     padding: 0 10px;
+    color: $color-blue;
 
     @media (max-width: $breakpoint-mobile) {
       padding-top: 10px;
-      color: $color-blue;
+      color: $color-black;
 
       &:first-child {
         padding-top: 0;

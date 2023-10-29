@@ -33,7 +33,9 @@ export const Images: FC<{ imageData: string, imageLqipData: string }> = ({imageL
 }
 
 export const SectionVisual: FC<{ imageData: string, imageLqipData: string }> = ({imageData, imageLqipData}) => {
-  return <div className={styles.visual}>
+  const dispatch = useDispatch();
+
+  return <div className={styles.visual} onClick={() => dispatch(actions.nextImage())}>
     <Images imageData={imageData} imageLqipData={imageLqipData}/>
   </div>
 }

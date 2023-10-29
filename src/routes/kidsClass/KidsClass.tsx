@@ -11,17 +11,19 @@ export const KidsClass: FC<{
   return <Section state={state}>
     <div className={styles.mainText}>
 
-      <h1>Children's Class</h1>
+      <h1>Kids Class</h1>
       <p>For children aged 6 to 12</p>
-
+      
       <p>During the lessons we’ll get to know all sorts of clay, be it white, black or red.</p>
       <p>We will try out different techniques, experimenting with kneading, rolling, stamping, and carving.</p>
       <p>We will create dishes, build cities, make toys, tiles and many other things!</p>
 
       <p>Only limited places are available!</p>
     </div>
-    <p>Where? 13359, Steegerstr. 1A, Berlin</p>
-    <p>When? On Wednesdays 16:30—18:00</p>
+    <h2>Where?</h2>
+    <p>13359, Steegerstr. 1A, Berlin</p>
+    <h2>When?</h2>
+    <p>On Wednesdays 16:30—18:00</p>
     <h2>Cost</h2>
     <p>4 lessons – 75 €</p>
     <p>Trial class – 20 €</p>

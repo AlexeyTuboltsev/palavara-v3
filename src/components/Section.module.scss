@@ -117,7 +117,7 @@
     font-weight: 700;
     line-height: 1.5;
     margin: 0;
-    font-size: 15px;
+    font-size: 17px;
     text-transform: uppercase;
     padding: 0 10px;
 
@@ -127,7 +127,7 @@
     font-weight: 700;
     line-height: 1.5;
     margin: 0;
-    font-size: 15px;
+    font-size: 17px;
     padding: 0 10px;
 
     @media (max-width: $breakpoint-mobile) {
@@ -144,7 +144,7 @@
   p {
     line-height: 1.5;
     margin: 0;
-    font-size: 15px;
+    font-size: 17px;
     padding: 0 10px;
   }
 
@@ -154,6 +154,8 @@
   }
 
   .main-text {
+    padding-bottom: 10px; 
+
     @media (max-width: $breakpoint-mobile) {
       background: $color-blue;
       padding: 10px 0 5px;

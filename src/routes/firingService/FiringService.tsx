@@ -11,14 +11,16 @@ export const FiringService: FC<{
   return <Section state={state}>
     <div className={styles.mainText}>
 
-      <h2>FIRING SERVICE</h2>
-
-      <p>Entire Kiln Cost:</p>
-      <p>€80 Large Kiln / €60 Small Kiln (bisque firing)</p>
-      <p>€95 Large Kiln /€75 Small Kiln (glaze firing 1130°)</p>
-
+      <h1>FIRING SERVICE</h1>
       <p>8€ / kg bisque firing</p>
       <p>10€/kg glaze firing</p>
+      <br />
+      <h2>Entire Kiln Cost:</h2>
+      <p>(bisque firing)</p>
+      <p>€80 Large Kiln (100l) / €60 Small Kiln (66l) </p>
+      <br/>
+      <p>(glaze firing 1130° or 1235°)</p>
+      <p>€95 Large Kiln (100l) /€75 Small Kiln (66l) </p>
     </div>
   </Section>
 }

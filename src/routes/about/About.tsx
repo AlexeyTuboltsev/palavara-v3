@@ -25,7 +25,6 @@ export const About: FC<{
 
     </div>
 
-    {/*<div className={cn(styles.sectionContent, {[styles.divider]: state.menuIsOpen})}>*/}
     {((state as any).imageUrl || (state as any).imageLqipUrl) &&
         <div className={styles.visual}>
             <Images imageData={(state as any).imageData} imageLqipData={(state as any).imageLqipData}/>
@@ -40,13 +39,13 @@ export const About: FC<{
           long time in the field of magazine and book illustration and design.</p>
 
         <p>In 2012 I moved from Moscow to Berlin and I also started creating ceramics under the brand name Palavara.</p>
+        <h2>See my work on Instagram: <a href="https://www.instagram.com/palavara_ceramics/">palavara_ceramics</a> </h2>
         <p>A few years ago I opened a Palavara-studio in Wedding, where I produce my ceramics and run workshops for
           children and adults.</p>
-        <p>You can find my ceramic works in my Etsy shop: www.etsy.com/shop/PALAVARA</p>
+        <h2>You can buy my ceramics in my Etsy shop: <a href="www.etsy.com/shop/PALAVARA">www.etsy.com/shop/PALAVARA</a></h2>
         <p>I'd be more than happy to discuss any potential projects or collaborations.</p>
 
         <p>Please contact me via e-mail: <a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
       </div>
-    {/*</div>*/}
   </div>
 }

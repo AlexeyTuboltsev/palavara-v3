@@ -19,11 +19,6 @@ export const GiftCertificate: FC<{
       <p>It is possible to visit with several children and adults for an additional fee.</p>
       <p>Firing is not included in the certificate price.</p>
     </div>
-    <h2>certificate to attend the "Open Workshop" - 50€.</h2>
-    <p>It is for 2 meetings of 3 hours.</p>
-    <p>Classes are held on Fridays from 17:00 to 20:00.</p>
-    <p>The certificate is for one person.</p>
-    <p>Firing is not included in the certificate price.</p>
-
+    
   </Section>
 }

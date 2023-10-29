@@ -33,7 +33,7 @@ export function* home(screenDimensions: TResizeEventPayload): Generator<any, voi
   yield put(setAppState(initialState))
 
   yield all([
-    // fork(cyclePictures, imageUrls,imageLqipUrls),
+    fork(cyclePictures, imageUrls,imageLqipUrls),
     fork(actionListenerLoop,
       {
         ...screenResize,
@@ -47,7 +47,7 @@ function* cyclePictures(imageUrls: string[], imageLqipUrls: string[]) {
   let i = 0
 
   while (true) {
-    yield delay(3000)
+    yield delay(5000)
 
     i = (i === imageUrls.length - 1) ? 0 : i + 1
     const state: Readonly<TReadyAppState> = yield select(state => state.ui)

@@ -30,7 +30,8 @@ export const OpenStudio: FC<{
     <h2>Cost</h2>
     <p>25 € regardless of how much time you spent in the studio</p>
 
-    <p>You also have to cover the firing costs: 10 € per kilo (pieces are before the firing)</p>
+    <p>Firing costs (10 € per kilo) are subject to an extra charge</p>
+    <p>(The items are weighed before glazing and firing)</p>
 
     <h2>When?</h2>
     <p>On Fridays 17:00 - 20:00</p>

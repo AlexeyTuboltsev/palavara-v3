@@ -26,10 +26,10 @@ export const WheelThrowing: FC<{
     <h2>When?</h2>
     <p>On Mondays 18:00—20:00</p>
     <p>Wednesday 18:30 — 20:30</p>
+    <p>(other options possible)</p>
     <h2>Cost</h2>
     <p>1 Course (4 weeks, once weekly) - 160 €</p>
-    <p>Trial class - 35 €</p>
-    <p>(If you for any reason miss a class, unfortunately, we will not be able to reimburse you. The classes also cannot
+    <p>(If you for any reason miss a class, unfortunately we will not be able to reimburse you. Classes also cannot
       be rescheduled)</p>
 
     <p>Usually there are no classes during school holidays.</p>
@@ -43,17 +43,15 @@ export const WheelThrowing: FC<{
 
     <p>You can join the class on any given Monday/Wednesday if there are places available.</p>
 
-    <p>Teacher Varvara Polyakova</p>
-
-    <p>The class can be taught in Russian, German</p>
 
     <h2>FAQ</h2>
 
     <p>Are there any additional fees?</p>
     <p>No. The cost of classes includes firing and all the materials.</p>
-
+      <br />
     <p>When can I pick up the pieces?</p>
     <p>After the piece is finished, it will be fired, and you will be able to pick it up as the course progresses.</p>
+    <h2>The class can be taught in Russian, German</h2>
 
   </Section>
 }

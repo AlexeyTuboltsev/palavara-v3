@@ -27,8 +27,8 @@ export const FamilySaturday: FC<{
     <h2>Where</h2>
     <p>Steegerstr. 1a, 13359, Berlin</p>
 
-    Cost
-    <p>Family Ticket</p>
+    <h2>Cost</h2>
+    <p>Family Ticket:</p>
     <p>1 adult + 1 child (under 12): 25 €</p>
     <p>• +1 child: + 10 €</p>
     <p>• +1 adult (over 13): + 20 €</p>
@@ -39,17 +39,16 @@ export const FamilySaturday: FC<{
     <p>(The items are weighed before glazing and firing)</p>
 
     <h2>How to book</h2>
-    <p>Please contact us at</p>
     <p>palavarastudio@gmail.com</p>
 
     <h2>FAQ</h2>
     <p>What to bring and what to wear in the studio?</p>
     <p>We provide aprons, but you can also bring clothes which you wouldn't regret getting soiled.</p>
-
+    <br />
     <p>Are there any additional fees?</p>
     <p>Firing costs (10 € per kilo) are subject to extra charge</p>
-
+    <br />
     <p>When can I pick up the pieces?</p>
-    <p>You can pick the pieces up within approximately two weeks after the class.</p>
+    <p>You can pick up the pieces within approximately two weeks after the class.</p>
   </Section>
 }
