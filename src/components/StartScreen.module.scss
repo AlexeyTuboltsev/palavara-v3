@@ -1,0 +1,23 @@
+@import "../styles/global.module";
+
+$logo-size: 200px;
+
+.start-screen-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.logo {
+    width: $logo-size;
+    height: $logo-size;
+
+    svg {
+        width: $logo-size;
+        height: $logo-size;
+        fill: $color-blue;
+        stroke: $color-blue;
+    }
+}

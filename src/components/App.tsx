@@ -14,6 +14,7 @@ import {OpenStudio} from "../routes/openStudio/OpenStudio";
 import {About} from "../routes/about/About";
 import {RentASpace} from "../routes/rentASpace/RentASpace";
 import {Contact} from "../routes/contact/Contact";
+import { StartScreen } from './StartScreen';
 
 
 export const App = () => {
@@ -30,8 +31,8 @@ export const App = () => {
   }
 }
 
-export const AppNotStarted = () => <div>starting</div>
-export const AppInProgress = () => <div>starting...</div>
+export const AppNotStarted = () => <StartScreen />
+export const AppInProgress = () => <StartScreen />
 export const AppError = () => <div>error</div>
 
 export const AppReady: FC<TReadyAppState> = (state) => {
