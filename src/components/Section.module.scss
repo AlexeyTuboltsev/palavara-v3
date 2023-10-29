@@ -11,7 +11,7 @@
   justify-content: flex-start;
   align-items: flex-start;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     grid-template: auto 1fr / 1fr;
   }
 }
@@ -25,7 +25,7 @@
   margin: 0;
   padding: 20px 20px 0 20px;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     background-color: transparent;
     padding: 10px 10px 0;
     grid-template: auto auto / #{$logo-size-small} 1fr;
@@ -41,7 +41,7 @@
   padding: 0 20px;
   overflow: hidden;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     overflow: auto;
     grid-template: auto 1fr / 1fr;
     padding: 0 10px;
@@ -64,7 +64,7 @@
     object-fit: cover;
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     grid-row: 2;
     grid-column: 1;
 
@@ -82,7 +82,7 @@
   top: 0;
   left: 0;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     position: relative;
   }
 }
@@ -108,7 +108,7 @@
   overflow: auto;
   grid-column: 4;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     overflow: initial;
   }
 
@@ -130,7 +130,7 @@
     font-size: 15px;
     padding: 0 10px;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       padding-top: 10px;
       color: $color-blue;
 
@@ -148,13 +148,13 @@
     padding: 0 10px;
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     grid-column: 1;
     padding: 0;
   }
 
   .main-text {
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       background: $color-blue;
       padding: 10px 0 5px;
 

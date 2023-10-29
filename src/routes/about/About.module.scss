@@ -12,7 +12,7 @@
   justify-content: flex-start;
   align-items: flex-start;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     grid-template: auto auto 1fr / 1fr;
   }
 }
@@ -34,7 +34,7 @@
   left: 0;
   pointer-events: none;
   
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     visibility: hidden;
   }
 }
@@ -49,7 +49,7 @@
   background-color: transparent;
 
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     background-color: transparent;
     padding: 10px 10px 0;
     grid-template: auto auto / #{$logo-size-small} 1fr;
@@ -64,7 +64,7 @@
   grid-gap: 20px;
   padding: 0 20px;
   overflow: hidden;
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     grid-template: auto 1fr /  1fr;
     padding: 0 10px;
   }
@@ -76,7 +76,7 @@
   grid-column: 1;
   grid-row: 2;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     padding: 20px 0 20px;
     grid-row: 3;
     align-self: stretch;
@@ -91,7 +91,7 @@
     padding: 0 10px;
     color: $color-blue;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color-black;
     }
   }
@@ -103,7 +103,7 @@
     font-size: 15px;
     padding: 0 10px;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       padding-top: 10px;
       color: $color-blue;
 
@@ -121,7 +121,7 @@
     padding: 0 10px;
     color: $color-blue;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color-black;
     }
   }
@@ -143,7 +143,7 @@
     object-fit: cover;
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     position: relative;
     grid-column: 1;
     grid-row: 2;
@@ -159,7 +159,7 @@
   }
 
   .color-block {
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       position: absolute;
       top: 0;
       left: 10px;

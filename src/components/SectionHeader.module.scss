@@ -6,7 +6,7 @@
   align-items: flex-start;
   grid-row-gap: 10px;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     grid-row: 1 ;
     grid-column: 2;
     align-items: flex-start;

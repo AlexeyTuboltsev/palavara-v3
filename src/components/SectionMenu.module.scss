@@ -5,7 +5,7 @@
   grid-auto-flow: column;
   justify-content: flex-end;
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     border-top: 1px solid $color-dark-grey;
     padding-top: 4px;
   }
@@ -39,7 +39,7 @@
     }
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     color: $color-blue;
     font-size: 16px;
   }
@@ -55,7 +55,7 @@
       color: $color-white;
     }
     
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color-black;
       font-size: 16px;
 
@@ -81,7 +81,7 @@
   &.section-menu-yellow {
     color: $color-yellow;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color-black;
     }
   }

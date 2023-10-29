@@ -3,5 +3,5 @@ export const config = {
   sentry: process.env.REACT_APP_SENTRY,
   imgPrefix: process.env.REACT_APP_IMG_PREFIX,
   lqipPrefix: 'lqip',
-  mobileBreakpoint: 500
+  mobileBreakpoint: 700
 }

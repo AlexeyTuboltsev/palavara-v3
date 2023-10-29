@@ -12,7 +12,7 @@
   text-transform: uppercase;
 
   &.menu-blue {
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
 
     background-color: $color-blue;
     }
@@ -27,7 +27,7 @@
     background-color:$color-yellow;
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: $breakpoint-mobile) {
     font-size: 22px;
     grid-column: 1 / span 2;
     padding: 0 0 5px 0;
@@ -49,7 +49,7 @@
     color: $color-black;
     border-bottom: 1px solid $color-black;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color_white;
       border-bottom: 1px solid $color-white;
     }
@@ -61,7 +61,7 @@
   }
 
   &.menu-about {
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color_blue;
       border-bottom: 1px solid $color_blue;
     }
@@ -75,7 +75,7 @@
   &.menu-blue {
     color: $color-blue;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color-yellow
 
     }
@@ -108,7 +108,7 @@
   &.menu-blue {
     color: $color-blue;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color-white;
     }
   }
@@ -129,7 +129,7 @@
   &.menu-blue {
     color: $color-black;
 
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
       color: $color-white;
     }
   }
@@ -163,7 +163,7 @@
 
   &.menu-blue {
 color: $color-blue;
-    @media (max-width: 500px) {
+    @media (max-width: $breakpoint-mobile) {
     color: $color-yellow;
     }
   }
