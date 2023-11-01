@@ -7,10 +7,18 @@ $instagram-logo-size: 25px;
   align-content: flex-start;
   justify-items: flex-end;
   display: grid;
-  grid-template: auto / 1fr #{$instagram-logo-size};
+  grid-template: calc($instagram-logo-size + 10px ) auto auto / 1fr ;
   grid-column-gap: 10px;
   font-weight: 500;
   font-size: 16px;
+  grid-row: 3;
+  padding-top: 40px;
+
+  @media (max-width: $breakpoint-mobile) {
+    grid-row:1;
+    padding-top: 0;
+    grid-template: auto / 1fr #{$instagram-logo-size};
+  }
 }
 
 .hidden-on-mobile {
@@ -45,5 +53,12 @@ $instagram-logo-size: 25px;
   svg {
     width: $instagram-logo-size;
     height: $instagram-logo-size;
+  }
+  grid-row: 1;
+  margin-bottom: 10px;
+
+  @media (max-width: $breakpoint-mobile) {
+    margin-bottom: 0;
+    grid-column: 2;
   }
 }

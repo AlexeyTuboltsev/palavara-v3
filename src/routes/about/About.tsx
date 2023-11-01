@@ -1,36 +1,49 @@
-import React, {FC} from 'react'
-import {TReadyAppState} from "../../types";
-import {Images, Section, SectionVisual} from "../../components/Section";
+import React, { FC } from 'react'
+import { TReadyAppState } from "../../types";
+import { Images, Section, SectionVisual } from "../../components/Section";
 import styles from "./About.module.scss";
-import {LogoSection} from "../../components/Logo";
-import {MenuAbout, MenuSec} from "../../components/Menu";
-import {SectionHeader, SectionHeaderAbout} from "../../components/SectionHeader";
-import {EScreenSize} from "../common/screenSize";
-import {actions} from "../../actions";
+import { LogoSection } from "../../components/Logo";
+import { MenuAbout, MenuSec } from "../../components/Menu";
+import { SectionHeader, SectionHeaderAbout } from "../../components/SectionHeader";
+import { EScreenSize } from "../common/screenSize";
+import { actions } from "../../actions";
 import cn from 'classnames';
+
 
 export const About: FC<{
   state: TReadyAppState
-}> = ({state}) => {
-  // const {t} = useTranslation();
+}> = ({ state }) => {
 
   return <div className={styles.sectionContainer}>
     <div className={styles.headerWrapper}>
       <div className={styles.headerBackground}></div>
-    <div className={styles.header}>
-      <LogoSection/>
-      <MenuAbout state={state}/>
-      <SectionHeaderAbout state={state} />
-    </div>
+      <div className={styles.header}>
+        <LogoSection />
+        <MenuAbout state={state} />
+        <SectionHeaderAbout state={state} />
+      </div>
 
     </div>
-
-    {((state as any).imageUrl || (state as any).imageLqipUrl) &&
-        <div className={styles.visual}>
-            <Images imageData={(state as any).imageData} imageLqipData={(state as any).imageLqipData}/>
-            <div className={styles.colorBlock} />
+    {state.screenSize === EScreenSize.MOBILE
+      ? <div className={styles.contentWrapper}>
+          <Content state={state} />
         </div>
+      : <Content state={state} />
     }
+  </div>
+}
+
+
+const Content: FC<{
+  state: TReadyAppState
+}> = ({ state }) =>
+    <>
+      {((state as any).imageUrl || (state as any).imageLqipUrl) &&
+        <div className={styles.visual}>
+          <Images imageData={(state as any).imageData} imageLqipData={(state as any).imageLqipData} />
+          <div className={styles.colorBlock} />
+        </div>
+      }
       <div className={styles.text}>
         <h1>ABOUT ME</h1>
         <p>My name is Varvara Polyakova,</p>
@@ -47,5 +60,4 @@ export const About: FC<{
 
         <p>Please contact me via e-mail: <a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
       </div>
-  </div>
-}
+    </>

@@ -14,7 +14,7 @@
   &.menu-blue {
     @media (max-width: $breakpoint-mobile) {
 
-    background-color: $color-blue;
+      background-color: $color-blue;
     }
   }
 
@@ -24,7 +24,7 @@
   }
 
   &.menu-yellow {
-    background-color:$color-yellow;
+    background-color: $color-yellow;
   }
 
   @media (max-width: $breakpoint-mobile) {
@@ -77,7 +77,6 @@
 
     @media (max-width: $breakpoint-mobile) {
       color: $color-yellow
-
     }
   }
 
@@ -98,6 +97,8 @@
   &.menu-yellow {
     color: $color-yellow;
   }
+
+
 }
 
 .parent-menu-item {
@@ -115,6 +116,12 @@
 
   &.menu-yellow {
     color: $color-yellow;
+  }
+
+  &.menu-about {
+    @media (max-width: $breakpoint-mobile) {
+      color: $color_blue;
+    }
   }
 }
 
@@ -138,6 +145,12 @@
     color: $color-white;
   }
 
+  &.menu-about {
+    @media (max-width: $breakpoint-mobile) {
+      color: $color_blue;
+    }
+  } 
+
   &:before {
     content: "";
     position: absolute;
@@ -155,6 +168,12 @@
     &.menu-yellow {
       border-color: $color-white;
     }
+
+    &.menu-about {
+      @media (max-width: $breakpoint-mobile) {
+        border-color: $color_blue;
+      }
+    }
   }
 }
 
@@ -162,9 +181,10 @@
   font-weight: 500;
 
   &.menu-blue {
-color: $color-blue;
+    color: $color-blue;
+
     @media (max-width: $breakpoint-mobile) {
-    color: $color-yellow;
+      color: $color-yellow;
     }
   }
 
@@ -178,7 +198,7 @@ color: $color-blue;
   flex-flow: column;
   justify-content: space-between;
   padding: 8px;
-  height: 28px;
+  height: 30px;
   width: 50px;
   background: transparent;
   position: absolute;
@@ -202,6 +222,7 @@ color: $color-blue;
   & * {
     display: none;
   }
+
   & .menu-button {
     display: flex;
 

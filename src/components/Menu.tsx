@@ -43,7 +43,7 @@ const MenuItem: FC<{
             {menuItem.label}{menuItem.isActive ? ":" : ''}
           </div>
           {menuItem.isActive && menuItem.children.map((menuItemId: string) =>
-            <ChildMenuItem key={menuItemId} menuItem={menu[menuItemId] as TChildMenuItem} type={type} />
+            <ChildMenuItem key={menuItemId} menuItem={menu[menuItemId] as TChildMenuItem} type={type} className={className}/>
           )}
         </div>
       case EMenuType.SIMPLE:
@@ -70,12 +70,13 @@ const SimpleMenuItem: FC<{
 
 const ChildMenuItem: FC<{
   menuItem: TChildMenuItem,
-  type: 'blue' | 'yellow'
-}> = ({ menuItem, type }) => {
+  type: 'blue' | 'yellow',
+  className?:string
+}> = ({ menuItem, type, className }) => {
   const dispatch = useDispatch()
 
   return <div
-    className={cn(styles.childMenuItem, { [styles.childMenuItemActive]: menuItem.isActive }, type === 'blue' ? styles.menuBlue : styles.menuYellow)}
+    className={cn(styles.childMenuItem, { [styles.childMenuItemActive]: menuItem.isActive }, type === 'blue' ? styles.menuBlue : styles.menuYellow, className)}
     onClick={() => dispatch(menuItem.action)}
   >
     {menuItem.label}

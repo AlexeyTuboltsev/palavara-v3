@@ -6,6 +6,7 @@
   grid-auto-flow: column;
   justify-content: flex-end;
   white-space: nowrap;
+  grid-row: 2;
 
   @media (max-width: $breakpoint-mobile) {
     border-top: 1px solid $color-dark-grey;
@@ -72,7 +73,7 @@
     color: $color-blue;
 
     &.active {
-      color: $color-yellow ;
+      color: $color-black ;
     }
 
     &:after {
@@ -118,7 +119,7 @@
     color: $color-white;
 
     &.active {
-      color: $color-yellow;
+      color: $color-black;
     }
   }
 
