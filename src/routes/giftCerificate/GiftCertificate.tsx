@@ -1,24 +1,31 @@
-import React, {FC} from 'react'
-import {TReadyAppState} from "../../types";
-import {Section} from "../../components/Section";
+import React, { FC } from 'react'
+import { TReadyAppState } from "../../types";
+import { Section } from "../../components/Section";
 import styles from "../../components/Section.module.scss";
 
 export const GiftCertificate: FC<{
   state: TReadyAppState
-}> = ({state}) => {
+}> = ({ state }) => {
   // const {t} = useTranslation();
 
   return <Section state={state}>
     <div className={styles.mainText}>
 
       <h1>GIFT CERTIFICATE</h1>
-      <h2>certificate for Family Saturday - 25€.</h2>
+      <h2>Certificate for open studio - 60€</h2>
+      <p>For 2 meetings 3 hours each.</p>
+      <p>Open studio is held every Friday from 17:00 to 20:00.</p>
+      <p>The certificate is for one person.</p>
+      <p>Firing fee is included in the certificate price.</p>
+      <p>(Please be aware that Open Studio is not a lesson!)</p>
+
+      <h2>Certificate for Family Saturday - 25€.</h2>
       <p>The duration of one class is 2 hours.</p>
       <p>Classes are held on Saturdays from 11:00 to 13:00.</p>
       <p>The certificate is for one adult and one child.</p>
       <p>It is possible to visit with several children and adults for an additional fee.</p>
       <p>Firing is not included in the certificate price.</p>
     </div>
-    
+
   </Section>
 }
