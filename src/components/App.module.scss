@@ -79,18 +79,3 @@
     padding: 0 10px 20px;
   }
 }
-
-.sale {
-  grid-column: 3;
-  font-size: 100px;
-  font-family:'Roboto', Courier, monospace;
-  color: $color-white;
-
-  @media (max-width: $breakpoint-mobile) {
-    font-size: 35px;
-    grid-column: 1;
-    padding-top: 20px;
-  }
-}
-
-

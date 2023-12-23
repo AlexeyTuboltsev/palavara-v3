@@ -51,16 +51,6 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
       <MenuHome state={state} />
     </div>
-    <div className={styles.content}>
-      <div className={styles.sale}>
-        Ceramics sale
-        <br />
-        16.12
-        <br/>
-        12:00-19:00
-        <br/>
-        Steeger Str. 1a 
-        </div>
-    </div>
+    <div className={styles.content}/>
   </Background>
 }
