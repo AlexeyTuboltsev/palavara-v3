@@ -22,7 +22,7 @@ export const FamilySaturday: FC<{
       <p>Only limited places are available!</p>
     </div>
     <h2>When</h2>
-    <p>On Saturdays, the studio is open from 11 till 13.</p>
+    <p>On Saturdays, the studio is open from 12:00 till 14:00.</p>
 
     <h2>Where</h2>
     <p>Steegerstr. 1a, 13359, Berlin</p>
