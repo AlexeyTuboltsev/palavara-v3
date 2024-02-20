@@ -51,7 +51,7 @@ export const WheelThrowing: FC<{
       <br />
     <p>When can I pick up the pieces?</p>
     <p>After the piece is finished, it will be fired, and you will be able to pick it up as the course progresses.</p>
-    <h2>The class can be taught in Russian, German</h2>
+    <h2>The class can be taught in Russian or English</h2>
 
   </Section>
 }
