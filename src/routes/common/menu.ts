@@ -23,7 +23,7 @@ export function menu(activeMenuId?: string): {
       type: EMenuType.PARENT as const,
       label: 'classes',
       isActive: false,
-      children: ['kidsClass', 'wheelThrowing'],
+      children: ['kidsClass', 'wheelThrowing', 'workshops'],
       action: actions.toggleOpen('classes')
     },
     'familySaturday': {
@@ -77,6 +77,13 @@ export function menu(activeMenuId?: string): {
       label: 'wheel-throwing',
       isActive: activeMenuId === ERoute.WHEEL_THROWING,
       action: actions.requestRouteChange({routeName: ERoute.WHEEL_THROWING})
+    },
+    'workshops': {
+      id: 'workshops',
+      type: EMenuType.SIMPLE,
+      label: 'workshops',
+      isActive: activeMenuId === ERoute.WORKSHOPS,
+      action: actions.requestRouteChange({routeName: ERoute.WORKSHOPS})
     },
   }
 

@@ -10,6 +10,7 @@ import {openStudio} from "../openStudio/openStudio";
 import {about} from "../about/about";
 import {rentASpace} from "../rentASpace/rentASpace";
 import {contact} from "../contact/contact";
+import { workshops } from "../workshops/workshops";
 
 export function findRouteGenerator(route: TRoute): any {
   switch (route.routeName) {
@@ -35,5 +36,7 @@ export function findRouteGenerator(route: TRoute): any {
       return rentASpace;
     case ERoute.CONTACT:
       return contact;
+    case ERoute.WORKSHOPS:
+      return workshops;
   }
 }

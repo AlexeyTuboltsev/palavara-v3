@@ -15,6 +15,7 @@ import {About} from "../routes/about/About";
 import {RentASpace} from "../routes/rentASpace/RentASpace";
 import {Contact} from "../routes/contact/Contact";
 import { StartScreen } from './StartScreen';
+import { Workshops } from '../routes/workshops/Workshops';
 
 
 export const App = () => {
@@ -59,5 +60,7 @@ export const AppReady: FC<TReadyAppState> = (state) => {
       return <RentASpace state={state} />
     case ERoute.CONTACT:
       return <Contact state={state} />
+    case ERoute.WORKSHOPS:
+      return <Workshops state={state} />
   }
 }
