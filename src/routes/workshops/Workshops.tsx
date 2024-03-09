@@ -26,7 +26,9 @@ export const Workshops: FC<{
     <h2>Cost</h2>
     <p>€58 + €10 (Materials & Firing)</p>
     <p>Only limited places are available, so make sure to secure your spot by making your payment.</p>
-    <p>PayPal: varya@palavara.com</p>
+    <br />
+    
+    <h2 style={{color: "#0054cf"}}><a href="https://1caece-69.myshopify.com/products/make-a-vase-with-me?utm_source=copyToPasteBoard&utm_medium=product-links&utm_content=web">Book the workshop here</a></h2>
     <br />
     <br />
     <h2>FAQ</h2>
