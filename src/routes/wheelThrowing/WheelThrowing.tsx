@@ -24,12 +24,12 @@ export const WheelThrowing: FC<{
     <h2>Where?</h2>
     <p>13359, Steegerstr. 1A, Berlin</p>
     <h2>When?</h2>
-    <p>Monday 18:00—20:00</p>
+    <p>Monday 18:00 — 20:00</p>
     <p>Wednesday 18:30 — 20:30</p>
     <p>Thursday 18:30 — 20:30</p>
     <p>(other options possible)</p>
     <h2>Cost</h2>
-    <p>1 Course (4 weeks, once weekly) - 160 €</p>
+    <p>1 Course (4 weeks, one session per week) - 200€</p>
     <p>(If you for any reason miss a class, unfortunately we will not be able to reimburse you. Classes also cannot
       be rescheduled)</p>
 
