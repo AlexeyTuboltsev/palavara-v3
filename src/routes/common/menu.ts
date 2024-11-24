@@ -65,7 +65,7 @@ export function menu(activeMenuId?: string): {
     'kidsClass': {
       id: 'kidsClass',
       type: EMenuType.SIMPLE,
-      label: 'kids class (sold out)',
+      label: 'kids class',
       isActive: activeMenuId === ERoute.KIDS_CLASS,
       action: actions.requestRouteChange({
         routeName: ERoute.KIDS_CLASS
