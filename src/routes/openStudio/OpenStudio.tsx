@@ -12,6 +12,7 @@ export const OpenStudio: FC<{
     <div className={styles.mainText}>
       <h1>Open studio</h1>
       <p>Our open-studio is intended for those who want to work independently on their projects/ ideas, including throwing on the pottery wheel. Previous experience in ceramics is welcome but not required.</p>
+      <p>There are three pottery wheels available in the studio. If you have prior experience with wheel-throwing, you are welcome to use them. Unfortunately it is not possible to reserve a wheel in advance – they are used on a first-come, first-served basis.</p>
       <p>Visitors of the “Open-studio” get full access to all of our materials and tools as well as to firing.</p>
       <p>On your first visit we will give you an introduction to the studio and our equipment and explain to you the studio rules. Moreover, there will always be an experienced ceramist present in the studio to answer all your questions and to  support you in case you have no experience in ceramics.</p>
       <p>Only limited places are available!</p>
@@ -25,8 +26,8 @@ export const OpenStudio: FC<{
     <p>(The items are weighed before glazing and firing)</p>
 
     <h2>When?</h2>
-    <p>On Fridays 17:00 - 20:00</p>
-    <p>On Saturdays 12:00 - 14:00</p>
+    <p>On Fridays 17:00 - 20:00 (adults and children 13+)</p>
+    <p>On Saturdays 12:00 - 14:00 (all ages)</p>
 
     <h2>How to book</h2>
     <p>palavarastudio@gmail.com</p>
