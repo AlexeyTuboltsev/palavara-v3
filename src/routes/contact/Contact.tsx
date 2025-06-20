@@ -18,7 +18,7 @@ export const Contact: FC<{
       <p>Steegerstr. 1 a, 13359 Berlin</p>
 
       <h2>instagram:</h2>
-      <p><a href="https://www.instagram.com/palavara_studio">instagram.com/palavara_studio/</a></p>
+      <p><a href="https://www.instagram.com/palavara_potterystudio">instagram.com/palavara_potterystudio/</a></p>
       <p><a href="https://www.instagram.com/palavara_ceramics">instagram.com/palavara_ceramics</a></p>
 
       <h2>telegram:</h2>
