@@ -21,29 +21,20 @@ export const WheelThrowing: FC<{
       <h1 id="4-session-wheel-throwing-class">A 4-session Wheel-Throwing class</h1>
       <p>A 4-session small group course (up to 3 participants in a group). The course covers preparing pottery clay, wedging and centring, pulling of walls, trimming, bisque firing, glazing and glaze firing. In 4 sessions you will go through all these basic steps of pottery making and afterwards will be able to take home unique and functional ceramic pieces.</p>
       <p>If after this introductory course you find yourself unable to stop and will want to learn more, you will be able to continue taking classes in our studio.</p>
-      <p>Only limited places are available!</p>
     </div>
     <br/>
     <h2>Where?</h2>
     <p>13359, Steegerstr. 1A, Berlin</p>
     <h2>When?</h2>
-    <p>Monday 18:00 — 20:00</p>
-    <p>Wednesday 18:30 — 20:30</p>
-    <p>Thursday 18:30 — 20:30</p>
-    <p>(other options possible)</p>
+    <p>Various scheduling options are available.</p>
     <h2>Cost</h2>
     <p>1 Course (4 sessions, 9.5 hours in total) — 250€</p>
     <p>(If you for any reason miss a class, unfortunately we will not be able to reimburse you. Classes also cannot be rescheduled)</p>
     
     <h2>Who is this course intended for?</h2>
-    <p>This course is intended for everyone, who wants to learn the basics of pottery wheel throwing and explore the
-      process of creating ceramics. No previous experience is necessary.</p>
-
+    <p>This course is intended for everyone, who wants to learn the basics of pottery wheel throwing and explore the process of creating ceramics. No previous experience is necessary.</p>
     <h2>How to book</h2>
     <p><a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
-
-    <p>You can join the class on any given Monday/Wednesday if there are places available.</p>
-
     <br />
     <h2>FAQ</h2>
 
@@ -51,14 +42,13 @@ export const WheelThrowing: FC<{
     <p>No. The cost of classes includes firing and all the materials.</p>
       <br />
     <h3>When can I pick up the pieces?</h3>
-    <p>After the piece is finished, it will be fired, and you will be able to pick it up as the course progresses.</p>
+    <p>The finished pieces will be ready for pickup approximately two weeks after the course ends.</p>
     <h2>The class can be taught in Russian or English</h2>
     <br />
     <div className={styles.mainText}>
       <h1 id="private-4-session-workshop">Private 4-Session Workshop</h1>
       <p>The course covers preparing pottery clay, wedging and centring, pulling of walls, trimming, bisque firing, glazing and glaze firing. In 4 sessions you will go through all these basic steps of pottery making and afterwards will be able to take home unique and functional ceramic pieces.</p>
       <p>If after this introductory course you find yourself unable to stop and will want to learn more, you will be able to continue taking classes in our studio.</p>
-      <p>Only limited places are available!</p>
     </div>
     <br/>
     <h2>Where?</h2>
@@ -75,16 +65,13 @@ export const WheelThrowing: FC<{
     <h2>How to book</h2>
     <p><a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
 
-    <p>You can join the class on any given Monday/Wednesday if there are places available.</p>
-
-
     <h2>FAQ</h2>
 
     <p>Are there any additional fees?</p>
     <p>No. The cost of classes includes firing and all the materials.</p>
       <br />
     <p>When can I pick up the pieces?</p>
-    <p>After the piece is finished, it will be fired, and you will be able to pick it up as the course progresses.</p>
+    <p>The finished pieces will be ready for pickup approximately two weeks after the course ends.</p>
     <h2>The class can be taught in Russian or English</h2>
     <br/>
     <div className={styles.mainText}>
@@ -101,8 +88,6 @@ export const WheelThrowing: FC<{
     <p>€85 per person</p>
     <h2>Duration</h2>
     <p>2.5 hours</p>
-    <h2>Group Size</h2>
-    <p>min. 2 — max. 3 participants</p>
 
     <h2>Who is this course intended for?</h2>
     <p>This workshop is perfect for anyone who wants to try the pottery wheel and gain a first hands-on impression of the process. No previous experience is necessary.</p>
