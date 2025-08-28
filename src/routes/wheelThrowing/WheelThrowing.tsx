@@ -88,6 +88,8 @@ export const WheelThrowing: FC<{
     <p>€85 per person</p>
     <h2>Duration</h2>
     <p>2.5 hours</p>
+    <h2>Group Size</h2>
+    <p>min. 2 — max. 3 participants</p>
 
     <h2>Who is this course intended for?</h2>
     <p>This workshop is perfect for anyone who wants to try the pottery wheel and gain a first hands-on impression of the process. No previous experience is necessary.</p>
@@ -117,8 +119,6 @@ export const WheelThrowing: FC<{
     <p>€140</p>
     <h2>Duration</h2>
     <p>2.5 hours</p>
-    <h2>Group Size</h2>
-    <p>min. 2 — max. 3 participants</p>
 
     <h2>Who is this course intended for?</h2>
     <p>This workshop is perfect for anyone who wants to try the pottery wheel and get a first hands-on experience. No previous experience is needed. If you have already tried working on the wheel but feel stuck at certain steps, we will help you understand what is going wrong, guide you through, and get you back on track to enjoy and improve your pottery skills.</p>
