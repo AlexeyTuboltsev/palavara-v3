@@ -40,7 +40,7 @@ export const SectionVisual: FC<{ imageData: string, imageLqipData: string }> = (
   </div>
 }
 
-export const Section: FC<{ state: TReadyAppState, children: ReactNode }> = ({state, children}) => {
+export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, children: ReactNode }> = ({state, children, anchorMenu}) => {
   const dispatch = useDispatch();
 
   return <div className={styles.sectionContainer}>
@@ -57,12 +57,19 @@ export const Section: FC<{ state: TReadyAppState, children: ReactNode }> = ({sta
       }
     </div>
     }
+    
     <div className={cn(styles.sectionContent, {[styles.divider]:state.menuIsOpen})}>
       {((state as any).imageUrl || (state as any).imageLqipUrl) &&
           <SectionVisual imageData={(state as any).imageData} imageLqipData={(state as any).imageLqipData}/>}
+     <div className={styles.textWrapper}>
+      {anchorMenu && <div>
+      {anchorMenu}
+    </div>}
+
       <div className={styles.text}>
         {children}
       </div>
+     </div>
     </div>
   </div>
 }
