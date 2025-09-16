@@ -28,7 +28,7 @@ export const WheelThrowing: FC<{
     <h2>When?</h2>
     <p>Various scheduling options are available.</p>
     <h2>Cost</h2>
-    <p>1 Course (4 sessions, 9.5 hours in total) — 250€</p>
+    <p>1 Course (4 sessions, 9.5 hours in total) — 250€ per person</p>
     <p>(If you for any reason miss a class, unfortunately we will not be able to reimburse you. Classes also cannot be rescheduled)</p>
     
     <h2>Who is this course intended for?</h2>
