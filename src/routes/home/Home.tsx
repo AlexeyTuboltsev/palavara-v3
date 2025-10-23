@@ -51,19 +51,6 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
       <MenuHome state={state} />
     </div>
-    <div className={styles.content}>
-    <div className={styles.announcement}>
-      <p>
-      Dear Berliners and friends of PALAVARA Studio!
-      </p>
-      <h3>
-        On <b>October 12</b>, from 12:20 till 20:00, our studio turns into a cozy autumn ceramics market</h3>
-        <br />
-      <p>You’ll find handmade tableware, vases, and jewelry from our studio’s ceramic artists.</p>
-      <p>To keep you warm, we’ll be serving aromatic mulled wine!</p>
-      <p>And as a little extra — everyone who takes home a piece of ceramics will get a small gift from the studio.</p>
-      <br />
-      <p>Celebrate autumn with warmth and beauty!</p>
-    </div>
-    </div>  </Background>
+    <div className={styles.content} />
+    </Background>
 }

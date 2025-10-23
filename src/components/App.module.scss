@@ -79,28 +79,3 @@
     padding: 0 10px 20px;
   }
 }
-
-.announcement {
-  grid-column: 3;
-  background-color: rgba($color-yellow,0.8);
-  padding: 20px;
-  margin: 0;
-
-  color: $color-blue;
-  font-size: 30px;
-  
-  h3 {
-    padding: 0;
-    margin: 0;
-  }
-
-  p {
-    padding: 0;
-    margin: 0;
-  }
-
-  @media (max-width: $breakpoint-mobile) {
-    grid-column: 1;
-    font-size: 20px;
-  }
-}

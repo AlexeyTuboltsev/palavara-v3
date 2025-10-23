@@ -4,7 +4,8 @@ import {EAppState, TReadyAppState} from "../types";
 import {TStore} from "../store";
 import {ERoute} from "../router";
 import {Home} from "../routes/home/Home";
-import {KidsClass} from "../routes/kidsClass/KidsClass";
+import {TeamEvents} from "../routes/teamEvents/TeamEvents";
+import {BirthdayParties} from "../routes/birthdayParties/BirthdayParties";
 import {WheelThrowing} from "../routes/wheelThrowing/WheelThrowing";
 import {FamilySaturday} from "../routes/familySaturday/FamilySaturday";
 import {FiringService} from "../routes/firingService/FiringService";
@@ -15,6 +16,7 @@ import {About} from "../routes/about/About";
 import {RentASpace} from "../routes/rentASpace/RentASpace";
 import {Contact} from "../routes/contact/Contact";
 import { StartScreen } from './StartScreen';
+import { KidsClass } from '../routes/kidsClass/KidsClass';
 
 export const App = () => {
   const state = useSelector((store: TStore) => store.ui)
@@ -50,6 +52,12 @@ export const AppReady: FC<TReadyAppState> = (state) => {
       return <GiftCertificate state={state}/>
     case ERoute.MEMBERSHIP:
       return <Membership state={state}/>
+    // case ERoute.EVENT_WORKSHOPS:
+    //   return <Membership state={state}/>
+    case ERoute.TEAM_EVENTS:
+      return <TeamEvents state={state}/>
+    case ERoute.BIRTHDAY_PARTIES:
+      return <BirthdayParties state={state}/>
     case ERoute.OPEN_STUDIO:
       return <OpenStudio state={state}/>
     case ERoute.ABOUT:

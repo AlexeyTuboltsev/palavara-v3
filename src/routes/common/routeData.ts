@@ -10,6 +10,8 @@ import {openStudio} from "../openStudio/openStudio";
 import {about} from "../about/about";
 import {rentASpace} from "../rentASpace/rentASpace";
 import {contact} from "../contact/contact";
+import { teamEvents } from "../teamEvents/teamEvents";
+import { birthdayParties } from "../birthdayParties/birthdayParties";
 
 export function findRouteGenerator(route: TRoute): any {
   switch (route.routeName) {
@@ -25,6 +27,10 @@ export function findRouteGenerator(route: TRoute): any {
       return firingService;
     case ERoute.GIFT_CERTIFICATE:
       return giftCertificate;
+    case ERoute.TEAM_EVENTS:
+      return teamEvents;
+    case ERoute.BIRTHDAY_PARTIES:
+      return birthdayParties;
     case ERoute.MEMBERSHIP:
       return membership;
     case ERoute.OPEN_STUDIO:

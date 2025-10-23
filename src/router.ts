@@ -7,6 +7,8 @@ export enum ERoute {
   OPEN_STUDIO = "openStudio",
   FIRING_SERVICE = "firingService",
   GIFT_CERTIFICATE = "giftCertificate",
+  TEAM_EVENTS = "teamEvents",
+  BIRTHDAY_PARTIES ="birthdayParties",
   MEMBERSHIP = "membership",
   ABOUT = "about",
   RENT_A_SPACE = "rentASpace",
@@ -27,6 +29,8 @@ export type TRoute =
   | ({ routeName: ERoute.OPEN_STUDIO } )
   | ({ routeName: ERoute.FIRING_SERVICE } )
   | ({ routeName: ERoute.GIFT_CERTIFICATE } )
+  | ({ routeName: ERoute.TEAM_EVENTS } )
+  | ({ routeName: ERoute.BIRTHDAY_PARTIES } )
   | ({ routeName: ERoute.MEMBERSHIP } )
   | ({ routeName: ERoute.ABOUT } )
   | ({ routeName: ERoute.RENT_A_SPACE } )
@@ -40,6 +44,8 @@ export const routeDefs:TRouteDef[] = [
   {routeName: ERoute.OPEN_STUDIO, routePattern: '/open-studio'},
   {routeName: ERoute.FIRING_SERVICE, routePattern: '/firing-service'},
   {routeName: ERoute.GIFT_CERTIFICATE, routePattern: '/gift-certificate'},
+  {routeName: ERoute.TEAM_EVENTS, routePattern: '/team-events'},
+  {routeName: ERoute.BIRTHDAY_PARTIES, routePattern: '/birthday-parties'},
   {routeName: ERoute.MEMBERSHIP, routePattern: '/membership'},
   {routeName: ERoute.ABOUT, routePattern: '/about-me'},
   {routeName: ERoute.RENT_A_SPACE, routePattern: '/rent-a-space'},

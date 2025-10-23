@@ -47,7 +47,7 @@ type TMenuItemCommonProps = {
 }
 export type TRootMenuItem = { id: 'root', type: EMenuType.ROOT, children: string[] }
 export type TParentMenuItem = { type: EMenuType.PARENT, children: string[] } & TMenuItemCommonProps
-export type TChildMenuItem = { type: EMenuType.CHILD, children: string[] } & TMenuItemCommonProps
+export type TChildMenuItem = { type: EMenuType.CHILD, parentId: string } & TMenuItemCommonProps
 export type TSimpleMenuItem = { type: EMenuType.SIMPLE } & TMenuItemCommonProps
 export type TMenuItem =
   | TRootMenuItem

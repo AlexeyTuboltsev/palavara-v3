@@ -1,4 +1,4 @@
-import {EMenuType, TMenuItem} from "../../types";
+import {EMenuType, TChildMenuItem, TMenuItem, TParentMenuItem} from "../../types";
 import {actions} from "../../actions";
 import {ERoute} from "../../router";
 
@@ -16,7 +16,7 @@ export function menu(activeMenuId?: string): {
     root: {
       id: 'root',
       type: EMenuType.ROOT as const,
-      children: ['classes', 'familySaturday', 'openStudio', 'firingService', 'giftCertificate', 'membership']
+      children: ['classes', 'familySaturday', 'openStudio', 'firingService', 'giftCertificate', 'membership','eventWorkshops']
     },
     'classes': {
       id: 'classes',
@@ -61,10 +61,10 @@ export function menu(activeMenuId?: string): {
       isActive: activeMenuId === ERoute.MEMBERSHIP,
       action: actions.requestRouteChange({routeName: ERoute.MEMBERSHIP})
     },
-
     'kidsClass': {
       id: 'kidsClass',
-      type: EMenuType.SIMPLE,
+      type: EMenuType.CHILD,
+      parentId: 'classes',
       label: 'kids class',
       isActive: activeMenuId === ERoute.KIDS_CLASS,
       action: actions.requestRouteChange({
@@ -73,15 +73,42 @@ export function menu(activeMenuId?: string): {
     },
     'wheelThrowing': {
       id: 'wheelThrowing',
-      type: EMenuType.SIMPLE,
+      type: EMenuType.CHILD,
+      parentId: 'classes',
       label: 'wheel-throwing',
       isActive: activeMenuId === ERoute.WHEEL_THROWING,
       action: actions.requestRouteChange({routeName: ERoute.WHEEL_THROWING})
     },
+    'eventWorkshops': {
+      id: 'eventWorkshops',
+      type: EMenuType.PARENT as const,
+      label: 'event workshops',
+      isActive: false,
+      children: ['teamEvents', 'birthdayParties'],
+      action: actions.toggleOpen('eventWorkshops')
+    },
+    'teamEvents': {
+      id: 'teamEvents',
+      type: EMenuType.CHILD,
+      parentId: 'eventWorkshops',
+      label: 'team events',
+      isActive: activeMenuId === ERoute.TEAM_EVENTS,
+      action: actions.requestRouteChange({routeName: ERoute.TEAM_EVENTS})
+    },
+    'birthdayParties': {
+      id: 'birthdayParties',
+      type: EMenuType.CHILD,
+      parentId: 'eventWorkshops',
+      label: 'birthday parties',
+      isActive: activeMenuId === ERoute.BIRTHDAY_PARTIES,
+      action: actions.requestRouteChange({routeName: ERoute.BIRTHDAY_PARTIES})
+    },
   }
 
-  if (activeMenuId && menuData.classes.type === EMenuType.PARENT && menuData.classes.children.includes(activeMenuId)) {
-    menuData.classes.isActive = true;
+  if (activeMenuId && menuData[activeMenuId].type === EMenuType.CHILD) {
+    const childMenuItem = menuData[activeMenuId] as TChildMenuItem
+    const parentMenuItem = menuData[childMenuItem.parentId] as TParentMenuItem
+    parentMenuItem.isActive = true;
   }
 
   return menuData
