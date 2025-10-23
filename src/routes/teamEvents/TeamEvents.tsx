@@ -10,29 +10,46 @@ export const TeamEvents: FC<{
 
   return <Section state={state}>
     <div className={styles.mainText}>
-
       <h1>Team Events</h1>
-      <p>For children aged 6 to 12</p>
-      
-      <p>During the lessons we’ll get to know all sorts of clay, be it white, black or red.</p>
-      <p>We will try out different techniques, experimenting with kneading, rolling, stamping, and carving.</p>
-      <p>We will create dishes, build cities, make toys, tiles and many other things!</p>
-
-      <p>Only limited places are available!</p>
+      <p>Bring your team together for a creative and relaxing experience.</p>
+    <br/>
+    <h2>OPTION 1. POTTERY WORKSHOP</h2>
+      <p>Our Ceramic Masterclass is designed for groups of 5–10 participants and lasts approximately 2.5 hours.</p>
+      <p>You’ll learn basic pottery handbuilding techniques and create your own ceramic piece — perfect as a personal keepsake or for your office desk.</p>
+      <br/>
+      <h3>What’s Included:</h3>
+      <ul>
+      <li><p>All materials for creating one ceramic piece*</p></li>
+      <li><p>Step-by-step instruction and creative support throughout the process</p></li>
+      <li><p>Transparent glazing and firing of your finished piece**</p></li>
+      </ul>
+      <p><small>* Each additional piece is charged at €5 per item.</small></p>
+      <p><small>** Finished pieces will be ready for pickup approximately two weeks after the workshop.</small></p>
+      <br/>
+      <h3>Price*:</h3>
+      <p>€75 per person (minimum 5 participants)</p>
+      <p><small>*Please note that 19% VAT will be added to the total amount.</small></p>
+      <br/>
+    <h2>OPTION 2. TEA AND POTTERY WORKSHOP</h2>
+      <p>Our Ceramic Masterclass is designed for groups of 5–10 participants and lasts approximately 2.5 hours.</p>
+      <p>Enjoy a calming blend of tea and creativity with our Tea & Pottery Workshop.</p>
+      <p>We’ll begin with a guided tea tasting — featuring a curated selection of delicious teas — followed by a hands-on pottery session where you’ll craft your own unique tea cup or bowl.</p>
+      <br/>
+      <h3>What’s Included:</h3>
+      <ul>
+      <li><p>A guided tea tasting experience</p></li>
+      <li><p>All materials for creating one ceramic piece*</p></li>
+      <li><p>Step-by-step instruction and creative support throughout the process</p></li>
+      <li><p>Transparent glazing and firing of your finished piece**</p></li>
+      </ul>
+      <br/>
+      <p><small>* Each additional piece is charged at €5 per item.</small></p>
+      <p><small>** Finished pieces will be ready for pickup approximately two weeks after the workshop.</small></p>
+      <br/>
+      <h3>Price*:</h3>
+      <p>€95 per person (minimum 5 participants)</p>
+      <p><small>*Please note that 19% VAT will be added to the total amount.</small></p>
     </div>
-    <h2>Where?</h2>
-    <p>13359, Steegerstr. 1A, Berlin</p>
-    <h2>When?</h2>
-    <p>On Wednesdays 16:30—18:00</p>
-    <h2>Cost</h2>
-    <p>4 lessons – 75 €</p>
-    <p>Trial class – 20 €</p>
-    <p>If you for any reason miss a class, unfortunately, we will not be able to reimburse you.</p>
-    <p>There are no classes during school holidays.</p>
-
-    <h2>How to book</h2>
-    <p><a href="mailto:palavarastudio+kp@gmail.com">palavarastudio+kp@gmail.com</a></p>
-
-    <p>The class is taught in Russian</p>
-  </Section>
+    
+    </Section>
 }
