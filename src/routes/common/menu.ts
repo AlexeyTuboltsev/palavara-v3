@@ -105,7 +105,7 @@ export function menu(activeMenuId?: string): {
     },
   }
 
-  if (activeMenuId && menuData[activeMenuId].type === EMenuType.CHILD) {
+  if (activeMenuId && menuData[activeMenuId] && menuData[activeMenuId].type === EMenuType.CHILD) {
     const childMenuItem = menuData[activeMenuId] as TChildMenuItem
     const parentMenuItem = menuData[childMenuItem.parentId] as TParentMenuItem
     parentMenuItem.isActive = true;
