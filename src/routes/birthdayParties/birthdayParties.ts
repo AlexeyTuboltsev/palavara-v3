@@ -12,8 +12,11 @@ import {EScreenSize, screenSize} from "../common/screenSize";
 
 export function* birthdayParties(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = [
-    "02-01.jpg", "02-02.jpg", "02-03.jpg", "02-04.jpg", "02-05.jpg", "02-06.jpg", "02-07.jpg", "02-08.jpg", "02-09.jpg", "02-10.jpg", "02-11.jpg",
-    "02-12.jpg", "02-13.jpg"]
+    "2025-10-24-155119_002.jpg",
+    "2025-10-24-155119_003.jpg",
+    "2025-10-24-155119.jpg",
+    "2025-10-24-155119_004.jpg",
+  ]
 
   const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
   const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
