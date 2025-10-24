@@ -23,7 +23,7 @@ export const GiftCertificate: FC<{
       <br />
       <h2>Certificate for Family Saturday - 25€.</h2>
       <p>The duration of one class is 2 hours.</p>
-      <p>Classes are held on Saturdays from 11:00 to 13:00.</p>
+      <p>Classes are held on Saturdays from 12:00 to 14:00.</p>
       <p>The certificate is for one adult and one child.</p>
       <p>It is possible to visit with several children and adults for an additional fee.</p>
       <p>Firing costs (10 € per kilo) are subject to an extra charge.<br/>

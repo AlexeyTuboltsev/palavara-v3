@@ -10,7 +10,6 @@ import { requestSaga } from "./requestSaga";
 import { EHttpMethod } from "../services/httpRequest";
 import { TResizeEventPayload } from "../services/resizeObserver";
 import { screenSize } from "../routes/common/screenSize";
-import { stat } from "fs";
 
 export function* uiSaga(screenSize: TResizeEventPayload) {
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
