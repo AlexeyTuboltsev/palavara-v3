@@ -51,6 +51,23 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
       <MenuHome state={state} />
     </div>
-    <div className={styles.content} />
+    <div className={styles.content}>
+    <div className={styles.announcement}>
+      <p>
+        Dear Berliners!
+      </p>
+      <h3>
+        On <b>December 6</b> we're hosting a Christmas Ceramics Sale.</h3>
+        <br />
+      <p>Address: Steegerstr. 1a, Berlin, from 12:00 to 19:00!</p>
+      <p>
+        Join us for a cozy day filled with unique creations by our talented studio members: cups, bowls, vases, and jewelry – perfect for one-of-a-kind gifts.
+        </p>
+      <p>
+        Looking forward to seeing you there!
+      </p>
+
+    </div>
+    </div>
     </Background>
 }
