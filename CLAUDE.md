@@ -23,6 +23,10 @@ eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn start
 
 Use **yarn** (not npm) for all package management and script execution in this project.
 
+## Git Configuration
+
+Git credentials are stored in `~/.git-credentials` for HTTPS authentication. The credential helper is set to `store` mode.
+
 ## Build & Development Commands
 
 ```bash
