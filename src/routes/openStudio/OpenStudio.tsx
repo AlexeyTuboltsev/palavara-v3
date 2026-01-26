@@ -20,7 +20,7 @@ export const OpenStudio: FC<{
     <h2>Where?</h2>
     <p>13359, Steegerstr. 1A, Berlin</p>
     <h2>Cost</h2>
-    <p>25 € regardless of how much time you spent in the studio</p>
+    <p>30 € regardless of how much time you spent in the studio</p>
 
     <p>Firing costs (10 € per kilo) are subject to an extra charge</p>
     <p>(The items are weighed before glazing and firing)</p>
