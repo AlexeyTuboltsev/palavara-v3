@@ -133,7 +133,7 @@ curl -s -X POST \
   https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/pulls \
   -d '{
     "title": "Brief description of change",
-    "body": "## Changes\n- Change description\n\nFixes #N\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+    "body": "## Changes\n- Change description\n\n## Related Issue\nFixes #N\nhttps://github.com/AlexeyTuboltsev/palavara-v3/issues/N\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
     "head": "N-short-description",
     "base": "main"
   }' | jq -r '"PR created: \(.html_url)\nPR number: \(.number)"'
