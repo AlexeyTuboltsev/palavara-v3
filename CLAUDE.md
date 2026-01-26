@@ -68,26 +68,17 @@ echo "https://k5qkop-bot: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@github.com" > 
 
 ```bash
 # List all open issues
-curl -s -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
-  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues \
-  | jq -r '.[] | "Issue #\(.number): \(.title)\n  State: \(.state)\n"'
+GH_TOKEN=$(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//') gh issue list
 
 # Get details of specific issue
-curl -s -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
-  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues/1 \
-  | jq -r '"Issue #\(.number): \(.title)\n\(.body)"'
+GH_TOKEN=$(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//') gh issue view N
 ```
 
 ### 2. Assign Issue to Bot
 
 ```bash
 # Assign issue N to k5qkop-bot
-curl -s -X POST \
-  -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues/N/assignees \
-  -d '{"assignees":["k5qkop-bot"]}' \
-  | jq -r '"Issue #\(.number) assigned to: \(.assignees[].login)"'
+GH_TOKEN=$(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//') gh issue edit N --add-assignee k5qkop-bot
 ```
 
 ### 3. Create Feature Branch
@@ -126,28 +117,16 @@ git push -u origin N-short-description
 ### 6. Create Pull Request
 
 ```bash
-# Create PR using GitHub API
-PR_NUMBER=$(curl -s -X POST \
-  -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/pulls \
-  -d '{
-    "title": "Brief description of change",
-    "body": "## Changes\n- Change description\n\nFixes #N\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
-    "head": "N-short-description",
-    "base": "main"
-  }' | jq -r '.number')
+# Create PR using gh CLI and assign to bot
+GH_TOKEN=$(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//') gh pr create \
+  --title "Brief description of change" \
+  --body "## Changes
+- Change description
 
-echo "PR created: https://github.com/AlexeyTuboltsev/palavara-v3/pull/$PR_NUMBER"
+Fixes #N
 
-# Assign PR to bot
-curl -s -X POST \
-  -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues/$PR_NUMBER/assignees \
-  -d '{"assignees":["k5qkop-bot"]}' > /dev/null
-
-echo "PR #$PR_NUMBER assigned to k5qkop-bot"
+🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
+  --assignee k5qkop-bot
 ```
 
 **Important:** Only include `Fixes #N` in the PR body - GitHub will automatically link to the issue.
