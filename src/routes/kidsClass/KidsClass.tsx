@@ -25,7 +25,7 @@ export const KidsClass: FC<{
     <h2>When?</h2>
     <p>On Wednesdays 16:30—18:00</p>
     <h2>Cost</h2>
-    <p>4 lessons – 75 €</p>
+    <p>4 lessons – 80 €</p>
     <p>Trial class – 20 €</p>
     <p>If you for any reason miss a class, unfortunately, we will not be able to reimburse you.</p>
     <p>There are no classes during school holidays.</p>
