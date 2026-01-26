@@ -27,6 +27,96 @@ Use **yarn** (not npm) for all package management and script execution in this p
 
 Git credentials are stored in `~/.git-credentials` for HTTPS authentication. The credential helper is set to `store` mode.
 
+## GitHub Issue Workflow
+
+When working on GitHub issues, follow this workflow:
+
+### 1. List and Read Issues
+
+```bash
+# List all open issues
+curl -s -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
+  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues \
+  | jq -r '.[] | "Issue #\(.number): \(.title)\n  State: \(.state)\n"'
+
+# Get details of specific issue
+curl -s -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
+  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues/1 \
+  | jq -r '"Issue #\(.number): \(.title)\n\(.body)"'
+```
+
+### 2. Assign Issue to Yourself
+
+```bash
+# Assign issue N to AlexeyTuboltsev
+curl -s -X POST \
+  -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
+  -H "Accept: application/vnd.github.v3+json" \
+  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues/N/assignees \
+  -d '{"assignees":["AlexeyTuboltsev"]}' \
+  | jq -r '"Issue #\(.number) assigned to: \(.assignees[].login)"'
+```
+
+### 3. Create Feature Branch
+
+```bash
+# Create and switch to new branch (use fix/ or feature/ prefix)
+git checkout -b fix/issue-N-short-description
+```
+
+### 4. Make Changes and Commit
+
+```bash
+# Make your code changes, then commit
+git add <files>
+git commit -m "$(cat <<'EOF'
+Brief description of change
+
+Fixes #N
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Important:** Include `Fixes #N` in the commit message to automatically close the issue when the PR is merged.
+
+### 5. Push Branch
+
+```bash
+git push -u origin fix/issue-N-short-description
+```
+
+### 6. Create Pull Request
+
+```bash
+# Create PR using GitHub API
+curl -s -X POST \
+  -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
+  -H "Accept: application/vnd.github.v3+json" \
+  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/pulls \
+  -d '{
+    "title": "Brief description of change",
+    "body": "## Changes\n- Change description\n\nFixes #N\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+    "head": "fix/issue-N-short-description",
+    "base": "main"
+  }' | jq -r '"PR created: \(.html_url)\nPR number: \(.number)"'
+```
+
+### 7. After PR is Merged
+
+```bash
+# Switch back to main and pull latest
+git checkout main
+git pull origin main
+
+# Delete local branch
+git branch -d fix/issue-N-short-description
+
+# Optionally delete remote branch (if not auto-deleted)
+git push origin --delete fix/issue-N-short-description
+```
+
 ## Build & Development Commands
 
 ```bash
