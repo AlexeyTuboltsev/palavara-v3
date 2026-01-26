@@ -60,9 +60,31 @@ echo "https://AlexeyTuboltsev:${USER_TOKEN}@github.com" > ~/.git-credentials
 
 **Important:** Always switch back to user credentials after completing automated GitHub issue workflows.
 
-## Pull Request Creation
+## GitHub Issue Workflow (Automated)
 
-### Automated PR Creation (Recommended)
+### Starting Work on an Issue
+
+Use the automated script to start working on a GitHub issue:
+
+```bash
+# Start working on issue #17
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn issue 17
+```
+
+**What the script does:**
+1. Checks current state (ensures on main, no uncommitted changes)
+2. Switches to bot credentials
+3. Pulls latest from origin/main
+4. Fetches and displays issue details
+5. Assigns issue to k5qkop-bot
+6. Creates feature branch with format `N-short-description`
+7. Switches back to user credentials
+
+**Branch naming:** Auto-generates from issue number and title (e.g., `17-remove-unused-vars`)
+
+**Script location:** `scripts/start-issue.js`
+
+### Creating a Pull Request
 
 Use the automated script to create pull requests with proper credential switching:
 
@@ -88,11 +110,28 @@ eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr --issue 42
 
 **Script location:** `scripts/create-pr.js`
 
-### Manual PR Creation Workflow
+### Complete Automated Workflow Example
 
-If you need manual control over the PR creation process:
+```bash
+# 1. Start working on issue
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn issue 17
 
-## GitHub Issue Workflow
+# 2. Make your changes
+# ... edit files ...
+
+# 3. Commit your work
+git add <files>
+git commit -m "Your commit message
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+
+# 4. Create PR
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr
+```
+
+## Manual GitHub Issue Workflow
+
+If you need manual control instead of using the automated scripts (`yarn issue` and `yarn pr`):
 
 When working on GitHub issues, follow this workflow:
 
