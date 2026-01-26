@@ -243,7 +243,7 @@ async function main() {
     // Get token from credentials file
     const homeDir = process.env.HOME;
     const credContent = fs.readFileSync(path.join(homeDir, '.git-credentials'), 'utf8');
-    const tokenMatch = credContent.match(/:([^@]+)@/);
+    const tokenMatch = credContent.match(/\/\/[^:]+:([^@]+)@/);
     const ghToken = tokenMatch ? tokenMatch[1] : null;
 
     if (!ghToken) {
