@@ -18,7 +18,7 @@ export const GiftCertificate: FC<{
       <p>Open Studio is held every Friday from 17:00 to 20:00.</p>
       <p>The certificate is for one person.</p>
       <p>Firing costs are €10 per kilo; items are weighed before glazing and firing.</p>
-      <p>Please note that Open Studio is not a lesson.</p>
+      <p className={styles.italic}>Please note that Open Studio is not a lesson.</p>
       <br />
       <h2>Certificate for Family Saturday – €30</h2>
       <p>Duration: 2 hours</p>
