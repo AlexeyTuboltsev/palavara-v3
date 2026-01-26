@@ -51,21 +51,6 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
       <MenuHome state={state} />
     </div>
-    <div className={styles.content}>
-    <div className={styles.announcement}>
-      <p>One Spot Available:</p>
-      <h3>4-Session Wheel-Throwing Class</h3>
-        <br />
-      <p>There is one place available in our 4-session wheel-throwing course</p>
-        <br />
-      <p>Schedule:</p>
-      <p>22nd January, 18:30–21:00 — Throwing (2.5 h)</p>
-      <p>29th January, 18:30–21:00 — Throwing (2.5 h)</p>
-      <p>31st January, 10:00–12:30 — Trimming (2.5 h)</p>
-      <p>8th February, 10:00–12:30 — Glazing (2.5 h)</p>
-        <br />
-      <p><a href="wheel-throwing#4-session-wheel-throwing-class">Full course description and booking</a></p>
-    </div>
-    </div>
-  </Background>
+    <div className={styles.content} />
+    </Background>
 }
