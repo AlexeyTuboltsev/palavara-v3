@@ -51,30 +51,34 @@ function execSilent(command, options = {}) {
 function switchToBotCredentials() {
   log('\n→ Switching to bot credentials...', 'cyan');
 
-  const homeDir = process.env.HOME;
-  const tokenFile = path.join(homeDir, '.github-tokens');
+  try {
+    const homeDir = process.env.HOME;
+    const tokenFile = path.join(homeDir, '.github-tokens');
 
-  if (!fs.existsSync(tokenFile)) {
-    throw new Error(`Token file not found: ${tokenFile}`);
+    if (!fs.existsSync(tokenFile)) {
+      throw new Error(`Token file not found: ${tokenFile}`);
+    }
+
+    // Source tokens and set credentials
+    const tokens = fs.readFileSync(tokenFile, 'utf8');
+    const botTokenMatch = tokens.match(/BOT_TOKEN=(.+)/);
+
+    if (!botTokenMatch || !botTokenMatch[1]) {
+      throw new Error('BOT_TOKEN not found in ~/.github-tokens');
+    }
+
+    const botToken = botTokenMatch[1].trim();
+
+    exec('git config --global user.name "k5qkop-bot"');
+    exec('git config --global user.email "tblz+k5qkop-bot@proton.me"');
+
+    const credFile = path.join(homeDir, '.git-credentials');
+    fs.writeFileSync(credFile, `https://k5qkop-bot:${botToken}@github.com\n`);
+
+    log('✓ Switched to k5qkop-bot', 'green');
+  } catch (error) {
+    throw new Error(`Failed to switch to bot credentials: ${error.message}`);
   }
-
-  // Source tokens and set credentials
-  const tokens = fs.readFileSync(tokenFile, 'utf8');
-  const botTokenMatch = tokens.match(/BOT_TOKEN=(.+)/);
-
-  if (!botTokenMatch) {
-    throw new Error('BOT_TOKEN not found in ~/.github-tokens');
-  }
-
-  const botToken = botTokenMatch[1].trim();
-
-  exec('git config --global user.name "k5qkop-bot"');
-  exec('git config --global user.email "tblz+k5qkop-bot@proton.me"');
-
-  const credFile = path.join(homeDir, '.git-credentials');
-  fs.writeFileSync(credFile, `https://k5qkop-bot:${botToken}@github.com\n`);
-
-  log('✓ Switched to k5qkop-bot', 'green');
 }
 
 function switchToUserCredentials() {
