@@ -29,11 +29,11 @@ export const FamilySaturday: FC<{
 
     <h2>Cost</h2>
     <p>Family Ticket:</p>
-    <p>1 adult + 1 child (under 12): 25 €</p>
+    <p>1 adult + 1 child (under 12): 30 €</p>
     <p>• +1 child: + 10 €</p>
-    <p>• +1 adult (over 13): + 20 €</p>
+    <p>• +1 adult (over 13): + 25 €</p>
     <p>You can also come without children or invite some friends</p>
-    <p>The price for 1 adult is 25 €</p>
+    <p>The price for 1 adult is 30 €</p>
 
     <p>• Firing costs (10 € per kilo) are subject to an extra charge</p>
     <p>(The items are weighed before glazing and firing)</p>
