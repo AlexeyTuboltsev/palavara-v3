@@ -34,8 +34,8 @@ Use **yarn** (not npm) for all package management and script execution in this p
 
 **Tokens file format** (`~/.github-tokens`):
 ```bash
-BOT_TOKEN=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
-USER_TOKEN=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
+BOT_TOKEN=<bot-github-token>
+USER_TOKEN=<user-github-token>
 ```
 
 ### Switching to Bot Credentials
