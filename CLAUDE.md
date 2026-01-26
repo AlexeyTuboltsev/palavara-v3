@@ -30,24 +30,32 @@ Use **yarn** (not npm) for all package management and script execution in this p
 **Bot Account:** For automated GitHub issue workflows, temporarily switch to bot credentials:
 - **Bot username:** k5qkop-bot
 - **Bot email:** tblz+k5qkop-bot@proton.me
-- **Bot token:** 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
+- **Bot token:** Stored in `~/.github-tokens` file
+
+**Tokens file format** (`~/.github-tokens`):
+```bash
+BOT_TOKEN=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
+USER_TOKEN=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
+```
 
 ### Switching to Bot Credentials
 
 ```bash
 # Switch to bot (before working on GitHub issues)
+source ~/.github-tokens
 git config --global user.name "k5qkop-bot"
 git config --global user.email "tblz+k5qkop-bot@proton.me"
-echo "https://k5qkop-bot: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@github.com" > ~/.git-credentials
+echo "https://k5qkop-bot:${BOT_TOKEN}@github.com" > ~/.git-credentials
 ```
 
 ### Switching Back to User Credentials
 
 ```bash
 # Switch back to user (after completing automated work)
+source ~/.github-tokens
 git config --global user.name "lexey"
 git config --global user.email "tblz@proton.me"
-echo "https://AlexeyTuboltsev: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@github.com" > ~/.git-credentials
+echo "https://AlexeyTuboltsev:${USER_TOKEN}@github.com" > ~/.git-credentials
 ```
 
 **Important:** Always switch back to user credentials after completing automated GitHub issue workflows.
@@ -59,9 +67,10 @@ When working on GitHub issues, follow this workflow:
 ### 0. Switch to Bot Credentials
 
 ```bash
+source ~/.github-tokens
 git config --global user.name "k5qkop-bot"
 git config --global user.email "tblz+k5qkop-bot@proton.me"
-echo "https://k5qkop-bot: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@github.com" > ~/.git-credentials
+echo "https://k5qkop-bot:${BOT_TOKEN}@github.com" > ~/.git-credentials
 ```
 
 ### 1. List and Read Issues
@@ -155,9 +164,10 @@ echo "PR #$PR_NUMBER assigned to k5qkop-bot"
 ### 7. Switch Back to User Credentials
 
 ```bash
+source ~/.github-tokens
 git config --global user.name "lexey"
 git config --global user.email "tblz@proton.me"
-echo "https://AlexeyTuboltsev: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@github.com" > ~/.git-credentials
+echo "https://AlexeyTuboltsev:${USER_TOKEN}@github.com" > ~/.git-credentials
 ```
 
 **Important:** Always do this immediately after creating the PR.
