@@ -165,6 +165,40 @@ git branch -d N-short-description
 git push origin --delete N-short-description
 ```
 
+## Deployment
+
+### GitHub Actions Deployment
+
+Production deployment via GitHub Actions (`.github/workflows/deploy-production.yml`). The workflow:
+- Triggers **manually only** via GitHub Actions UI
+- Builds the production bundle
+- Syncs to S3 bucket: `studio.palavara.com`
+- Invalidates CloudFront distribution: `E3HIR7ZV6FCTFO`
+- AWS region: `eu-central-1`
+
+**Required GitHub Secrets:**
+Configure these in repo Settings → Secrets and variables → Actions:
+- `AWS_ACCESS_KEY_ID` - AWS access key for S3/CloudFront access
+- `AWS_SECRET_ACCESS_KEY` - AWS secret key
+- `REACT_APP_SENTRY` - Sentry DSN URL (from `.env.production`)
+
+**How to deploy:**
+1. Go to GitHub repo → Actions tab
+2. Select "Deploy to Production" workflow
+3. Click "Run workflow" → Run workflow
+4. Monitor deployment progress in Actions tab
+
+### Manual Deployment (Local)
+
+For manual deployments from local machine:
+
+```bash
+# Deploy to production (builds and syncs to S3 + invalidates CloudFront)
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn deploy-prod
+```
+
+**Note:** Requires AWS CLI configured with credentials locally. Automated deployment via GitHub Actions is preferred.
+
 ## Build & Development Commands
 
 ```bash
@@ -176,9 +210,6 @@ eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn build
 
 # Run tests
 eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test
-
-# Deploy to production (builds and syncs to S3 + invalidates CloudFront)
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn deploy-prod
 ```
 
 Test files live in `tests/` directory (not `src/`), with setup in `tests/setupTests.ts`. Test file pattern: `tests/**/*.test.{js,jsx,ts,tsx}`
