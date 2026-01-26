@@ -86,7 +86,8 @@
     "start": "BROWSER='google-chrome' node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "deploy-prod": "yarn build && scripts/deploy-prod.sh"
+    "deploy-prod": "yarn build && scripts/deploy-prod.sh",
+    "pr": "node scripts/create-pr.js"
   },
   "eslintConfig": {
     "extends": [
