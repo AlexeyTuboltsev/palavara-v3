@@ -60,6 +60,38 @@ echo "https://AlexeyTuboltsev:${USER_TOKEN}@github.com" > ~/.git-credentials
 
 **Important:** Always switch back to user credentials after completing automated GitHub issue workflows.
 
+## Pull Request Creation
+
+### Automated PR Creation (Recommended)
+
+Use the automated script to create pull requests with proper credential switching:
+
+```bash
+# From your feature branch (after committing changes)
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr
+
+# With custom title
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr --title "Custom PR title"
+
+# With issue number (if branch name doesn't follow N-description format)
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr --issue 42
+```
+
+**What the script does:**
+- Validates current state (not on main, no uncommitted changes)
+- Auto-detects issue number from branch name (e.g., `16-description` → `Fixes #16`)
+- Generates PR title and body from commit history
+- Switches to bot credentials
+- Pushes branch if needed
+- Creates PR via gh CLI and assigns to k5qkop-bot
+- **Always** switches back to user credentials (even on failure)
+
+**Script location:** `scripts/create-pr.js`
+
+### Manual PR Creation Workflow
+
+If you need manual control over the PR creation process:
+
 ## GitHub Issue Workflow
 
 When working on GitHub issues, follow this workflow:
