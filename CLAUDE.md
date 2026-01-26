@@ -93,9 +93,12 @@ curl -s -X POST \
 ### 3. Create Feature Branch
 
 ```bash
-# Create and switch to new branch (use fix/ or feature/ prefix)
-git checkout -b fix/issue-N-short-description
+# Create and switch to new branch (format: N-short-description)
+# Example: 1-kids-class-pricing
+git checkout -b N-short-description
 ```
+
+**Branch naming convention:** `N-short-description` where N is the issue number (e.g., `1-kids-class-pricing`, `2-family-saturday-pricing`).
 
 ### 4. Make Changes and Commit
 
@@ -117,7 +120,7 @@ EOF
 ### 5. Push Branch
 
 ```bash
-git push -u origin fix/issue-N-short-description
+git push -u origin N-short-description
 ```
 
 ### 6. Create Pull Request
@@ -131,7 +134,7 @@ curl -s -X POST \
   -d '{
     "title": "Brief description of change",
     "body": "## Changes\n- Change description\n\nFixes #N\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
-    "head": "fix/issue-N-short-description",
+    "head": "N-short-description",
     "base": "main"
   }' | jq -r '"PR created: \(.html_url)\nPR number: \(.number)"'
 ```
@@ -154,10 +157,10 @@ git checkout main
 git pull origin main
 
 # Delete local branch
-git branch -d fix/issue-N-short-description
+git branch -d N-short-description
 
 # Optionally delete remote branch (if not auto-deleted)
-git push origin --delete fix/issue-N-short-description
+git push origin --delete N-short-description
 ```
 
 ## Build & Development Commands
