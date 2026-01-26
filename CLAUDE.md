@@ -25,7 +25,13 @@ Use **yarn** (not npm) for all package management and script execution in this p
 
 ## Git Configuration
 
-Git credentials are stored in `~/.git-credentials` for HTTPS authentication. The credential helper is set to `store` mode.
+Git is configured to use the bot account `k5qkop-bot` for all automated commits and GitHub API operations.
+
+- **Bot username:** k5qkop-bot
+- **Bot email:** tblz+k5qkop-bot@proton.me
+- **Credentials:** Stored in `~/.git-credentials` for HTTPS authentication (credential helper: `store`)
+
+All commits will be authored by the bot, with co-authorship attribution to Claude.
 
 ## GitHub Issue Workflow
 
@@ -45,15 +51,15 @@ curl -s -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.
   | jq -r '"Issue #\(.number): \(.title)\n\(.body)"'
 ```
 
-### 2. Assign Issue to Yourself
+### 2. Assign Issue to Bot
 
 ```bash
-# Assign issue N to AlexeyTuboltsev
+# Assign issue N to k5qkop-bot
 curl -s -X POST \
   -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
   -H "Accept: application/vnd.github.v3+json" \
   https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues/N/assignees \
-  -d '{"assignees":["AlexeyTuboltsev"]}' \
+  -d '{"assignees":["k5qkop-bot"]}' \
   | jq -r '"Issue #\(.number) assigned to: \(.assignees[].login)"'
 ```
 
