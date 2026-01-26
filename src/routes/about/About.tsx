@@ -1,13 +1,11 @@
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { TReadyAppState } from "../../types";
-import { Images, Section, SectionVisual } from "../../components/Section";
+import { Images } from "../../components/Section";
 import styles from "./About.module.scss";
 import { LogoSection } from "../../components/Logo";
-import { MenuAbout, MenuSec } from "../../components/Menu";
-import { SectionHeader, SectionHeaderAbout } from "../../components/SectionHeader";
+import { MenuAbout } from "../../components/Menu";
+import { SectionHeaderAbout } from "../../components/SectionHeader";
 import { EScreenSize } from "../common/screenSize";
-import { actions } from "../../actions";
-import cn from 'classnames';
 
 
 export const About: FC<{

@@ -16,6 +16,7 @@ import {actions} from "../actions";
 export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: any) {
   yield put(setAppState({appState: EAppState.IN_PROGRESS}))
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [history, stopHistoryListener]: [BrowserHistory, () => void] = yield call(setupHistory, dispatch)
   const initialRoute: TRoute = yield call(getRoute, history.location) //todo extract location to a service for testing etc
   yield fork(locationWatcherSaga, history, initialRoute)
@@ -23,6 +24,7 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: an
   yield call(initI18n, i18n, ELang.EN)
   yield fork(langWatcherSaga, i18n)
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const stopResizeObserver: () => void = yield call(setupResizeObserver, rootElement, dispatch)
   const screenSize: { payload: TResizeEventPayload } = yield take(actions.screenResize)
   yield fork(uiSaga, screenSize.payload)

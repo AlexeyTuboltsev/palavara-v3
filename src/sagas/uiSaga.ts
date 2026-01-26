@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { actions, EActionType, TAction } from "../actions";
 import { call, cancel, fork, put, select, take, cancelled } from "redux-saga/effects";
 import { EMenuType, TMenuItem, TReadyAppState } from "../types";
