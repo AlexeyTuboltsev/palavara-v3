@@ -72,13 +72,14 @@ eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn issue 17
 ```
 
 **What the script does:**
-1. Checks current state (ensures on main, no uncommitted changes)
-2. Switches to bot credentials
-3. Pulls latest from origin/main
-4. Fetches and displays issue details
-5. Assigns issue to k5qkop-bot
-6. Creates feature branch with format `N-short-description`
-7. Switches back to user credentials
+1. Checks for uncommitted changes (fails if any exist)
+2. Automatically switches to main branch (if not already on it)
+3. Switches to bot credentials
+4. Pulls latest from origin/main
+5. Fetches and displays issue details
+6. Assigns issue to k5qkop-bot
+7. Creates feature branch with format `N-short-description`
+8. Switches back to user credentials
 
 **Branch naming:** Auto-generates from issue number and title (e.g., `17-remove-unused-vars`)
 

@@ -177,30 +177,20 @@ async function main() {
 
     const issueNumber = args[0];
 
-    // 1. Check current state
+    // 1. Check current state and switch to main
     log('\n→ Checking current state...', 'cyan');
+
+    if (hasUncommittedChanges()) {
+      throw new Error('You have uncommitted changes. Please commit or stash them first.');
+    }
 
     const currentBranch = getCurrentBranch();
     log(`  Current branch: ${currentBranch}`, 'yellow');
 
     if (currentBranch !== 'main') {
-      log('\n⚠ Warning: Not on main branch', 'yellow');
-      const response = execSilent('read -p "Switch to main? (y/n): " answer && echo $answer', {
-        shell: '/bin/bash',
-        ignoreError: true
-      });
-
-      if (response !== 'y') {
-        log('\n✗ Aborted', 'red');
-        process.exit(1);
-      }
-
+      log('→ Switching to main branch...', 'cyan');
       execSilent('git checkout main');
       log('✓ Switched to main', 'green');
-    }
-
-    if (hasUncommittedChanges()) {
-      throw new Error('You have uncommitted changes. Please commit or stash them first.');
     }
 
     // 2. Switch to bot credentials
