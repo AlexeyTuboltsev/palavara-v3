@@ -127,17 +127,30 @@ git push -u origin N-short-description
 
 ```bash
 # Create PR using GitHub API
-curl -s -X POST \
+PR_NUMBER=$(curl -s -X POST \
   -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
   -H "Accept: application/vnd.github.v3+json" \
   https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/pulls \
   -d '{
     "title": "Brief description of change",
-    "body": "## Changes\n- Change description\n\n## Related Issue\nFixes #N\nhttps://github.com/AlexeyTuboltsev/palavara-v3/issues/N\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+    "body": "## Changes\n- Change description\n\nFixes #N\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
     "head": "N-short-description",
     "base": "main"
-  }' | jq -r '"PR created: \(.html_url)\nPR number: \(.number)"'
+  }' | jq -r '.number')
+
+echo "PR created: https://github.com/AlexeyTuboltsev/palavara-v3/pull/$PR_NUMBER"
+
+# Assign PR to bot
+curl -s -X POST \
+  -H "Authorization: token $(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//')" \
+  -H "Accept: application/vnd.github.v3+json" \
+  https://api.github.com/repos/AlexeyTuboltsev/palavara-v3/issues/$PR_NUMBER/assignees \
+  -d '{"assignees":["k5qkop-bot"]}' > /dev/null
+
+echo "PR #$PR_NUMBER assigned to k5qkop-bot"
 ```
+
+**Important:** Only include `Fixes #N` in the PR body - GitHub will automatically link to the issue.
 
 ### 7. Switch Back to User Credentials
 
