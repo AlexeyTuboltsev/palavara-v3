@@ -87,6 +87,7 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "deploy-prod": "yarn build && scripts/deploy-prod.sh",
+    "issue": "node scripts/start-issue.js",
     "pr": "node scripts/create-pr.js"
   },
   "eslintConfig": {
