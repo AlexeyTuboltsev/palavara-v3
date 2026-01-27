@@ -16,6 +16,8 @@ import {About} from "../routes/about/About";
 import {RentASpace} from "../routes/rentASpace/RentASpace";
 import {Contact} from "../routes/contact/Contact";
 import {Impressum} from "../routes/impressum/Impressum";
+import {Agb} from "../routes/agb/Agb";
+import {Datenschutzerklaerung} from "../routes/datenschutzerklaerung/Datenschutzerklaerung";
 import { StartScreen } from './StartScreen';
 import { KidsClass } from '../routes/kidsClass/KidsClass';
 
@@ -69,5 +71,9 @@ export const AppReady: FC<TReadyAppState> = (state) => {
       return <Contact state={state} />
     case ERoute.IMPRESSUM:
       return <Impressum state={state} />
+    case ERoute.AGB:
+      return <Agb state={state} />
+    case ERoute.DATENSCHUTZ:
+      return <Datenschutzerklaerung state={state} />
   }
 }
