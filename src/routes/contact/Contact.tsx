@@ -23,9 +23,6 @@ export const Contact: FC<{
       <p><a href="https://www.instagram.com/palavara_potterystudio">instagram.com/palavara_potterystudio/</a></p>
       <p><a href="https://www.instagram.com/palavara_ceramics">instagram.com/palavara_ceramics</a></p>
 
-      <h2>telegram:</h2>
-      <p><a href="https://t.me/comeandclay">t.me/comeandclay</a></p>
-
       <h1 className={styles.impressum}>
         <Link to={{routeName: ERoute.IMPRESSUM}}>Impressum</Link>
       </h1>
