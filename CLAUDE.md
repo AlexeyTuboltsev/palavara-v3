@@ -25,12 +25,17 @@ Use **yarn** (not npm) for all package management and script execution in this p
 
 ## Git Configuration
 
-**Default:** Git uses user credentials (lexey / tblz@proton.me)
+**CRITICAL: ALL git operations (commits, pushes, PRs) MUST be done using bot credentials.**
 
-**Bot Account:** For automated GitHub issue workflows, temporarily switch to bot credentials:
-- **Bot username:** k5qkop-bot
-- **Bot email:** tblz+k5qkop-bot@proton.me
-- **Bot token:** Stored in `~/.github-tokens` file
+**Bot Account (k5qkop-bot):**
+- **Username:** k5qkop-bot
+- **Email:** tblz+k5qkop-bot@proton.me
+- **Token:** Stored in `~/.github-tokens` file
+
+**User Account (lexey):**
+- **Username:** lexey
+- **Email:** tblz@proton.me
+- **Token:** Stored in `~/.github-tokens` file
 
 **Tokens file format** (`~/.github-tokens`):
 ```bash
@@ -38,10 +43,20 @@ BOT_TOKEN=<bot-github-token>
 USER_TOKEN=<user-github-token>
 ```
 
+### Required Workflow for ALL Git Operations
+
+**ALWAYS follow this pattern for any git commit, push, or PR:**
+
+1. **Switch to bot credentials BEFORE any git operation**
+2. **Perform the git operation (commit, push, create PR)**
+3. **Switch back to user credentials IMMEDIATELY after**
+
+You do NOT need user permission to switch credentials - just do it automatically.
+
 ### Switching to Bot Credentials
 
 ```bash
-# Switch to bot (before working on GitHub issues)
+# Switch to bot (BEFORE any git commit/push/PR)
 source ~/.github-tokens
 git config --global user.name "k5qkop-bot"
 git config --global user.email "tblz+k5qkop-bot@proton.me"
@@ -51,14 +66,18 @@ echo "https://k5qkop-bot:${BOT_TOKEN}@github.com" > ~/.git-credentials
 ### Switching Back to User Credentials
 
 ```bash
-# Switch back to user (after completing automated work)
+# Switch back to user (IMMEDIATELY after git operation completes)
 source ~/.github-tokens
 git config --global user.name "lexey"
 git config --global user.email "tblz@proton.me"
 echo "https://AlexeyTuboltsev:${USER_TOKEN}@github.com" > ~/.git-credentials
 ```
 
-**Important:** Always switch back to user credentials after completing automated GitHub issue workflows.
+**IMPORTANT:**
+- NEVER commit or push as user (lexey)
+- ALWAYS use bot credentials (k5qkop-bot) for all git operations
+- ALWAYS switch back to user credentials after completing the git operation
+- This applies to ALL commits, not just issue-related work
 
 ## GitHub Issue Workflow (Automated)
 
