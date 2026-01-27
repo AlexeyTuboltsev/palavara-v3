@@ -23,237 +23,92 @@ eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn start
 
 Use **yarn** (not npm) for all package management and script execution in this project.
 
-## Git Configuration
+## Git & GitHub Workflow
 
-**CRITICAL: ALL git operations (commits, pushes, PRs) MUST be done using bot credentials.**
+**CRITICAL: ALL remote git operations (push, PR creation, etc.) MUST use the GitHub MCP server.**
+
+The GitHub MCP server is configured with bot credentials (k5qkop-bot) and handles all remote GitHub operations automatically. You do NOT need to manually switch credentials or use bash commands for GitHub API operations.
+
+**Local git config:** Can remain as any user (lexey or bot) - doesn't matter since only remote operations matter.
 
 **Bot Account (k5qkop-bot):**
 - **Username:** k5qkop-bot
 - **Email:** tblz+k5qkop-bot@proton.me
-- **Token:** Stored in `~/.github-tokens` file
+- Used automatically by GitHub MCP server for all remote operations
 
-**User Account (lexey):**
-- **Username:** lexey
-- **Email:** tblz@proton.me
-- **Token:** Stored in `~/.github-tokens` file
+### GitHub MCP Server Usage
 
-**Tokens file format** (`~/.github-tokens`):
-```bash
-BOT_TOKEN=<bot-github-token>
-USER_TOKEN=<user-github-token>
-```
+**ALWAYS use GitHub MCP server tools** for:
+- Listing and viewing issues
+- Assigning issues
+- Creating/updating pull requests
+- Pushing code to remote
+- Managing branches on remote
+- All other GitHub API operations
 
-### Required Workflow for ALL Git Operations
+**DO NOT use:**
+- `gh` CLI commands for GitHub operations
+- Manual `git push` commands (use MCP)
+- Manual credential switching scripts
+- Bash scripts for GitHub API calls
 
-**ALWAYS follow this pattern for any git commit, push, or PR:**
+The MCP server handles authentication with bot credentials automatically.
 
-1. **Switch to bot credentials BEFORE any git operation**
-2. **Perform the git operation (commit, push, create PR)**
-3. **Switch back to user credentials IMMEDIATELY after**
+## GitHub Issue Workflow
 
-You do NOT need user permission to switch credentials - just do it automatically.
+### 1. Working on an Issue
 
-### Switching to Bot Credentials
+Typical workflow using GitHub MCP tools:
 
-```bash
-# Switch to bot (BEFORE any git commit/push/PR)
-source ~/.github-tokens
-git config --global user.name "k5qkop-bot"
-git config --global user.email "tblz+k5qkop-bot@proton.me"
-echo "https://k5qkop-bot:${BOT_TOKEN}@github.com" > ~/.git-credentials
-```
+1. **List/view issues** using GitHub MCP tools
+2. **Create feature branch** locally:
+   ```bash
+   git checkout -b N-short-description
+   ```
+   **Branch naming:** `N-short-description` where N is issue number
+   - Example: `1-kids-class-pricing`, `17-remove-unused-vars`
 
-### Switching Back to User Credentials
+3. **Make code changes** and commit locally:
+   ```bash
+   git add <files>
+   git commit -m "$(cat <<'EOF'
+   Brief description of change
 
-```bash
-# Switch back to user (IMMEDIATELY after git operation completes)
-source ~/.github-tokens
-git config --global user.name "lexey"
-git config --global user.email "tblz@proton.me"
-echo "https://AlexeyTuboltsev:${USER_TOKEN}@github.com" > ~/.git-credentials
-```
+   Fixes #N
 
-**IMPORTANT:**
-- NEVER commit or push as user (lexey)
-- ALWAYS use bot credentials (k5qkop-bot) for all git operations
-- ALWAYS switch back to user credentials after completing the git operation
-- This applies to ALL commits, not just issue-related work
+   Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+   EOF
+   )"
+   ```
+   **Important:** Include `Fixes #N` to auto-close issue when PR merges
 
-## GitHub Issue Workflow (Automated)
+4. **Push and create PR** using GitHub MCP tools:
+   - Push branch to remote via MCP
+   - Create PR via MCP with:
+     - Title: Brief description
+     - Body: Changes list + `Fixes #N`
+     - Assignee: k5qkop-bot
 
-### Starting Work on an Issue
-
-Use the automated script to start working on a GitHub issue:
-
-```bash
-# Start working on issue #17
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn issue 17
-```
-
-**What the script does:**
-1. Checks for uncommitted changes (fails if any exist)
-2. Automatically switches to main branch (if not already on it)
-3. Switches to bot credentials
-4. Pulls latest from origin/main
-5. Fetches and displays issue details
-6. Assigns issue to k5qkop-bot
-7. Creates feature branch with format `N-short-description`
-8. Switches back to user credentials
-
-**Branch naming:** Auto-generates from issue number and title (e.g., `17-remove-unused-vars`)
-
-**Script location:** `scripts/start-issue.js`
-
-### Creating a Pull Request
-
-Use the automated script to create pull requests with proper credential switching:
-
-```bash
-# From your feature branch (after committing changes)
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr
-
-# With custom title
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr --title "Custom PR title"
-
-# With issue number (if branch name doesn't follow N-description format)
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr --issue 42
-```
-
-**What the script does:**
-- Validates current state (not on main, no uncommitted changes)
-- Auto-detects issue number from branch name (e.g., `16-description` → `Fixes #16`)
-- Generates PR title and body from commit history
-- Switches to bot credentials
-- Pushes branch if needed
-- Creates PR via gh CLI and assigns to k5qkop-bot
-- **Always** switches back to user credentials (even on failure)
-
-**Script location:** `scripts/create-pr.js`
-
-### Complete Automated Workflow Example
-
-```bash
-# 1. Start working on issue
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn issue 17
-
-# 2. Make your changes
-# ... edit files ...
-
-# 3. Commit your work
-git add <files>
-git commit -m "Your commit message
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
-
-# 4. Create PR
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn pr
-```
-
-## Manual GitHub Issue Workflow
-
-If you need manual control instead of using the automated scripts (`yarn issue` and `yarn pr`):
-
-When working on GitHub issues, follow this workflow:
-
-### 0. Switch to Bot Credentials
-
-```bash
-source ~/.github-tokens
-git config --global user.name "k5qkop-bot"
-git config --global user.email "tblz+k5qkop-bot@proton.me"
-echo "https://k5qkop-bot:${BOT_TOKEN}@github.com" > ~/.git-credentials
-```
-
-### 1. List and Read Issues
-
-```bash
-# List all open issues
-GH_TOKEN=$(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//') gh issue list
-
-# Get details of specific issue
-GH_TOKEN=$(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//') gh issue view N
-```
-
-### 2. Assign Issue to Bot
-
-```bash
-# Assign issue N to k5qkop-bot
-GH_TOKEN=$(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//') gh issue edit N --add-assignee k5qkop-bot
-```
-
-### 3. Create Feature Branch
-
-```bash
-# Create and switch to new branch (format: N-short-description)
-# Example: 1-kids-class-pricing
-git checkout -b N-short-description
-```
-
-**Branch naming convention:** `N-short-description` where N is the issue number (e.g., `1-kids-class-pricing`, `2-family-saturday-pricing`).
-
-### 4. Make Changes and Commit
-
-```bash
-# Make your code changes, then commit
-git add <files>
-git commit -m "$(cat <<'EOF'
-Brief description of change
-
-Fixes #N
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
-EOF
-)"
-```
-
-**Important:** Include `Fixes #N` in the commit message to automatically close the issue when the PR is merged.
-
-### 5. Push Branch
-
-```bash
-git push -u origin N-short-description
-```
-
-### 6. Create Pull Request
-
-```bash
-# Create PR using gh CLI and assign to bot
-GH_TOKEN=$(grep github.com ~/.git-credentials | sed 's/.*://' | sed 's/@.*//') gh pr create \
-  --title "Brief description of change" \
-  --body "## Changes
+**PR body format:**
+```markdown
+## Changes
 - Change description
 
 Fixes #N
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
-  --assignee k5qkop-bot
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
-**Important:** Only include `Fixes #N` in the PR body - GitHub will automatically link to the issue.
+### 2. After PR is Merged
 
-### 7. Switch Back to User Credentials
-
+Use standard git commands for local cleanup:
 ```bash
-source ~/.github-tokens
-git config --global user.name "lexey"
-git config --global user.email "tblz@proton.me"
-echo "https://AlexeyTuboltsev:${USER_TOKEN}@github.com" > ~/.git-credentials
-```
-
-**Important:** Always do this immediately after creating the PR.
-
-### 8. After PR is Merged
-
-```bash
-# Switch back to main and pull latest
+# Switch to main and pull latest
 git checkout main
 git pull origin main
 
 # Delete local branch
 git branch -d N-short-description
-
-# Optionally delete remote branch (if not auto-deleted)
-git push origin --delete N-short-description
 ```
 
 ## Deployment
