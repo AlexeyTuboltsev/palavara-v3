@@ -10,6 +10,7 @@ import {openStudio} from "../openStudio/openStudio";
 import {about} from "../about/about";
 import {rentASpace} from "../rentASpace/rentASpace";
 import {contact} from "../contact/contact";
+import {impressum} from "../impressum/impressum";
 import { teamEvents } from "../teamEvents/teamEvents";
 import { birthdayParties } from "../birthdayParties/birthdayParties";
 
@@ -41,5 +42,7 @@ export function findRouteGenerator(route: TRoute): any {
       return rentASpace;
     case ERoute.CONTACT:
       return contact;
+    case ERoute.IMPRESSUM:
+      return impressum;
   }
 }

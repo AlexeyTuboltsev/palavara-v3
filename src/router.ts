@@ -13,6 +13,7 @@ export enum ERoute {
   ABOUT = "about",
   RENT_A_SPACE = "rentASpace",
   CONTACT = "contact",
+  IMPRESSUM = "impressum",
 }
 
 export type TRouteDef = {
@@ -35,6 +36,7 @@ export type TRoute =
   | ({ routeName: ERoute.ABOUT } )
   | ({ routeName: ERoute.RENT_A_SPACE } )
   | ({ routeName: ERoute.CONTACT } )
+  | ({ routeName: ERoute.IMPRESSUM } )
 
 export const routeDefs:TRouteDef[] = [
   {routeName: ERoute.HOME, routePattern: '/'},
@@ -50,6 +52,7 @@ export const routeDefs:TRouteDef[] = [
   {routeName: ERoute.ABOUT, routePattern: '/about-me'},
   {routeName: ERoute.RENT_A_SPACE, routePattern: '/rent-a-space'},
   {routeName: ERoute.CONTACT, routePattern: '/contact'},
+  {routeName: ERoute.IMPRESSUM, routePattern: '/impressum'},
 
   // {
   //   routeName: ERoute.ROUTE_TREE, routePattern: '/asd/:id', paramsParser: (params: {[key:string]:any}) => {

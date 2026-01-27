@@ -15,6 +15,7 @@ import {OpenStudio} from "../routes/openStudio/OpenStudio";
 import {About} from "../routes/about/About";
 import {RentASpace} from "../routes/rentASpace/RentASpace";
 import {Contact} from "../routes/contact/Contact";
+import {Impressum} from "../routes/impressum/Impressum";
 import { StartScreen } from './StartScreen';
 import { KidsClass } from '../routes/kidsClass/KidsClass';
 
@@ -66,5 +67,7 @@ export const AppReady: FC<TReadyAppState> = (state) => {
       return <RentASpace state={state} />
     case ERoute.CONTACT:
       return <Contact state={state} />
+    case ERoute.IMPRESSUM:
+      return <Impressum state={state} />
   }
 }
