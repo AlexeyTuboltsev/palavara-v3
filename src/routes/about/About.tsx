@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { TReadyAppState } from "../../types";
-import { Images } from "../../components/Section";
+import { Images } from "../../components/Images";
 import styles from "./About.module.scss";
 import { LogoSection } from "../../components/Logo";
 import { MenuAbout } from "../../components/Menu";
