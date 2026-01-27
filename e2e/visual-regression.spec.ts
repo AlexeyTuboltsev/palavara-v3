@@ -31,6 +31,7 @@ const routes = [
   { path: '/about-me', name: 'about-me' },
   { path: '/rent-a-space', name: 'rent-a-space' },
   { path: '/contact', name: 'contact' },
+  { path: '/impressum', name: 'impressum' },
 ];
 
 /**

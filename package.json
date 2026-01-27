@@ -84,7 +84,9 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "scripts": {
+    "prestart": "node scripts/generate-markdown-components.js",
     "start": "BROWSER='google-chrome' node scripts/start.js",
+    "prebuild": "node scripts/generate-markdown-components.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "test:visual": "playwright test",
