@@ -2,6 +2,8 @@ import React, {FC} from 'react'
 import {TReadyAppState} from "../../types";
 import {Section} from "../../components/Section";
 import styles from "../../components/Section.module.scss";
+import {Link} from "../../components/Link";
+import {ERoute} from "../../router";
 
 export const Contact: FC<{
   state: TReadyAppState
@@ -24,9 +26,15 @@ export const Contact: FC<{
       <h2>telegram:</h2>
       <p><a href="https://t.me/comeandclay">t.me/comeandclay</a></p>
 
-      <h1 className={styles.impressum}><a href="/impressum">Impressum</a></h1>
-      <h1 className={styles.impressum}><a href="/agb">AGB</a></h1>
-      <h1 className={styles.impressum}><a href="/datenschutzerklaerung">Datenschutzerklärung</a></h1>
+      <h1 className={styles.impressum}>
+        <Link to={{routeName: ERoute.IMPRESSUM}}>Impressum</Link>
+      </h1>
+      <h1 className={styles.impressum}>
+        <Link to={{routeName: ERoute.AGB}}>AGB</Link>
+      </h1>
+      <h1 className={styles.impressum}>
+        <Link to={{routeName: ERoute.DATENSCHUTZ}}>Datenschutzerklärung</Link>
+      </h1>
     </div>
   </Section>
 }
