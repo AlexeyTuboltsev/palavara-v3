@@ -10,27 +10,7 @@ import {useDispatch} from "react-redux";
 import {actions} from "../actions";
 import cn from "classnames";
 import {EScreenSize} from "../routes/common/screenSize";
-
-export const Images: FC<{ imageData: string, imageLqipData: string }> = ({imageLqipData, imageData}) => {
-  return <>
-
-    {imageData && <img
-        aria-hidden={true}
-        loading="lazy"
-        className={styles.img}
-        src={imageData}
-        alt=""
-    />}
-
-    {imageLqipData && <img
-        alt=""
-        src={imageLqipData}
-        aria-hidden={true}
-        className={cn(styles.imgLowRes, {[styles.lqipVisible]: imageData})}
-    />}
-  </>
-
-}
+import {Images} from "./Images";
 
 export const SectionVisual: FC<{ imageData: string, imageLqipData: string }> = ({imageData, imageLqipData}) => {
   const dispatch = useDispatch();

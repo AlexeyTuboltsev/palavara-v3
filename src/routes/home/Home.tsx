@@ -5,6 +5,7 @@ import {LogoHome} from "../../components/Logo";
 import cn from 'classnames';
 import {HomeHeader} from "../../components/SectionHeader";
 import {MenuHome} from "../../components/Menu";
+import {config} from "../../config";
 
 
 const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}) => {
@@ -15,6 +16,22 @@ const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}
       setLoaded(true);
     }
   }, []);
+
+  // In visual test mode, show gray placeholder instead of actual images
+  if (config.visualTestMode) {
+    return <div
+      className={styles.backgroundImg}
+      style={{
+        backgroundColor: '#e0e0e0',
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0
+      }}
+      aria-hidden={true}
+    />;
+  }
 
   return <>
     <img alt="" src={imgLqipUrl} aria-hidden={true} className={styles.backgroundImgLowRes}/>
