@@ -91,9 +91,7 @@
     "test:visual:update": "playwright test --update-snapshots",
     "test:visual:ui": "playwright test --ui",
     "test:visual:report": "playwright show-report",
-    "deploy-prod": "yarn build && scripts/deploy-prod.sh",
-    "issue": "node scripts/start-issue.js",
-    "pr": "node scripts/create-pr.js"
+    "deploy-prod": "yarn build && scripts/deploy-prod.sh"
   },
   "eslintConfig": {
     "extends": [
