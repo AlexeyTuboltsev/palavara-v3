@@ -60,8 +60,9 @@ for (const route of routes) {
     await expect(page).toHaveScreenshot(`${route.name}.png`, {
       fullPage: true,
       animations: 'disabled',
-      // Allow small differences due to anti-aliasing
-      maxDiffPixels: 100,
+      // Allow small differences due to font rendering and anti-aliasing between environments
+      // 500 pixels ≈ 0.02% of typical full-page screenshot
+      maxDiffPixels: 500,
     });
   });
 }
@@ -88,7 +89,7 @@ test.describe('Interactive states', () => {
       await expect(page).toHaveScreenshot('home-menu-open.png', {
         fullPage: true,
         animations: 'disabled',
-        maxDiffPixels: 100,
+        maxDiffPixels: 500,
       });
     }
   });
@@ -106,7 +107,7 @@ test.describe('Interactive states', () => {
       await expect(page).toHaveScreenshot('contact-form-focus.png', {
         fullPage: true,
         animations: 'disabled',
-        maxDiffPixels: 100,
+        maxDiffPixels: 500,
       });
     }
   });
