@@ -32,6 +32,8 @@ const routes = [
   { path: '/rent-a-space', name: 'rent-a-space' },
   { path: '/contact', name: 'contact' },
   { path: '/impressum', name: 'impressum' },
+  { path: '/agb', name: 'agb' },
+  { path: '/datenschutzerklaerung', name: 'datenschutzerklaerung' },
 ];
 
 /**

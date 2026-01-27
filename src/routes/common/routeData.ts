@@ -13,6 +13,8 @@ import {contact} from "../contact/contact";
 import {impressum} from "../impressum/impressum";
 import { teamEvents } from "../teamEvents/teamEvents";
 import { birthdayParties } from "../birthdayParties/birthdayParties";
+import { agb } from "../agb/agb";
+import { datenschutzerklaerung } from "../datenschutzerklaerung/datenschutzerklaerung";
 
 export function findRouteGenerator(route: TRoute): any {
   switch (route.routeName) {
@@ -44,5 +46,9 @@ export function findRouteGenerator(route: TRoute): any {
       return contact;
     case ERoute.IMPRESSUM:
       return impressum;
+    case ERoute.AGB:
+      return agb;
+    case ERoute.DATENSCHUTZ:
+      return datenschutzerklaerung;
   }
 }

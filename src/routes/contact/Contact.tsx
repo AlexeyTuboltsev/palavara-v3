@@ -25,6 +25,8 @@ export const Contact: FC<{
       <p><a href="https://t.me/comeandclay">t.me/comeandclay</a></p>
 
       <h1 className={styles.impressum}><a href="/impressum">Impressum</a></h1>
+      <h1 className={styles.impressum}><a href="/agb">AGB</a></h1>
+      <h1 className={styles.impressum}><a href="/datenschutzerklaerung">Datenschutzerklärung</a></h1>
     </div>
   </Section>
 }
