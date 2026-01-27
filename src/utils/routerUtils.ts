@@ -77,6 +77,16 @@ export function getRoute(location: {pathname:string}): TRoute {
   }
 }
 
+export function getRoutePath(route: TRoute): string {
+  const routeDef = getRoutePattern(routeDefs, route)
+  if (routeDef) {
+    const toPath = compile(routeDef.routePattern, {encode: encodeURIComponent});
+    return toPath((route as any).params || {})
+  } else {
+    throw Error("cannot create path for route")
+  }
+}
+
 export function setupHistory(dispatch: Dispatch) {
   const history = createBrowserHistory()
 
