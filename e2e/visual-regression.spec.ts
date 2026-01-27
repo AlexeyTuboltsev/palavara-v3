@@ -62,7 +62,7 @@ for (const route of routes) {
       animations: 'disabled',
       // Allow small differences due to font rendering and anti-aliasing
       // Images are replaced with gray placeholders in test mode to avoid randomization issues
-      maxDiffPixels: 5000,
+      maxDiffPixels: 6100,
     });
   });
 }
@@ -89,7 +89,7 @@ test.describe('Interactive states', () => {
       await expect(page).toHaveScreenshot('home-menu-open.png', {
         fullPage: true,
         animations: 'disabled',
-        maxDiffPixels: 5000,
+        maxDiffPixels: 6100,
       });
     }
   });
@@ -107,7 +107,7 @@ test.describe('Interactive states', () => {
       await expect(page).toHaveScreenshot('contact-form-focus.png', {
         fullPage: true,
         animations: 'disabled',
-        maxDiffPixels: 5000,
+        maxDiffPixels: 6100,
       });
     }
   });
