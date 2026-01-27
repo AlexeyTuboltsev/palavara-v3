@@ -17,7 +17,7 @@ export const Link: FC<{
   }
 
   return (
-    <a href={getRoutePath(to)} onClick={handleClick} className={className}>
+    <a href={getRoutePath(to)} onClick={handleClick} className={className || undefined}>
       {children}
     </a>
   )

@@ -6,7 +6,33 @@ import { useDispatch } from "react-redux";
 import cn from 'classnames'
 import { EScreenSize } from "../routes/common/screenSize";
 import { SectionMenuSecondary } from "./SectionMenu";
-import { actions } from "../actions";
+import { actions, EActionType, TAction } from "../actions";
+import { Link } from "./Link";
+import { TRoute } from "../router";
+
+const MenuItemWrapper: FC<{
+  action: TAction
+  className?: string
+  children: React.ReactNode
+}> = ({ action, className, children }) => {
+  const dispatch = useDispatch()
+
+  // Check if this is a route navigation action
+  if (action.type === EActionType.REQUEST_ROUTE_CHANGE) {
+    return (
+      <Link to={action.payload as TRoute} className={className}>
+        {children}
+      </Link>
+    )
+  }
+
+  // For other actions (like toggleOpen), use div with onClick
+  return (
+    <div className={className} onClick={() => dispatch(action)}>
+      {children}
+    </div>
+  )
+}
 
 const MenuButton: FC<{ className?: string }> = ({ className }) => {
   const dispatch = useDispatch();
@@ -29,23 +55,24 @@ const MenuItem: FC<{
   type,
   className
 }) => {
-    const dispatch = useDispatch()
     const menuItem = menu[menuItemId]
 
     switch (menuItem.type) {
       case EMenuType.PARENT:
-        return <div
+        return (
+        <div
           className={cn(styles.parentMenuItemWrapper, { [styles.parentMenuItemWrapperActive]: menuItem.isActive })}>
-          <div
+          <MenuItemWrapper
+            action={menuItem.action}
             className={cn(menuItem.isActive ? styles.parentMenuItem : styles.menuItem, className, type === 'blue' ? styles.menuBlue : styles.menuYellow)}
-            onClick={() => dispatch(menuItem.action)}
           >
             {menuItem.label}{menuItem.isActive ? ":" : ''}
-          </div>
+          </MenuItemWrapper>
           {menuItem.isActive && menuItem.children.map((menuItemId: string) =>
             <ChildMenuItem key={menuItemId} menuItem={menu[menuItemId] as TChildMenuItem} type={type} className={className}/>
           )}
         </div>
+        )
       case EMenuType.SIMPLE:
         return <SimpleMenuItem menuItem={menu[menuItemId] as TSimpleMenuItem} className={className} type={type} />
       default:
@@ -58,14 +85,12 @@ const SimpleMenuItem: FC<{
   type: 'blue' | 'yellow',
   className?: string
 }> = ({ menuItem, type, className }) => {
-  const dispatch = useDispatch()
-
-  return <div
+  return <MenuItemWrapper
+    action={menuItem.action}
     className={cn(styles.menuItem, { [styles.menuItemActive]: menuItem.isActive }, className, type === 'blue' ? styles.menuBlue : styles.menuYellow)}
-    onClick={() => dispatch(menuItem.action)}
   >
     {menuItem.label}
-  </div>
+  </MenuItemWrapper>
 }
 
 const ChildMenuItem: FC<{
@@ -73,14 +98,12 @@ const ChildMenuItem: FC<{
   type: 'blue' | 'yellow',
   className?:string
 }> = ({ menuItem, type, className }) => {
-  const dispatch = useDispatch()
-
-  return <div
+  return <MenuItemWrapper
+    action={menuItem.action}
     className={cn(styles.childMenuItem, { [styles.childMenuItemActive]: menuItem.isActive }, type === 'blue' ? styles.menuBlue : styles.menuYellow, className)}
-    onClick={() => dispatch(menuItem.action)}
   >
     {menuItem.label}
-  </div>
+  </MenuItemWrapper>
 }
 
 

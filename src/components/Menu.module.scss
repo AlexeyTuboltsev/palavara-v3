@@ -36,6 +36,7 @@
 
 
 .menu-item {
+  display: block;
   padding: 5px 10px;
   line-height: 1;
 
@@ -102,6 +103,7 @@
 }
 
 .parent-menu-item {
+  display: block;
   font-weight: 500;
   padding: 5px 10px;
   line-height: 1;
@@ -127,6 +129,7 @@
 }
 
 .child-menu-item {
+  display: block;
   padding: 5px 57px;
   line-height: 1;
   font-weight: 300;
