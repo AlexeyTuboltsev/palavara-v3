@@ -40,17 +40,6 @@ async function waitForPageStable(page: any) {
   // Wait for network to be idle (no pending requests)
   await page.waitForLoadState('networkidle');
 
-  // Wait for all images to be fully loaded
-  await page.evaluate(() => {
-    return Promise.all(
-      Array.from(document.images)
-        .filter(img => !img.complete)
-        .map(img => new Promise((resolve) => {
-          img.onload = img.onerror = resolve;
-        }))
-    );
-  });
-
   // Wait for any animations to complete
   await page.waitForTimeout(500);
 
@@ -71,9 +60,9 @@ for (const route of routes) {
     await expect(page).toHaveScreenshot(`${route.name}.png`, {
       fullPage: true,
       animations: 'disabled',
-      // Allow small differences due to font rendering and anti-aliasing between environments
-      // 500 pixels ≈ 0.02% of typical full-page screenshot
-      maxDiffPixels: 500,
+      // Allow small differences due to font rendering and anti-aliasing
+      // Images are replaced with gray placeholders in test mode to avoid randomization issues
+      maxDiffPixels: 100,
     });
   });
 }
@@ -100,7 +89,7 @@ test.describe('Interactive states', () => {
       await expect(page).toHaveScreenshot('home-menu-open.png', {
         fullPage: true,
         animations: 'disabled',
-        maxDiffPixels: 500,
+        maxDiffPixels: 100,
       });
     }
   });
@@ -118,7 +107,7 @@ test.describe('Interactive states', () => {
       await expect(page).toHaveScreenshot('contact-form-focus.png', {
         fullPage: true,
         animations: 'disabled',
-        maxDiffPixels: 500,
+        maxDiffPixels: 100,
       });
     }
   });
