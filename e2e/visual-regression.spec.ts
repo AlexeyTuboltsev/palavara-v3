@@ -40,6 +40,17 @@ async function waitForPageStable(page: any) {
   // Wait for network to be idle (no pending requests)
   await page.waitForLoadState('networkidle');
 
+  // Wait for all images to be fully loaded
+  await page.evaluate(() => {
+    return Promise.all(
+      Array.from(document.images)
+        .filter(img => !img.complete)
+        .map(img => new Promise((resolve) => {
+          img.onload = img.onerror = resolve;
+        }))
+    );
+  });
+
   // Wait for any animations to complete
   await page.waitForTimeout(500);
 
