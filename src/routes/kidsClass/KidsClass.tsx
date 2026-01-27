@@ -32,7 +32,5 @@ export const KidsClass: FC<{
 
     <h2>How to book</h2>
     <p><a href="mailto:palavarastudio+kp@gmail.com">palavarastudio+kp@gmail.com</a></p>
-
-    <p>The class is taught in Russian</p>
   </Section>
 }
