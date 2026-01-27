@@ -24,7 +24,7 @@ export const Contact: FC<{
       <h2>telegram:</h2>
       <p><a href="https://t.me/comeandclay">t.me/comeandclay</a></p>
 
-      <p><a href="/impressum">Impressum</a></p>
+      <h1><a href="/impressum">Impressum</a></h1>
     </div>
   </Section>
 }
