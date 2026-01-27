@@ -160,6 +160,50 @@ eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test
 
 Test files live in `tests/` directory (not `src/`), with setup in `tests/setupTests.ts`. Test file pattern: `tests/**/*.test.{js,jsx,ts,tsx}`
 
+## Visual Regression Testing
+
+Playwright-based visual regression tests ensure UI consistency across all pages and viewports.
+
+### Running Visual Tests
+
+```bash
+# Run visual tests (compares screenshots to baseline)
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test:visual
+
+# Update baseline screenshots (after intentional UI changes)
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test:visual:update
+
+# Open Playwright UI mode for interactive debugging
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test:visual:ui
+
+# View HTML report of last test run
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test:visual:report
+```
+
+### Visual Test Mode
+
+Visual tests run with `REACT_APP_VISUAL_TEST_MODE=true` environment variable, which:
+- Replaces all images with gray placeholder boxes (`#e0e0e0`)
+- Prevents image loading variance from causing false test failures
+- Ensures consistent screenshots across test runs
+- Configured automatically in `playwright.config.ts` webServer env
+
+Implementation in `src/config.ts` and `src/components/Images.tsx`.
+
+### Test Coverage
+
+Tests run on 3 viewport sizes (desktop, tablet, mobile) across all 16 routes:
+- Home, Kids Class, Wheel Throwing, Family Saturday
+- Open Studio, Firing Service, Gift Certificate, Team Events
+- Birthday Parties, Membership, About Me, Rent a Space
+- Contact, Impressum, AGB, Datenschutzerklärung
+
+Total: 48 test cases (16 routes × 3 viewports)
+
+### CI/CD Integration
+
+Visual tests run automatically on GitHub Actions via `.github/workflows/visual-tests.yml`. Tests must pass before PRs can be merged.
+
 ## Architecture
 
 This is a React + TypeScript SPA for a pottery studio (Palavara), using a custom client-side routing system rather than React Router.

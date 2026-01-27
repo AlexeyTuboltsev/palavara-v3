@@ -1,22 +1,19 @@
 import styles from "./Logo.module.scss";
-import {actions} from "../actions";
 import {ERoute} from "../router";
 import React, {FC} from "react";
-import {useDispatch} from "react-redux";
 import {ReactComponent as PalavaraLogo} from "../assets/logo.svg";
 import cn from 'classnames'
+import {Link} from "./Link";
 
 export const Logo: FC<{
   className: string
 }> = ({className}) => {
-  const dispatch = useDispatch()
-
-  return <div
+  return <Link
+    to={{routeName: ERoute.HOME}}
     className={cn(styles.logo, className)}
-    onClick={() => dispatch(actions.requestRouteChange({routeName: ERoute.HOME}))}
   >
     <PalavaraLogo/>
-  </div>
+  </Link>
 }
 
 export const LogoHome = () => <Logo className={styles.logoYellow}/>

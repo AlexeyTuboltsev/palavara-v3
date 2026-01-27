@@ -4,27 +4,59 @@ import {ESectionMenuDisplayType, TSectionMenuItem} from "../types";
 import cn from 'classnames';
 import {useDispatch} from "react-redux";
 import {EScreenSize} from "../routes/common/screenSize";
+import {EActionType, TAction} from "../actions";
+import {Link} from "./Link";
+import {TRoute} from "../router";
 
-const SectionMenuItem: FC<TSectionMenuItem & { className: string }> = ({className, ...menuItem}) => {
+const SectionMenuItemWrapper: FC<{
+  action: TAction
+  className?: string
+  children: React.ReactNode
+}> = ({ action, className, children }) => {
   const dispatch = useDispatch()
 
-  return <div
+  // Check if this is a route navigation action
+  if (action.type === EActionType.REQUEST_ROUTE_CHANGE) {
+    return (
+      <Link to={action.payload as TRoute} className={className}>
+        {children}
+      </Link>
+    )
+  }
+
+  // Check if this is an external link action
+  if (action.type === EActionType.EXTERNAL_LINK) {
+    return (
+      <a href={action.payload as string} className={className} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    )
+  }
+
+  // For other actions, use div with onClick
+  return (
+    <div className={className} onClick={() => dispatch(action)}>
+      {children}
+    </div>
+  )
+}
+
+const SectionMenuItem: FC<TSectionMenuItem & { className: string }> = ({className, ...menuItem}) => {
+  return <SectionMenuItemWrapper
+    action={menuItem.action}
     className={cn(styles.sectionMenuItem, {[styles.active]:menuItem.isActive}, className, )}
-    onClick={() => dispatch((menuItem.action))}
   >
     {menuItem.label}
-  </div>
+  </SectionMenuItemWrapper>
 }
 
 const SectionMenuSecondaryItem: FC<TSectionMenuItem & { className?: string }> = ({className, ...menuItem}) => {
-  const dispatch = useDispatch()
-
-  return <div
+  return <SectionMenuItemWrapper
+    action={menuItem.action}
     className={cn(styles.sectionMenuItemSecondary, {[styles.active]:menuItem.isActive}, className, )}
-    onClick={() => dispatch((menuItem.action))}
   >
     {menuItem.label}
-  </div>
+  </SectionMenuItemWrapper>
 }
 
 const SectionMenu: FC<{ sectionMenu: TSectionMenuItem[], className: string, screenSize: EScreenSize}> = ({screenSize, sectionMenu, className}) => {
