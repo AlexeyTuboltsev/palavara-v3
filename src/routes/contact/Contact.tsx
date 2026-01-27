@@ -2,7 +2,6 @@ import React, {FC} from 'react'
 import {TReadyAppState} from "../../types";
 import {Section} from "../../components/Section";
 import styles from "../../components/Section.module.scss";
-import contactStyles from "./Contact.module.scss";
 
 export const Contact: FC<{
   state: TReadyAppState
@@ -25,7 +24,7 @@ export const Contact: FC<{
       <h2>telegram:</h2>
       <p><a href="https://t.me/comeandclay">t.me/comeandclay</a></p>
 
-      <h1 className={contactStyles.impressum}><a href="/impressum">Impressum</a></h1>
+      <h1 className={styles.impressum}><a href="/impressum">Impressum</a></h1>
     </div>
   </Section>
 }
