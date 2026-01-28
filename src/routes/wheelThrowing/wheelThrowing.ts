@@ -31,7 +31,7 @@ export function* wheelThrowing(screenDimensions: TResizeEventPayload): Generator
   yield fork(actionListenerLoop, {
     ...screenResize,
     ...toggleSubmenu,
-    ...imageChanger(urls, []),
+    ...imageChanger(urls),
     ...toggleMobileMenu
   })
   yield put(actions.nextImage())

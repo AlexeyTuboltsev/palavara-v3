@@ -7,7 +7,8 @@ import {Dispatch} from "@reduxjs/toolkit";
 import {setupResizeObserver, TResizeEventPayload} from "../services/resizeObserver";
 import {langWatcherSaga} from "./langWatcherSaga";
 import {ELang, initI18n} from "../services/i18n";
-import {loadImageManifest, uiSaga} from "./uiSaga";
+import {uiSaga} from "./uiSaga";
+import {loadImageManifest} from "./imageManifestLoader";
 import {setAppState} from "../store";
 import {EAppState} from "../types";
 import {actions} from "../actions";
@@ -24,7 +25,6 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: an
   yield call(initI18n, i18n, ELang.EN)
   yield fork(langWatcherSaga, i18n)
 
-  // Load image manifest before starting UI saga
   yield call(loadImageManifest);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

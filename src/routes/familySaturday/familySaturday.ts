@@ -33,7 +33,7 @@ export function* familySaturday(screenDimensions: TResizeEventPayload): Generato
   yield fork(actionListenerLoop, {
     ...screenResize,
     ...toggleSubmenu,
-    ...imageChanger(urls, []),
+    ...imageChanger(urls),
     ...toggleMobileMenu
   })
   yield put(actions.nextImage())

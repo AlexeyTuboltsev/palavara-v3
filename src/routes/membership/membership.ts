@@ -31,7 +31,7 @@ export function* membership(screenDimensions: TResizeEventPayload): Generator<an
   yield fork(actionListenerLoop, {
     ...screenResize,
     ...toggleSubmenu,
-    ...imageChanger(urls, []),
+    ...imageChanger(urls),
     ...toggleMobileMenu
   })
   yield put(actions.nextImage())

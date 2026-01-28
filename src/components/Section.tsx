@@ -11,7 +11,7 @@ import {actions} from "../actions";
 import cn from "classnames";
 import {EScreenSize} from "../routes/common/screenSize";
 import {Images} from "./Images";
-import {getImageManifest} from "../sagas/uiSaga";
+import {getImageManifest} from "../sagas/imageManifestLoader";
 import {TImageManifest} from "../types/imageManifest";
 
 export const SectionVisual: FC<{

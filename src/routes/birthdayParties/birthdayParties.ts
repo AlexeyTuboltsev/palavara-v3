@@ -37,7 +37,7 @@ export function* birthdayParties(screenDimensions: TResizeEventPayload): Generat
     ...screenResize,
     ...toggleSubmenu,
     ...toggleMobileMenu,
-    ...imageChanger(urls, [])
+    ...imageChanger(urls)
   })
   yield put(actions.nextImage())
 }

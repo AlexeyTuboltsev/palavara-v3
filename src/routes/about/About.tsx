@@ -6,7 +6,7 @@ import { LogoSection } from "../../components/Logo";
 import { MenuAbout } from "../../components/Menu";
 import { SectionHeaderAbout } from "../../components/SectionHeader";
 import { EScreenSize } from "../common/screenSize";
-import { getImageManifest } from "../../sagas/uiSaga";
+import { getImageManifest } from "../../sagas/imageManifestLoader";
 
 
 export const About: FC<{

@@ -36,7 +36,7 @@ export function* teamEvents(screenDimensions: TResizeEventPayload): Generator<an
     ...screenResize,
     ...toggleSubmenu,
     ...toggleMobileMenu,
-    ...imageChanger(urls, [])
+    ...imageChanger(urls)
   })
   yield put(actions.nextImage())
 }

@@ -34,7 +34,7 @@ export function* kidsClass(screenDimensions: TResizeEventPayload): Generator<any
     ...screenResize,
     ...toggleSubmenu,
     ...toggleMobileMenu,
-    ...imageChanger(urls, [])
+    ...imageChanger(urls)
   })
   yield put(actions.nextImage())
 }

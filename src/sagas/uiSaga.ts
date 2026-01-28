@@ -11,40 +11,6 @@ import { requestSaga } from "./requestSaga";
 import { EHttpMethod } from "../services/httpRequest";
 import { TResizeEventPayload } from "../services/resizeObserver";
 import { screenSize } from "../routes/common/screenSize";
-import { config } from "../config";
-import { TImageManifest } from "../types/imageManifest";
-
-// Store manifest at module level (loaded once at startup)
-let imageManifest: TImageManifest | null = null;
-
-/**
- * Get the loaded image manifest
- */
-export function getImageManifest(): TImageManifest | null {
-  return imageManifest;
-}
-
-/**
- * Load image manifest from CDN (once at startup)
- * Called from initSaga before uiSaga starts
- */
-export function* loadImageManifest() {
-  if (!config.useOptimizedImages) {
-    return;
-  }
-
-  try {
-    const response: Response = yield call(fetch, config.manifestUrl);
-    if (!response.ok) {
-      console.error(`Failed to load image manifest: ${response.statusText}`);
-      return;
-    }
-    const manifest: TImageManifest = yield call([response, 'json']);
-    imageManifest = manifest;
-  } catch (error) {
-    console.error('Error loading image manifest:', error);
-  }
-}
 
 export function* uiSaga(screenSize: TResizeEventPayload) {
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
@@ -124,7 +90,7 @@ export const toggleMobileMenu: TActionMap = {
   }
 }
 
-export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => {
+export const imageChanger = (urls: string[]): TActionMap => {
   return {
     [EActionType.NEXT_IMAGE]:
       function* (state: TReadyAppState, action: ReturnType<typeof actions.nextImage>) {
@@ -133,10 +99,9 @@ export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => 
 
         if (i >= 0) {
           const newImageUrl = urls[i + 1 <= urls.length - 1 ? i + 1 : 0];
-          const newImageLqipUrl = lqipUrls[i + 1 <= urls.length - 1 ? i + 1 : 0];
-          return yield fork(loadImageWithLqip, newImageUrl, newImageLqipUrl)
+          return yield fork(loadImageWithLqip, newImageUrl)
         } else {
-          return yield fork(loadImageWithLqip, urls[0], lqipUrls[0])
+          return yield fork(loadImageWithLqip, urls[0])
         }
       },
 
@@ -148,16 +113,15 @@ export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => 
 
         if (i >= 0) {
           const newImageUrl = urls[i > 0 ? i - 1 : urls.length - 1];
-          const newImageLqipUrl = lqipUrls[i > 0 ? i - 1 : urls.length - 1]
-          return yield fork(loadImageWithLqip, newImageUrl, newImageLqipUrl)
+          return yield fork(loadImageWithLqip, newImageUrl)
         } else {
-          return yield fork(loadImageWithLqip, urls[urls.length - 1], lqipUrls[urls.length - 1])
+          return yield fork(loadImageWithLqip, urls[urls.length - 1])
         }
       },
   }
 }
 
-function* loadImageWithLqip(url: string, lqipUrl: string) {
+function* loadImageWithLqip(url: string) {
   // Extract filename from URL (last part after /)
   const filename = url.split('/').pop() || '';
 

@@ -31,7 +31,7 @@ export function* giftCertificate(screenDimensions: TResizeEventPayload): Generat
   yield fork(actionListenerLoop, {
     ...screenResize,
     ...toggleSubmenu,
-    ...imageChanger(urls, []),
+    ...imageChanger(urls),
      ...toggleMobileMenu
   })
   yield put(actions.nextImage())

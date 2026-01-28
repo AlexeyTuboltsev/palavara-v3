@@ -42,7 +42,7 @@ export function* about(screenDimensions: TResizeEventPayload): Generator<any, vo
   yield fork(actionListenerLoop, {
     ...screenResize,
     ...toggleSubmenu,
-    ...imageChanger(urls, []),
+    ...imageChanger(urls),
     ...toggleMobileMenu
   })
 
