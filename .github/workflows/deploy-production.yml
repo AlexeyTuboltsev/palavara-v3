@@ -25,7 +25,7 @@ jobs:
         env:
           REACT_APP_SENTRY: ${{ secrets.REACT_APP_SENTRY }}
           REACT_APP_IMG_PREFIX: https://be.palavara.com/img/studio
-          REACT_APP_USE_OPTIMIZED_IMAGES: false
+          REACT_APP_USE_OPTIMIZED_IMAGES: true
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
