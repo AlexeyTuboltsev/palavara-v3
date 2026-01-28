@@ -30,32 +30,23 @@ export function getImageManifest(): TImageManifest | null {
  */
 export function* loadImageManifest() {
   if (!config.useOptimizedImages) {
-    console.log('Optimized images disabled, skipping manifest load');
     return;
   }
 
-  console.log('Loading image manifest from:', config.manifestUrl);
-
   try {
     const response: Response = yield call(fetch, config.manifestUrl);
-    console.log('Manifest fetch response:', response.status, response.statusText);
-
     if (!response.ok) {
       console.error(`Failed to load image manifest: ${response.statusText}`);
       return;
     }
     const manifest: TImageManifest = yield call([response, 'json']);
-    console.log(`✓ Loaded image manifest with ${Object.keys(manifest.images).length} images`);
     imageManifest = manifest;
   } catch (error) {
     console.error('Error loading image manifest:', error);
-    // Continue even if manifest fails to load
   }
 }
 
 export function* uiSaga(screenSize: TResizeEventPayload) {
-  console.log('uiSaga starting... (manifest already loaded in initSaga)');
-
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
   while (true) {
     const action: TAction = yield take(Object.values(actions).map(action => action.type))
@@ -77,14 +68,12 @@ export function* uiSaga(screenSize: TResizeEventPayload) {
         break;
       }
       case "IMAGE_LOADED": {
-        if (config.useOptimizedImages) {
-          const state: TReadyAppState = yield select(state => state.ui);
-          yield put(setAppState(
-            produce(state, (nextState) => {
-              (nextState as any).imageLoaded = true;
-            })
-          ));
-        }
+        const state: TReadyAppState = yield select(state => state.ui);
+        yield put(setAppState(
+          produce(state, (nextState) => {
+            (nextState as any).imageLoaded = true;
+          })
+        ));
         break;
       }
       case "EXTERNAL_LINK": {
@@ -139,16 +128,8 @@ export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => 
   return {
     [EActionType.NEXT_IMAGE]:
       function* (state: TReadyAppState, action: ReturnType<typeof actions.nextImage>) {
-        // For optimized images, compare currentImage (filename) against url filenames
-        // For legacy, compare imageUrl (full URL) against urls
-        let i: number;
-        if (config.useOptimizedImages) {
-          const currentImage = (state as any).currentImage;
-          i = urls.findIndex(url => url === currentImage || url.endsWith(`/${currentImage}`));
-        } else {
-          const imageUrl = (state as any).imageUrl;
-          i = urls.findIndex(url => imageUrl === url);
-        }
+        const currentImage = (state as any).currentImage;
+        const i = urls.findIndex(url => url === currentImage || url.endsWith(`/${currentImage}`));
 
         if (i >= 0) {
           const newImageUrl = urls[i + 1 <= urls.length - 1 ? i + 1 : 0];
@@ -162,16 +143,8 @@ export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => 
 
     [EActionType.PREVIOUS_IMAGE]:
       function* (state: TReadyAppState, action: ReturnType<typeof actions.previousImage>) {
-        // For optimized images, compare currentImage (filename) against url filenames
-        // For legacy, compare imageUrl (full URL) against urls
-        let i: number;
-        if (config.useOptimizedImages) {
-          const currentImage = (state as any).currentImage;
-          i = urls.findIndex(url => url === currentImage || url.endsWith(`/${currentImage}`));
-        } else {
-          const imageUrl = (state as any).imageUrl;
-          i = urls.findIndex(url => imageUrl === url);
-        }
+        const currentImage = (state as any).currentImage;
+        const i = urls.findIndex(url => url === currentImage || url.endsWith(`/${currentImage}`));
 
         if (i >= 0) {
           const newImageUrl = urls[i > 0 ? i - 1 : urls.length - 1];
@@ -185,76 +158,16 @@ export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => 
 }
 
 function* loadImageWithLqip(url: string, lqipUrl: string) {
-  // Optimized images path: just store the filename
-  if (config.useOptimizedImages) {
-    // Extract filename from URL (last part after /)
-    const filename = url.split('/').pop() || '';
+  // Extract filename from URL (last part after /)
+  const filename = url.split('/').pop() || '';
 
-    const state: TReadyAppState = yield select(state => state.ui);
-    yield put(setAppState(
-      produce(state, (nextState: TReadyAppState) => {
-        (nextState as any).currentImage = filename;
-        (nextState as any).imageLoaded = false;
-      })
-    ));
-
-    return;
-  }
-
-  // Legacy blob loading path
-  const lqip: Task<any> = yield fork(requestSaga, EHttpMethod.GET, lqipUrl, 'blob', actions.lqip)
-  yield fork(requestSaga, EHttpMethod.GET, url, 'blob', actions.image)
-
-  //img comes before lqip
-  const imageOrLqip: {
-    type: EActionType.LQIP | EActionType.IMG,
-    payload: { data: string, status: string, statusText: string }
-  } = yield take([actions.image.type, actions.lqip.type])
-
-  if (imageOrLqip.type === EActionType.IMG) {
-    yield cancel(lqip)
-
-    const newState = produce(
-      (yield select(state => state.ui)) as TReadyAppState,
-      (nextState: TReadyAppState) => {
-        (nextState as any).imageLqipUrl = lqipUrl;
-        (nextState as any).imageUrl = url;
-
-        (nextState as any).imageData = imageOrLqip.payload.data;
-        (nextState as any).imageLqipData = null;
-      })
-    yield put(setAppState(newState))
-  } else {
-    // lqip comes before img
-
-    yield put(setAppState(
-      produce(
-        (yield select(state => state.ui)) as TReadyAppState,
-        (nextState: TReadyAppState) => {
-          (nextState as any).imageLqipUrl = lqipUrl;
-          (nextState as any).imageUrl = url;
-          (nextState as any).imageLqipData = imageOrLqip.payload.data;
-          (nextState as any).imageData = null;
-        })
-    ))
-
-    const image: {
-      payload: { data: string, status: string, statusText: string }
-    } = yield take([actions.image.type, actions.image.type])
-
-    const prevState: TReadyAppState = yield select(state => state.ui)
-
-    yield put(setAppState(
-      produce(
-        (yield select(state => state.ui)) as TReadyAppState,
-        (nextState: TReadyAppState) => {
-          (nextState as any).imageLqipUrl = lqipUrl;
-          (nextState as any).imageUrl = url;
-          (nextState as any).imageLqipData = (prevState as any).imageLqipData;
-          (nextState as any).imageData = image.payload.data;
-        })
-    ))
-  }
+  const state: TReadyAppState = yield select(state => state.ui);
+  yield put(setAppState(
+    produce(state, (nextState: TReadyAppState) => {
+      (nextState as any).currentImage = filename;
+      (nextState as any).imageLoaded = false;
+    })
+  ));
 }
 
 

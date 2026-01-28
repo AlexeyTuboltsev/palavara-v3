@@ -11,24 +11,19 @@ import {actions} from "../actions";
 import cn from "classnames";
 import {EScreenSize} from "../routes/common/screenSize";
 import {Images} from "./Images";
-import {config} from "../config";
 import {getImageManifest} from "../sagas/uiSaga";
 import {TImageManifest} from "../types/imageManifest";
 
 export const SectionVisual: FC<{
-  imageData?: string;
-  imageLqipData?: string;
-  filename?: string;
-  screenSize?: EScreenSize;
-  manifest?: TImageManifest | null;
-  imageLoaded?: boolean;
-}> = ({imageData, imageLqipData, filename, screenSize, manifest, imageLoaded}) => {
+  filename: string;
+  screenSize: EScreenSize;
+  manifest: TImageManifest | null;
+  imageLoaded: boolean;
+}> = ({filename, screenSize, manifest, imageLoaded}) => {
   const dispatch = useDispatch();
 
   return <div className={styles.visual} onClick={() => dispatch(actions.nextImage())}>
     <Images
-      imageData={imageData}
-      imageLqipData={imageLqipData}
       filename={filename}
       screenSize={screenSize}
       manifest={manifest}
@@ -40,23 +35,8 @@ export const SectionVisual: FC<{
 export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, children: ReactNode }> = ({state, children, anchorMenu}) => {
   const dispatch = useDispatch();
 
-  // Determine if we should show images
-  const hasImages = config.useOptimizedImages
-    ? (state as any).currentImage
-    : ((state as any).imageUrl || (state as any).imageLqipUrl);
-
-  // Get manifest from saga module
-  const manifest = config.useOptimizedImages ? getImageManifest() : null;
-
-  // Debug logging
-  console.log('Section render:', {
-    useOptimizedImages: config.useOptimizedImages,
-    currentImage: (state as any).currentImage,
-    imageUrl: (state as any).imageUrl,
-    hasImages,
-    manifestLoaded: manifest ? 'yes' : 'no',
-    route: state.route
-  });
+  const hasImages = (state as any).currentImage;
+  const manifest = getImageManifest();
 
   return <div className={styles.sectionContainer}>
     <div className={styles.header}>
@@ -74,17 +54,12 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
     }
 
     <div className={cn(styles.sectionContent, {[styles.divider]:state.menuIsOpen})}>
-      {hasImages && config.useOptimizedImages &&
+      {hasImages &&
           <SectionVisual
             filename={(state as any).currentImage}
             screenSize={(state as any).screenSize}
             manifest={manifest}
             imageLoaded={(state as any).imageLoaded}
-          />}
-      {hasImages && !config.useOptimizedImages &&
-          <SectionVisual
-            imageData={(state as any).imageData}
-            imageLqipData={(state as any).imageLqipData}
           />}
      <div className={styles.textWrapper}>
       {anchorMenu && <div>

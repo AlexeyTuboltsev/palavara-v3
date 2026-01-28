@@ -6,7 +6,6 @@ import { LogoSection } from "../../components/Logo";
 import { MenuAbout } from "../../components/Menu";
 import { SectionHeaderAbout } from "../../components/SectionHeader";
 import { EScreenSize } from "../common/screenSize";
-import { config } from "../../config";
 import { getImageManifest } from "../../sagas/uiSaga";
 
 
@@ -37,16 +36,11 @@ export const About: FC<{
 const Content: FC<{
   state: TReadyAppState
 }> = ({ state }) => {
-  // Determine if we should show images
-  const hasImages = config.useOptimizedImages
-    ? (state as any).currentImage
-    : ((state as any).imageUrl || (state as any).imageLqipUrl);
-
-  // Get manifest from saga module
-  const manifest = config.useOptimizedImages ? getImageManifest() : null;
+  const hasImages = (state as any).currentImage;
+  const manifest = getImageManifest();
 
   return <>
-    {hasImages && config.useOptimizedImages &&
+    {hasImages &&
       <div className={styles.visual}>
         <Images
           filename={(state as any).currentImage}
@@ -54,12 +48,6 @@ const Content: FC<{
           manifest={manifest}
           imageLoaded={(state as any).imageLoaded}
         />
-        <div className={styles.colorBlock} />
-      </div>
-    }
-    {hasImages && !config.useOptimizedImages &&
-      <div className={styles.visual}>
-        <Images imageData={(state as any).imageData} imageLqipData={(state as any).imageLqipData} />
         <div className={styles.colorBlock} />
       </div>
     }

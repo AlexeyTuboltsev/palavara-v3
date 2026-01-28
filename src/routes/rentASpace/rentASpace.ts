@@ -5,10 +5,10 @@ import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
 import {actionListenerLoop,screenResize, imageChanger, toggleMobileMenu, toggleSubmenu} from "../../sagas/uiSaga";
-import {config} from "../../config";
 import {actions} from "../../actions";
 import {TResizeEventPayload} from "../../services/resizeObserver";
 import {EScreenSize, screenSize} from "../common/screenSize";
+import {createImageState} from "../common/imageState";
 
 export function* rentASpace(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = [
@@ -17,11 +17,9 @@ export function* rentASpace(screenDimensions: TResizeEventPayload): Generator<an
     "09-03.jpg",
   ]
 
-  const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
-  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
   const s = screenSize(screenDimensions)
   const routeName = ERoute.RENT_A_SPACE
-  
+
   const initialState = {
     appState: EAppState.READY as const,
     route: {routeName: routeName},
@@ -30,15 +28,14 @@ export function* rentASpace(screenDimensions: TResizeEventPayload): Generator<an
     menuIsCollapsible:true,
     sectionMenu: sectionMenu(routeName),
     menu: menu(routeName),
-    imageUrl: imageUrls[0],
-    imageLqipUrl: imageLqipUrls[0]
+    ...createImageState(urls[0])
   }
   yield put(setAppState(initialState))
 
   yield fork(actionListenerLoop, {
     ...screenResize,
     ...toggleSubmenu,
-     ...imageChanger(imageUrls, imageLqipUrls),
+     ...imageChanger(urls, []),
       ...toggleMobileMenu
   })
   yield put(actions.nextImage())

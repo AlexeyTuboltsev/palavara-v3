@@ -9,13 +9,11 @@ import {useDispatch} from "react-redux";
 import {actions} from "../actions";
 
 export const Images: FC<{
-  imageData?: string;
-  imageLqipData?: string;
-  filename?: string;
-  screenSize?: EScreenSize;
-  manifest?: TImageManifest | null;
-  imageLoaded?: boolean;
-}> = ({imageLqipData, imageData, filename, screenSize, manifest, imageLoaded}) => {
+  filename: string;
+  screenSize: EScreenSize;
+  manifest: TImageManifest | null;
+  imageLoaded: boolean;
+}> = ({filename, screenSize, manifest, imageLoaded}) => {
   const dispatch = useDispatch();
   // In visual test mode, show gray placeholder instead of actual images
   if (config.visualTestMode) {
@@ -30,55 +28,33 @@ export const Images: FC<{
     />;
   }
 
-  // New optimized image path
-  if (config.useOptimizedImages && filename && screenSize !== undefined && manifest) {
-    const src = selectImageSource(filename, screenSize, manifest);
+  const src = selectImageSource(filename, screenSize, manifest);
 
-    if (!src) {
-      // Fallback if image not found in manifest
-      return null;
-    }
-
-    return <>
-      {/* Main image with format fallback (AVIF > WebP > JPEG) */}
-      <picture>
-        <source srcSet={src.responsiveAvif} type="image/avif" />
-        <source srcSet={src.responsiveWebp} type="image/webp" />
-        <img
-          src={src.responsiveJpeg}
-          loading="lazy"
-          className={styles.img}
-          alt=""
-          aria-hidden={true}
-          onLoad={() => dispatch(actions.imageLoaded())}
-        />
-      </picture>
-
-      {/* LQIP - instant display from base64 */}
-      <img
-        src={src.lqipBase64}
-        alt=""
-        aria-hidden={true}
-        className={cn(styles.imgLowRes, {[styles.lqipVisible]: imageLoaded})}
-      />
-    </>;
+  if (!src) {
+    return null;
   }
 
-  // Legacy path (old blob-based loading)
   return <>
-    {imageData && <img
-        aria-hidden={true}
+    {/* Main image with format fallback (AVIF > WebP > JPEG) */}
+    <picture>
+      <source srcSet={src.responsiveAvif} type="image/avif" />
+      <source srcSet={src.responsiveWebp} type="image/webp" />
+      <img
+        src={src.responsiveJpeg}
         loading="lazy"
         className={styles.img}
-        src={imageData}
         alt=""
-    />}
-
-    {imageLqipData && <img
-        alt=""
-        src={imageLqipData}
         aria-hidden={true}
-        className={cn(styles.imgLowRes, {[styles.lqipVisible]: imageData})}
-    />}
-  </>
+        onLoad={() => dispatch(actions.imageLoaded())}
+      />
+    </picture>
+
+    {/* LQIP - instant display from base64 */}
+    <img
+      src={src.lqipBase64}
+      alt=""
+      aria-hidden={true}
+      className={cn(styles.imgLowRes, {[styles.lqipVisible]: imageLoaded})}
+    />
+  </>;
 }

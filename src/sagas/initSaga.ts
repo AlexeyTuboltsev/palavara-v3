@@ -25,9 +25,7 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: an
   yield fork(langWatcherSaga, i18n)
 
   // Load image manifest before starting UI saga
-  console.log('initSaga: Loading image manifest...');
   yield call(loadImageManifest);
-  console.log('initSaga: Manifest loaded');
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const stopResizeObserver: () => void = yield call(setupResizeObserver, rootElement, dispatch)
