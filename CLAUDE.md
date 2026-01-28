@@ -274,6 +274,34 @@ Two env files:
 - `.env` - development
 - `.env.production` - contains `BUCKET_NAME` and `DISTRIBUTION_ID` for AWS deployment
 
+### Development Environment Variables (.env)
+
+See `.env.example` for a template. Key variables:
+
+- `REACT_APP_SENTRY` - Sentry DSN for error tracking
+- `REACT_APP_IMG_PREFIX` - CDN prefix for images (e.g., `https://data.palavara.com/img/studio`)
+- `REACT_APP_USE_OPTIMIZED_IMAGES` - Enable optimized image pipeline
+  - `true` - Use optimized images with AVIF/WebP/JPEG formats and responsive variants from manifest
+  - `false` (default) - Use legacy blob-based image loading
+
+### Image Optimization Pipeline
+
+When `REACT_APP_USE_OPTIMIZED_IMAGES=true`:
+- Images load from manifest at `${REACT_APP_IMG_PREFIX}/image-manifest.json`
+- Browser automatically selects best format: AVIF → WebP → JPEG
+- Responsive images served based on screen size (1920w desktop, 640w mobile)
+- LQIP (Low Quality Image Placeholder) displayed instantly from base64 in manifest
+
+To optimize new images:
+```bash
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn optimize-images
+```
+
+To deploy optimized images to CDN:
+```bash
+eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn deploy-images
+```
+
 ## Code Conventions
 
 - Prefix type names with `T`: `TAppState`, `TRoute`, `TMenuItem`
