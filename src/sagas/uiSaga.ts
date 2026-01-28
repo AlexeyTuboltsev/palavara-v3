@@ -11,8 +11,46 @@ import { requestSaga } from "./requestSaga";
 import { EHttpMethod } from "../services/httpRequest";
 import { TResizeEventPayload } from "../services/resizeObserver";
 import { screenSize } from "../routes/common/screenSize";
+import { config } from "../config";
+import { TImageManifest } from "../types/imageManifest";
+
+/**
+ * Load image manifest from CDN (once at startup)
+ */
+function* loadImageManifest() {
+  if (!config.useOptimizedImages) {
+    return null;
+  }
+
+  try {
+    const response: Response = yield call(fetch, config.manifestUrl);
+    if (!response.ok) {
+      console.error(`Failed to load image manifest: ${response.statusText}`);
+      return null;
+    }
+    const manifest: TImageManifest = yield call([response, 'json']);
+    console.log(`Loaded image manifest with ${Object.keys(manifest.images).length} images`);
+    return manifest;
+  } catch (error) {
+    console.error('Error loading image manifest:', error);
+    return null;
+  }
+}
 
 export function* uiSaga(screenSize: TResizeEventPayload) {
+  // Load manifest at startup if optimized images enabled
+  const manifest: TImageManifest | null = yield call(loadImageManifest);
+
+  // Store manifest in state
+  if (manifest) {
+    const state: TReadyAppState = yield select(state => state.ui);
+    yield put(setAppState(
+      produce(state, (nextState) => {
+        (nextState as any).imageManifest = manifest;
+      })
+    ));
+  }
+
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
   while (true) {
     const action: TAction = yield take(Object.values(actions).map(action => action.type))
@@ -31,6 +69,17 @@ export function* uiSaga(screenSize: TResizeEventPayload) {
           currentRouteDataGenerator = yield fork(routeDataGenerator as any, screenSize)
         }
 
+        break;
+      }
+      case "IMAGE_LOADED": {
+        if (config.useOptimizedImages) {
+          const state: TReadyAppState = yield select(state => state.ui);
+          yield put(setAppState(
+            produce(state, (nextState) => {
+              (nextState as any).imageLoaded = true;
+            })
+          ));
+        }
         break;
       }
       case "EXTERNAL_LINK": {
@@ -114,6 +163,23 @@ export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => 
 }
 
 function* loadImageWithLqip(url: string, lqipUrl: string) {
+  // Optimized images path: just store the filename
+  if (config.useOptimizedImages) {
+    // Extract filename from URL (last part after /)
+    const filename = url.split('/').pop() || '';
+
+    const state: TReadyAppState = yield select(state => state.ui);
+    yield put(setAppState(
+      produce(state, (nextState: TReadyAppState) => {
+        (nextState as any).currentImage = filename;
+        (nextState as any).imageLoaded = false;
+      })
+    ));
+
+    return;
+  }
+
+  // Legacy blob loading path
   const lqip: Task<any> = yield fork(requestSaga, EHttpMethod.GET, lqipUrl, 'blob', actions.lqip)
   yield fork(requestSaga, EHttpMethod.GET, url, 'blob', actions.image)
 

@@ -37,8 +37,13 @@ export interface TImageSource {
 export function selectImageSource(
   filename: string,
   screenSize: EScreenSize,
-  manifest: TImageManifest
+  manifest: TImageManifest | null
 ): TImageSource | null {
+  if (!manifest) {
+    console.error('Image manifest not loaded');
+    return null;
+  }
+
   const entry: TOptimizedImageResult | undefined = manifest.images[filename];
 
   if (!entry) {
@@ -50,8 +55,7 @@ export function selectImageSource(
 
   // Select responsive size based on screen
   const responsiveSize =
-    screenSize === EScreenSize.DESKTOP ? '1920w' :
-    screenSize === EScreenSize.TABLET ? '1024w' : '640w';
+    screenSize === EScreenSize.DESKTOP ? '1920w' : '640w';
 
   const responsiveVariant = entry.responsive[responsiveSize];
 
@@ -83,7 +87,8 @@ export function selectImageSource(
  * @param manifest - Image manifest
  * @returns LQIP base64 data URL or null
  */
-export function getLqip(filename: string, manifest: TImageManifest): string | null {
+export function getLqip(filename: string, manifest: TImageManifest | null): string | null {
+  if (!manifest) return null;
   const entry = manifest.images[filename];
   return entry ? entry.lqip.base64 : null;
 }
@@ -91,6 +96,7 @@ export function getLqip(filename: string, manifest: TImageManifest): string | nu
 /**
  * Check if image exists in manifest
  */
-export function hasImage(filename: string, manifest: TImageManifest): boolean {
+export function hasImage(filename: string, manifest: TImageManifest | null): boolean {
+  if (!manifest) return false;
   return filename in manifest.images;
 }
