@@ -30,3 +30,6 @@ yarn-debug.log*
 yarn-error.log*
 
 /src/generated/
+
+# Optimized images (deployed to CDN, not committed)
+/public/img/optimized/
