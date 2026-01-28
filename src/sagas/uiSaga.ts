@@ -29,26 +29,38 @@ export function getImageManifest(): TImageManifest | null {
  */
 function* loadImageManifest() {
   if (!config.useOptimizedImages) {
+    console.log('Optimized images disabled, skipping manifest load');
     return;
   }
 
+  console.log('Loading image manifest from:', config.manifestUrl);
+
   try {
     const response: Response = yield call(fetch, config.manifestUrl);
+    console.log('Manifest fetch response:', response.status, response.statusText);
+
     if (!response.ok) {
       console.error(`Failed to load image manifest: ${response.statusText}`);
       return;
     }
     const manifest: TImageManifest = yield call([response, 'json']);
-    console.log(`Loaded image manifest with ${Object.keys(manifest.images).length} images`);
+    console.log(`✓ Loaded image manifest with ${Object.keys(manifest.images).length} images`);
     imageManifest = manifest;
   } catch (error) {
     console.error('Error loading image manifest:', error);
+    // Continue even if manifest fails to load
   }
 }
 
 export function* uiSaga(screenSize: TResizeEventPayload) {
-  // Load manifest at startup if optimized images enabled
-  yield call(loadImageManifest);
+  console.log('uiSaga starting...');
+
+  // Load manifest at startup if optimized images enabled (non-blocking)
+  if (config.useOptimizedImages) {
+    yield fork(loadImageManifest);
+  }
+
+  console.log('uiSaga: entering main loop');
 
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
   while (true) {
