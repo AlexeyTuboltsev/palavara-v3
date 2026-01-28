@@ -14,42 +14,41 @@ import { screenSize } from "../routes/common/screenSize";
 import { config } from "../config";
 import { TImageManifest } from "../types/imageManifest";
 
+// Store manifest at module level (loaded once at startup)
+let imageManifest: TImageManifest | null = null;
+
+/**
+ * Get the loaded image manifest
+ */
+export function getImageManifest(): TImageManifest | null {
+  return imageManifest;
+}
+
 /**
  * Load image manifest from CDN (once at startup)
  */
 function* loadImageManifest() {
   if (!config.useOptimizedImages) {
-    return null;
+    return;
   }
 
   try {
     const response: Response = yield call(fetch, config.manifestUrl);
     if (!response.ok) {
       console.error(`Failed to load image manifest: ${response.statusText}`);
-      return null;
+      return;
     }
     const manifest: TImageManifest = yield call([response, 'json']);
     console.log(`Loaded image manifest with ${Object.keys(manifest.images).length} images`);
-    return manifest;
+    imageManifest = manifest;
   } catch (error) {
     console.error('Error loading image manifest:', error);
-    return null;
   }
 }
 
 export function* uiSaga(screenSize: TResizeEventPayload) {
   // Load manifest at startup if optimized images enabled
-  const manifest: TImageManifest | null = yield call(loadImageManifest);
-
-  // Store manifest in state
-  if (manifest) {
-    const state: TReadyAppState = yield select(state => state.ui);
-    yield put(setAppState(
-      produce(state, (nextState) => {
-        (nextState as any).imageManifest = manifest;
-      })
-    ));
-  }
+  yield call(loadImageManifest);
 
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
   while (true) {

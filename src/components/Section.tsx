@@ -12,7 +12,7 @@ import cn from "classnames";
 import {EScreenSize} from "../routes/common/screenSize";
 import {Images} from "./Images";
 import {config} from "../config";
-import {TImageManifest} from "../types/imageManifest";
+import {getImageManifest} from "../sagas/uiSaga";
 
 export const SectionVisual: FC<{
   imageData?: string;
@@ -44,6 +44,9 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
     ? (state as any).currentImage
     : ((state as any).imageUrl || (state as any).imageLqipUrl);
 
+  // Get manifest from saga module
+  const manifest = config.useOptimizedImages ? getImageManifest() : null;
+
   return <div className={styles.sectionContainer}>
     <div className={styles.header}>
       <LogoSection />
@@ -64,7 +67,7 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
           <SectionVisual
             filename={(state as any).currentImage}
             screenSize={(state as any).screenSize}
-            manifest={(state as any).imageManifest}
+            manifest={manifest}
             imageLoaded={(state as any).imageLoaded}
           />}
       {hasImages && !config.useOptimizedImages &&
