@@ -145,10 +145,18 @@ export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => 
   return {
     [EActionType.NEXT_IMAGE]:
       function* (state: TReadyAppState, action: ReturnType<typeof actions.nextImage>) {
-        const imageUrl = (state as any).imageUrl
-        const i = urls.findIndex(url => imageUrl === url)
+        // For optimized images, compare currentImage (filename) against url filenames
+        // For legacy, compare imageUrl (full URL) against urls
+        let i: number;
+        if (config.useOptimizedImages) {
+          const currentImage = (state as any).currentImage;
+          i = urls.findIndex(url => url === currentImage || url.endsWith(`/${currentImage}`));
+        } else {
+          const imageUrl = (state as any).imageUrl;
+          i = urls.findIndex(url => imageUrl === url);
+        }
 
-        if (i !== undefined) {
+        if (i >= 0) {
           const newImageUrl = urls[i + 1 <= urls.length - 1 ? i + 1 : 0];
           const newImageLqipUrl = lqipUrls[i + 1 <= urls.length - 1 ? i + 1 : 0];
           return yield fork(loadImageWithLqip, newImageUrl, newImageLqipUrl)
@@ -160,9 +168,18 @@ export const imageChanger = (urls: string[], lqipUrls: string[]): TActionMap => 
 
     [EActionType.PREVIOUS_IMAGE]:
       function* (state: TReadyAppState, action: ReturnType<typeof actions.previousImage>) {
-        const imageUrl = (state as any).imageUrl
-        const i = urls.findIndex(url => imageUrl === url)
-        if (i !== undefined) {
+        // For optimized images, compare currentImage (filename) against url filenames
+        // For legacy, compare imageUrl (full URL) against urls
+        let i: number;
+        if (config.useOptimizedImages) {
+          const currentImage = (state as any).currentImage;
+          i = urls.findIndex(url => url === currentImage || url.endsWith(`/${currentImage}`));
+        } else {
+          const imageUrl = (state as any).imageUrl;
+          i = urls.findIndex(url => imageUrl === url);
+        }
+
+        if (i >= 0) {
           const newImageUrl = urls[i > 0 ? i - 1 : urls.length - 1];
           const newImageLqipUrl = lqipUrls[i > 0 ? i - 1 : urls.length - 1]
           return yield fork(loadImageWithLqip, newImageUrl, newImageLqipUrl)
