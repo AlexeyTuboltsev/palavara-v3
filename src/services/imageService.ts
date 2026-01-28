@@ -51,7 +51,8 @@ export function selectImageSource(
     return null;
   }
 
-  const imgPrefix = config.imgPrefix;
+  // Use local paths in development, CDN in production
+  const imgPrefix = process.env.NODE_ENV === 'development' ? '/img' : config.imgPrefix;
 
   // Select responsive size based on screen
   const responsiveSize =
