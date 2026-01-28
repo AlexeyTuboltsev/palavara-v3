@@ -19,7 +19,7 @@ if ! command -v aws &> /dev/null; then
 fi
 
 # Configuration
-S3_BUCKET="data.palavara.com"
+S3_BUCKET="palavara-front-api"
 S3_PATH="img/studio"
 OPTIMIZED_DIR="public/img/optimized"
 MANIFEST_FILE="public/img/image-manifest.json"
@@ -71,6 +71,6 @@ echo "✅ Images deployed successfully to CDN!"
 echo ""
 echo "📊 Deployment summary:"
 echo "   S3 Bucket: s3://$S3_BUCKET"
-echo "   CDN Path: https://$S3_BUCKET/$S3_PATH/optimized/"
-echo "   Manifest: https://$S3_BUCKET/$S3_PATH/image-manifest.json"
+echo "   CDN Path: https://be.palavara.com/$S3_PATH/optimized/"
+echo "   Manifest: https://be.palavara.com/$S3_PATH/image-manifest.json"
 echo ""
