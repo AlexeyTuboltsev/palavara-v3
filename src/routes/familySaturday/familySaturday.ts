@@ -5,17 +5,15 @@ import { sectionMenu } from "../common/sectionMenu";
 import { fork, put } from "redux-saga/effects";
 import { setAppState } from "../../store";
 import { actionListenerLoop, imageChanger, screenResize, toggleMobileMenu, toggleSubmenu } from "../../sagas/uiSaga";
-import { config } from "../../config";
 import { actions } from "../../actions";
 import { TResizeEventPayload } from "../../services/resizeObserver";
 import { EScreenSize, screenSize } from "../common/screenSize";
+import { createImageState } from "../common/imageState";
 
 export function* familySaturday(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = [
     "01-01.jpg", "01-02.jpg", "01-03.jpg", "01-04.jpg", "01-05.jpg", "01-06.jpg"]
 
-  const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
-  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
   const s = screenSize(screenDimensions)
   const routeName = ERoute.FAMILY_SATURDAY
 
@@ -27,8 +25,7 @@ export function* familySaturday(screenDimensions: TResizeEventPayload): Generato
     menuIsCollapsible: true,
     sectionMenu: sectionMenu(routeName),
     menu: menu(routeName),
-    imageUrl: imageUrls[0],
-    imageLqipUrl: imageLqipUrls[0]
+    ...createImageState(urls[0])
   }
 
   yield put(setAppState(initialState))
@@ -36,7 +33,7 @@ export function* familySaturday(screenDimensions: TResizeEventPayload): Generato
   yield fork(actionListenerLoop, {
     ...screenResize,
     ...toggleSubmenu,
-    ...imageChanger(imageUrls, imageLqipUrls),
+    ...imageChanger(urls),
     ...toggleMobileMenu
   })
   yield put(actions.nextImage())

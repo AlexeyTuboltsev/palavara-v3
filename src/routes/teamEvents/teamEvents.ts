@@ -5,10 +5,10 @@ import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
 import {actionListenerLoop, imageChanger, screenResize, toggleMobileMenu, toggleSubmenu} from "../../sagas/uiSaga";
-import {config} from "../../config";
 import {actions} from "../../actions";
 import {TResizeEventPayload} from "../../services/resizeObserver";
 import {EScreenSize, screenSize} from "../common/screenSize";
+import {createImageState} from "../common/imageState";
 
 export function* teamEvents(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
   const urls = [
@@ -17,8 +17,6 @@ export function* teamEvents(screenDimensions: TResizeEventPayload): Generator<an
     "2025-10-24-155119_004.jpg",
   ]
 
-  const imageUrls = urls.map(url => `${config.imgPrefix}/${url}`);
-  const imageLqipUrls = urls.map(url => `${config.imgPrefix}/${config.lqipPrefix}/${url}`)
   const s = screenSize(screenDimensions)
   const routeName = ERoute.TEAM_EVENTS
 
@@ -30,16 +28,15 @@ export function* teamEvents(screenDimensions: TResizeEventPayload): Generator<an
     menuIsCollapsible:true,
     sectionMenu: sectionMenu(routeName),
     menu: menu(routeName),
-    imageUrl: null,
-    imageLqipUrl: null
+    ...createImageState(urls[0])
   }
   yield put(setAppState(initialState))
 
   yield fork(actionListenerLoop, {
     ...screenResize,
-    ...toggleSubmenu, 
+    ...toggleSubmenu,
     ...toggleMobileMenu,
-    ...imageChanger(imageUrls, imageLqipUrls)
+    ...imageChanger(urls)
   })
   yield put(actions.nextImage())
 }

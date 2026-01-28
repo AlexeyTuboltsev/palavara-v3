@@ -8,6 +8,7 @@ import {setupResizeObserver, TResizeEventPayload} from "../services/resizeObserv
 import {langWatcherSaga} from "./langWatcherSaga";
 import {ELang, initI18n} from "../services/i18n";
 import {uiSaga} from "./uiSaga";
+import {loadImageManifest} from "./imageManifestLoader";
 import {setAppState} from "../store";
 import {EAppState} from "../types";
 import {actions} from "../actions";
@@ -23,6 +24,8 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: an
 
   yield call(initI18n, i18n, ELang.EN)
   yield fork(langWatcherSaga, i18n)
+
+  yield call(loadImageManifest);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const stopResizeObserver: () => void = yield call(setupResizeObserver, rootElement, dispatch)

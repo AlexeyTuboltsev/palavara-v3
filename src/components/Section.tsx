@@ -11,17 +11,32 @@ import {actions} from "../actions";
 import cn from "classnames";
 import {EScreenSize} from "../routes/common/screenSize";
 import {Images} from "./Images";
+import {getImageManifest} from "../sagas/imageManifestLoader";
+import {TImageManifest} from "../types/imageManifest";
 
-export const SectionVisual: FC<{ imageData: string, imageLqipData: string }> = ({imageData, imageLqipData}) => {
+export const SectionVisual: FC<{
+  filename: string;
+  screenSize: EScreenSize;
+  manifest: TImageManifest | null;
+  imageLoaded: boolean;
+}> = ({filename, screenSize, manifest, imageLoaded}) => {
   const dispatch = useDispatch();
 
   return <div className={styles.visual} onClick={() => dispatch(actions.nextImage())}>
-    <Images imageData={imageData} imageLqipData={imageLqipData}/>
+    <Images
+      filename={filename}
+      screenSize={screenSize}
+      manifest={manifest}
+      imageLoaded={imageLoaded}
+    />
   </div>
 }
 
 export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, children: ReactNode }> = ({state, children, anchorMenu}) => {
   const dispatch = useDispatch();
+
+  const hasImages = (state as any).currentImage;
+  const manifest = getImageManifest();
 
   return <div className={styles.sectionContainer}>
     <div className={styles.header}>
@@ -30,17 +45,22 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
       <SectionHeader state={state}/>
     </div>
     {(state as any).screenSize === EScreenSize.DESKTOP && <div className={styles.buttons}>
-      {((state as any).imageUrl || (state as any).imageLqipUrl) && <>
+      {hasImages && <>
           <Minus className={styles.minus} onClick={() => dispatch(actions.previousImage())}/>
           <Plus className={styles.plus} onClick={() => dispatch(actions.nextImage())}/>
       </>
       }
     </div>
     }
-    
+
     <div className={cn(styles.sectionContent, {[styles.divider]:state.menuIsOpen})}>
-      {((state as any).imageUrl || (state as any).imageLqipUrl) &&
-          <SectionVisual imageData={(state as any).imageData} imageLqipData={(state as any).imageLqipData}/>}
+      {hasImages &&
+          <SectionVisual
+            filename={(state as any).currentImage}
+            screenSize={(state as any).screenSize}
+            manifest={manifest}
+            imageLoaded={(state as any).imageLoaded}
+          />}
      <div className={styles.textWrapper}>
       {anchorMenu && <div>
       {anchorMenu}

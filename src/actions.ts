@@ -21,7 +21,8 @@ export enum EActionType {
   EXTERNAL_LINK = 'EXTERNAL_LINK',
   IMG = 'IMG',
   LQIP = 'LQIP',
-  TOGLLE_MOBILE_MENU = 'TOGLLE_MOBILE_MENU'
+  TOGLLE_MOBILE_MENU = 'TOGLLE_MOBILE_MENU',
+  IMAGE_LOADED = 'IMAGE_LOADED'
 }
 
 export type TAction = ReturnType<typeof actions[keyof typeof actions]>
@@ -42,6 +43,7 @@ export const actions = {
   externalLink: createAction(EActionType.EXTERNAL_LINK, withPayloadType<string>()),
   image: createAction(EActionType.IMG, withPayloadType<{data:string, status:number, statusText:string}>()),
   lqip: createAction(EActionType.LQIP, withPayloadType<{data:string, status:number, statusText:string}>()),
-  toggleMobileMenu: createAction(EActionType.TOGLLE_MOBILE_MENU)
+  toggleMobileMenu: createAction(EActionType.TOGLLE_MOBILE_MENU),
+  imageLoaded: createAction(EActionType.IMAGE_LOADED)
 }
 

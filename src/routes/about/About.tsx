@@ -6,6 +6,7 @@ import { LogoSection } from "../../components/Logo";
 import { MenuAbout } from "../../components/Menu";
 import { SectionHeaderAbout } from "../../components/SectionHeader";
 import { EScreenSize } from "../common/screenSize";
+import { getImageManifest } from "../../sagas/imageManifestLoader";
 
 
 export const About: FC<{
@@ -34,15 +35,23 @@ export const About: FC<{
 
 const Content: FC<{
   state: TReadyAppState
-}> = ({ state }) =>
-    <>
-      {((state as any).imageUrl || (state as any).imageLqipUrl) &&
-        <div className={styles.visual}>
-          <Images imageData={(state as any).imageData} imageLqipData={(state as any).imageLqipData} />
-          <div className={styles.colorBlock} />
-        </div>
-      }
-      <div className={styles.text}>
+}> = ({ state }) => {
+  const hasImages = (state as any).currentImage;
+  const manifest = getImageManifest();
+
+  return <>
+    {hasImages &&
+      <div className={styles.visual}>
+        <Images
+          filename={(state as any).currentImage}
+          screenSize={(state as any).screenSize}
+          manifest={manifest}
+          imageLoaded={(state as any).imageLoaded}
+        />
+        <div className={styles.colorBlock} />
+      </div>
+    }
+    <div className={styles.text}>
         <h1>ABOUT ME</h1>
         <p>My name is Varvara Polyakova,</p>
         <p>I am a diverse visual artist working across the fields of graphic design, illustration and ceramics.</p>
@@ -59,3 +68,4 @@ const Content: FC<{
         <p>Please contact me via e-mail: <a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
       </div>
     </>
+}
