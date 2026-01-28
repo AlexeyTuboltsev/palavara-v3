@@ -1,0 +1,72 @@
+name: Deploy Optimized Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force re-optimization of all images'
+        type: boolean
+        default: false
+        required: false
+
+jobs:
+  optimize-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Optimize images
+        run: |
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "🔄 Force re-optimizing all images..."
+            yarn optimize-images --force
+          else
+            echo "⚡ Optimizing new/modified images only..."
+            yarn optimize-images
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Deploy to S3/CloudFront
+        run: |
+          echo "🚀 Deploying optimized images to CDN..."
+          ./scripts/deploy-images.sh
+
+      - name: Commit updated manifest
+        run: |
+          git config --local user.email "tblz+k5qkop-bot@proton.me"
+          git config --local user.name "k5qkop-bot"
+          git add public/img/image-manifest.json
+
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "Update image manifest after optimization
+
+            Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+            echo "📝 Manifest updated and committed"
+          else
+            echo "ℹ️  No manifest changes to commit"
+          fi
+
+      - name: Push changes
+        if: success()
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
