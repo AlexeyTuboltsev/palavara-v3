@@ -48,6 +48,16 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
   // Get manifest from saga module
   const manifest = config.useOptimizedImages ? getImageManifest() : null;
 
+  // Debug logging
+  console.log('Section render:', {
+    useOptimizedImages: config.useOptimizedImages,
+    currentImage: (state as any).currentImage,
+    imageUrl: (state as any).imageUrl,
+    hasImages,
+    manifestLoaded: manifest ? 'yes' : 'no',
+    route: state.route
+  });
+
   return <div className={styles.sectionContainer}>
     <div className={styles.header}>
       <LogoSection />

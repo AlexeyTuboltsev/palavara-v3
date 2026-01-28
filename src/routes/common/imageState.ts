@@ -12,15 +12,19 @@ import {config} from "../../config";
  * @returns State fields for initial image
  */
 export function createImageState(filename: string) {
-  if (config.useOptimizedImages) {
-    return {
-      currentImage: filename,
-      imageLoaded: false
-    };
-  } else {
-    return {
-      imageUrl: `${config.imgPrefix}/${filename}`,
-      imageLqipUrl: `${config.imgPrefix}/${config.lqipPrefix}/${filename}`
-    };
-  }
+  const result = config.useOptimizedImages ? {
+    currentImage: filename,
+    imageLoaded: false
+  } : {
+    imageUrl: `${config.imgPrefix}/${filename}`,
+    imageLqipUrl: `${config.imgPrefix}/${config.lqipPrefix}/${filename}`
+  };
+
+  console.log('createImageState:', {
+    filename,
+    useOptimizedImages: config.useOptimizedImages,
+    result
+  });
+
+  return result;
 }

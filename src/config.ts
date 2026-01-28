@@ -19,3 +19,9 @@ export const config = {
   useOptimizedImages: process.env.REACT_APP_USE_OPTIMIZED_IMAGES === 'true',
   manifestUrl: getManifestUrl()
 }
+
+console.log('Config loaded:', {
+  useOptimizedImages: config.useOptimizedImages,
+  manifestUrl: config.manifestUrl,
+  env_value: process.env.REACT_APP_USE_OPTIMIZED_IMAGES
+})
