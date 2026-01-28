@@ -13,6 +13,7 @@ import {EScreenSize} from "../routes/common/screenSize";
 import {Images} from "./Images";
 import {config} from "../config";
 import {getImageManifest} from "../sagas/uiSaga";
+import {TImageManifest} from "../types/imageManifest";
 
 export const SectionVisual: FC<{
   imageData?: string;
