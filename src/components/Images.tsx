@@ -2,7 +2,7 @@ import React, {FC} from "react";
 import cn from "classnames";
 import {config} from "../config";
 import styles from "./Section.module.scss";
-import {selectImageSource} from "../services/imageService";
+import {getImageSources} from "../services/imageService";
 import {EScreenSize} from "../routes/common/screenSize";
 import {TImageManifest} from "../types/imageManifest";
 import {useDispatch} from "react-redux";
@@ -15,6 +15,7 @@ export const Images: FC<{
   imageLoaded: boolean;
 }> = ({filename, screenSize, manifest, imageLoaded}) => {
   const dispatch = useDispatch();
+
   // In visual test mode, show gray placeholder instead of actual images
   if (config.visualTestMode) {
     return <div
@@ -28,7 +29,7 @@ export const Images: FC<{
     />;
   }
 
-  const src = selectImageSource(filename, screenSize, manifest);
+  const src = getImageSources(filename, manifest);
 
   if (!src) {
     return null;
@@ -37,10 +38,10 @@ export const Images: FC<{
   return <>
     {/* Main image with format fallback (AVIF > WebP > JPEG) */}
     <picture>
-      <source srcSet={src.responsiveAvif} type="image/avif" />
-      <source srcSet={src.responsiveWebp} type="image/webp" />
+      <source srcSet={src.avif} type="image/avif" />
+      <source srcSet={src.webp} type="image/webp" />
       <img
-        src={src.responsiveJpeg}
+        src={src.jpeg}
         loading="lazy"
         className={styles.img}
         alt=""
@@ -51,7 +52,7 @@ export const Images: FC<{
 
     {/* LQIP - instant display from base64 */}
     <img
-      src={src.lqipBase64}
+      src={src.lqip}
       alt=""
       aria-hidden={true}
       className={cn(styles.imgLowRes, {[styles.lqipVisible]: imageLoaded})}

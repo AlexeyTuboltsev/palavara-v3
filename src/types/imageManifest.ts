@@ -1,5 +1,7 @@
 /**
  * Image manifest types for optimized image system
+ *
+ * Flat structure: all image variants in same directory with different extensions
  */
 
 export interface TImageFormat {
@@ -15,33 +17,23 @@ export interface TOriginalImageInfo {
 }
 
 export interface TOptimizedFormats {
+  width: number;
+  height: number;
   jpeg: TImageFormat;
   webp: TImageFormat;
   avif: TImageFormat;
-}
-
-export interface TResponsiveVariant {
-  jpeg: TImageFormat;
-  webp: TImageFormat;
-  avif: TImageFormat;
-}
-
-export interface TResponsiveVariants {
-  '1920w': TResponsiveVariant;
-  '1024w': TResponsiveVariant;
-  '640w': TResponsiveVariant;
 }
 
 export interface TLqipInfo {
   width: number;
   height: number;
   base64: string;
+  path: string;
 }
 
 export interface TOptimizedImageResult {
   original: TOriginalImageInfo;
   optimized: TOptimizedFormats;
-  responsive: TResponsiveVariants;
   lqip: TLqipInfo;
 }
 
@@ -59,5 +51,5 @@ export interface TOptimizeOptions {
   avifQuality?: number;
   lqipQuality?: number;
   lqipWidth?: number;
-  responsiveSizes?: number[];
+  maxWidth?: number;
 }

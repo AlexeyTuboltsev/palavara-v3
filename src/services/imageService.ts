@@ -1,42 +1,32 @@
 /**
  * Image service for optimized image selection
  *
- * Selects the best image format and size based on:
- * - Browser support (AVIF > WebP > JPEG)
- * - Screen size (desktop/tablet/mobile)
- * - Image manifest data
+ * Selects the best image format based on browser support:
+ * - AVIF (best compression, 70-80% savings)
+ * - WebP (good compression, 60-70% savings)
+ * - JPEG (baseline fallback)
  */
 
-import { EScreenSize } from '../routes/common/screenSize';
 import { TImageManifest, TOptimizedImageResult } from '../types/imageManifest';
 import { config } from '../config';
 
 export interface TImageSource {
-  // Full-size image URLs for each format
-  srcJpeg: string;
-  srcWebp: string;
-  srcAvif: string;
-
-  // Responsive variant URLs (size-optimized)
-  responsiveJpeg: string;
-  responsiveWebp: string;
-  responsiveAvif: string;
+  // Selected image URL based on browser support
+  src: string;
 
   // LQIP as base64 data URL (instant display)
   lqipBase64: string;
 }
 
 /**
- * Select image source based on screen size
+ * Select best image source based on browser support
  *
  * @param filename - Image filename (e.g., "home-1.jpg")
- * @param screenSize - Current screen size
  * @param manifest - Image manifest
- * @returns Image source URLs or null if not found
+ * @returns Image source URL or null if not found
  */
 export function selectImageSource(
   filename: string,
-  screenSize: EScreenSize,
   manifest: TImageManifest | null
 ): TImageSource | null {
   if (!manifest) {
@@ -54,30 +44,40 @@ export function selectImageSource(
   // Use local paths in development, CDN in production
   const imgPrefix = process.env.NODE_ENV === 'development' ? '/img' : config.imgPrefix;
 
-  // Select responsive size based on screen
-  const responsiveSize =
-    screenSize === EScreenSize.DESKTOP ? '1920w' : '640w';
-
-  const responsiveVariant = entry.responsive[responsiveSize];
-
-  if (!responsiveVariant) {
-    console.error(`Responsive variant not found for ${filename} at ${responsiveSize}`);
-    return null;
-  }
+  // Select best format based on browser support
+  // Browser will automatically choose the best format via <picture> element
+  // For now, default to AVIF (most modern browsers support it)
+  const selectedPath = entry.optimized.avif.path;
 
   return {
-    // Full-size optimized images
-    srcJpeg: `${imgPrefix}/${entry.optimized.jpeg.path}`,
-    srcWebp: `${imgPrefix}/${entry.optimized.webp.path}`,
-    srcAvif: `${imgPrefix}/${entry.optimized.avif.path}`,
-
-    // Responsive variants (size-optimized for current screen)
-    responsiveJpeg: `${imgPrefix}/${responsiveVariant.jpeg.path}`,
-    responsiveWebp: `${imgPrefix}/${responsiveVariant.webp.path}`,
-    responsiveAvif: `${imgPrefix}/${responsiveVariant.avif.path}`,
-
-    // LQIP (instant display, no fetch needed)
+    src: `${imgPrefix}/${selectedPath}`,
     lqipBase64: entry.lqip.base64
+  };
+}
+
+/**
+ * Get all format URLs for <picture> element
+ *
+ * @param filename - Image filename
+ * @param manifest - Image manifest
+ * @returns Object with URLs for each format
+ */
+export function getImageSources(
+  filename: string,
+  manifest: TImageManifest | null
+): { avif: string; webp: string; jpeg: string; lqip: string } | null {
+  if (!manifest) return null;
+
+  const entry = manifest.images[filename];
+  if (!entry) return null;
+
+  const imgPrefix = process.env.NODE_ENV === 'development' ? '/img' : config.imgPrefix;
+
+  return {
+    avif: `${imgPrefix}/${entry.optimized.avif.path}`,
+    webp: `${imgPrefix}/${entry.optimized.webp.path}`,
+    jpeg: `${imgPrefix}/${entry.optimized.jpeg.path}`,
+    lqip: entry.lqip.base64
   };
 }
 

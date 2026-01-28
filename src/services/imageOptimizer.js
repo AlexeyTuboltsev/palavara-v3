@@ -1,8 +1,11 @@
 /**
  * Core image optimization module using Sharp
  *
- * This module provides reusable image optimization functionality
- * that can be used by CLI scripts, upload APIs, and other tools.
+ * Generates optimized images with flat directory structure:
+ * - filename.jpg (optimized JPEG, replaces original)
+ * - filename.webp (WebP version)
+ * - filename.avif (AVIF version)
+ * - filename.lqip.jpg (tiny placeholder)
  */
 
 const sharp = require('sharp');
@@ -16,14 +19,14 @@ const DEFAULT_OPTIONS = {
   avifQuality: 65,
   lqipQuality: 30,
   lqipWidth: 10,
-  responsiveSizes: [1920, 1024, 640]
+  maxWidth: 1920  // Resize to max 1920px width
 };
 
 /**
  * Main optimization function
  *
  * @param {string} inputPath - Absolute path to input image
- * @param {string} outputDir - Base output directory (e.g., './public/img')
+ * @param {string} outputDir - Output directory (e.g., './public/img')
  * @param {Object} options - Optimization options
  * @returns {Promise<Object>} Manifest entry with all generated files and metadata
  */
@@ -44,8 +47,9 @@ async function optimizeImage(inputPath, outputDir, options = {}) {
 
   console.log(`📷 Optimizing ${filename}...`);
 
-  // Read original image and get metadata
-  const originalImage = sharp(inputPath);
+  // Read original image into buffer (to avoid input/output conflicts)
+  const inputBuffer = await fs.readFile(inputPath);
+  const originalImage = sharp(inputBuffer);
   const metadata = await originalImage.metadata();
 
   if (!metadata.width || !metadata.height) {
@@ -54,37 +58,32 @@ async function optimizeImage(inputPath, outputDir, options = {}) {
 
   const originalStats = await fs.stat(inputPath);
 
-  // Create output directories
-  const optimizedDir = path.join(outputDir, 'optimized');
-  await fs.ensureDir(path.join(optimizedDir, 'jpeg'));
-  await fs.ensureDir(path.join(optimizedDir, 'webp'));
-  await fs.ensureDir(path.join(optimizedDir, 'avif'));
+  // Ensure output directory exists
+  await fs.ensureDir(outputDir);
 
-  for (const size of opts.responsiveSizes) {
-    await fs.ensureDir(path.join(optimizedDir, 'responsive', 'jpeg', `${size}w`));
-    await fs.ensureDir(path.join(optimizedDir, 'responsive', 'webp', `${size}w`));
-    await fs.ensureDir(path.join(optimizedDir, 'responsive', 'avif', `${size}w`));
-  }
-
-  // Generate optimized full-size images
+  // Generate optimized images (resize if larger than maxWidth)
   console.log(`  ⚙️  Generating optimized formats...`);
 
-  const jpegPath = path.join(optimizedDir, 'jpeg', filename);
-  const webpPath = path.join(optimizedDir, 'webp', `${nameWithoutExt}.webp`);
-  const avifPath = path.join(optimizedDir, 'avif', `${nameWithoutExt}.avif`);
+  const jpegPath = path.join(outputDir, `${nameWithoutExt}.jpg`);
+  const webpPath = path.join(outputDir, `${nameWithoutExt}.webp`);
+  const avifPath = path.join(outputDir, `${nameWithoutExt}.avif`);
+  const lqipPath = path.join(outputDir, `${nameWithoutExt}.lqip.jpg`);
 
-  // JPEG (progressive, optimized)
-  await sharp(inputPath)
+  // JPEG (progressive, optimized, resized)
+  await sharp(inputBuffer)
+    .resize(opts.maxWidth, null, { withoutEnlargement: true })
     .jpeg({ quality: opts.jpegQuality, progressive: true })
     .toFile(jpegPath);
 
-  // WebP
-  await sharp(inputPath)
+  // WebP (resized)
+  await sharp(inputBuffer)
+    .resize(opts.maxWidth, null, { withoutEnlargement: true })
     .webp({ quality: opts.webpQuality })
     .toFile(webpPath);
 
-  // AVIF
-  await sharp(inputPath)
+  // AVIF (resized)
+  await sharp(inputBuffer)
+    .resize(opts.maxWidth, null, { withoutEnlargement: true })
     .avif({ quality: opts.avifQuality })
     .toFile(avifPath);
 
@@ -96,62 +95,16 @@ async function optimizeImage(inputPath, outputDir, options = {}) {
   console.log(`    WebP: ${formatBytes(webpStats.size)} (${calculateSavings(originalStats.size, webpStats.size)}% savings)`);
   console.log(`    AVIF: ${formatBytes(avifStats.size)} (${calculateSavings(originalStats.size, avifStats.size)}% savings)`);
 
-  // Generate responsive variants
-  console.log(`  ⚙️  Generating responsive variants...`);
-  const responsiveVariants = {};
-
-  for (const size of opts.responsiveSizes) {
-    const jpegResponsivePath = path.join(optimizedDir, 'responsive', 'jpeg', `${size}w`, filename);
-    const webpResponsivePath = path.join(optimizedDir, 'responsive', 'webp', `${size}w`, `${nameWithoutExt}.webp`);
-    const avifResponsivePath = path.join(optimizedDir, 'responsive', 'avif', `${size}w`, `${nameWithoutExt}.avif`);
-
-    // Resize and save JPEG
-    await sharp(inputPath)
-      .resize(size, null, { withoutEnlargement: true })
-      .jpeg({ quality: opts.jpegQuality, progressive: true })
-      .toFile(jpegResponsivePath);
-
-    // Resize and save WebP
-    await sharp(inputPath)
-      .resize(size, null, { withoutEnlargement: true })
-      .webp({ quality: opts.webpQuality })
-      .toFile(webpResponsivePath);
-
-    // Resize and save AVIF
-    await sharp(inputPath)
-      .resize(size, null, { withoutEnlargement: true })
-      .avif({ quality: opts.avifQuality })
-      .toFile(avifResponsivePath);
-
-    const jpegResponsiveStats = await fs.stat(jpegResponsivePath);
-    const webpResponsiveStats = await fs.stat(webpResponsivePath);
-    const avifResponsiveStats = await fs.stat(avifResponsivePath);
-
-    responsiveVariants[`${size}w`] = {
-      jpeg: {
-        path: `optimized/responsive/jpeg/${size}w/${filename}`,
-        size: jpegResponsiveStats.size
-      },
-      webp: {
-        path: `optimized/responsive/webp/${size}w/${nameWithoutExt}.webp`,
-        size: webpResponsiveStats.size
-      },
-      avif: {
-        path: `optimized/responsive/avif/${size}w/${nameWithoutExt}.avif`,
-        size: avifResponsiveStats.size
-      }
-    };
-
-    console.log(`    ${size}w: JPEG ${formatBytes(jpegResponsiveStats.size)}, WebP ${formatBytes(webpResponsiveStats.size)}, AVIF ${formatBytes(avifResponsiveStats.size)}`);
-  }
-
   // Generate LQIP (Low Quality Image Placeholder)
   console.log(`  ⚙️  Generating LQIP...`);
 
-  const lqipBuffer = await sharp(inputPath)
+  const lqipBuffer = await sharp(inputBuffer)
     .resize(opts.lqipWidth, null, { withoutEnlargement: true })
     .jpeg({ quality: opts.lqipQuality })
     .toBuffer();
+
+  // Save LQIP to file (for development/debugging)
+  await fs.writeFile(lqipPath, lqipBuffer);
 
   const lqipMetadata = await sharp(lqipBuffer).metadata();
   const lqipBase64 = `data:image/jpeg;base64,${lqipBuffer.toString('base64')}`;
@@ -159,7 +112,10 @@ async function optimizeImage(inputPath, outputDir, options = {}) {
   console.log(`    LQIP: ${lqipMetadata.width}x${lqipMetadata.height}, ${formatBytes(lqipBuffer.length)}`);
   console.log(`  ✅ Optimization complete\n`);
 
-  // Return manifest entry
+  // Get final dimensions (after potential resize)
+  const finalMetadata = await sharp(jpegPath).metadata();
+
+  // Return manifest entry with simple paths
   return {
     original: {
       width: metadata.width,
@@ -168,24 +124,26 @@ async function optimizeImage(inputPath, outputDir, options = {}) {
       format: metadata.format || 'jpeg'
     },
     optimized: {
+      width: finalMetadata.width,
+      height: finalMetadata.height,
       jpeg: {
-        path: `optimized/jpeg/${filename}`,
+        path: `${nameWithoutExt}.jpg`,
         size: jpegStats.size
       },
       webp: {
-        path: `optimized/webp/${nameWithoutExt}.webp`,
+        path: `${nameWithoutExt}.webp`,
         size: webpStats.size
       },
       avif: {
-        path: `optimized/avif/${nameWithoutExt}.avif`,
+        path: `${nameWithoutExt}.avif`,
         size: avifStats.size
       }
     },
-    responsive: responsiveVariants,
     lqip: {
       width: lqipMetadata.width || opts.lqipWidth,
       height: lqipMetadata.height || Math.round((lqipMetadata.width || opts.lqipWidth) * metadata.height / metadata.width),
-      base64: lqipBase64
+      base64: lqipBase64,
+      path: `${nameWithoutExt}.lqip.jpg`
     }
   };
 }
