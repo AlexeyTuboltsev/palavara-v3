@@ -26,8 +26,9 @@ export function getImageManifest(): TImageManifest | null {
 
 /**
  * Load image manifest from CDN (once at startup)
+ * Called from initSaga before uiSaga starts
  */
-function* loadImageManifest() {
+export function* loadImageManifest() {
   if (!config.useOptimizedImages) {
     console.log('Optimized images disabled, skipping manifest load');
     return;
@@ -53,14 +54,7 @@ function* loadImageManifest() {
 }
 
 export function* uiSaga(screenSize: TResizeEventPayload) {
-  console.log('uiSaga starting...');
-
-  // Load manifest at startup if optimized images enabled (non-blocking)
-  if (config.useOptimizedImages) {
-    yield fork(loadImageManifest);
-  }
-
-  console.log('uiSaga: entering main loop');
+  console.log('uiSaga starting... (manifest already loaded in initSaga)');
 
   let currentRouteDataGenerator: Task<any> | undefined = undefined;
   while (true) {
