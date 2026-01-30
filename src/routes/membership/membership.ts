@@ -24,7 +24,7 @@ export function* membership(screenDimensions: TResizeEventPayload): Generator<an
     menuIsCollapsible:true,
     sectionMenu: sectionMenu(routeName),
     menu: menu(routeName),
-    ...createImageState(urls[0])
+    ...createImageState(urls[0], urls.length)
   }
   yield put(setAppState(initialState))
 

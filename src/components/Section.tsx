@@ -35,7 +35,9 @@ export const SectionVisual: FC<{
 export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, children: ReactNode }> = ({state, children, anchorMenu}) => {
   const dispatch = useDispatch();
 
-  const hasImages = (state as any).currentImage;
+  const totalImages = (state as any).totalImages || 0;
+  const hasImages = totalImages > 0;
+  const showImageButtons = totalImages > 1;
   const manifest = getImageManifest();
 
   return <div className={styles.sectionContainer}>
@@ -45,7 +47,7 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
       <SectionHeader state={state}/>
     </div>
     {(state as any).screenSize === EScreenSize.DESKTOP && <div className={styles.buttons}>
-      {hasImages && <>
+      {showImageButtons && <>
           <Minus className={styles.minus} onClick={() => dispatch(actions.previousImage())}/>
           <Plus className={styles.plus} onClick={() => dispatch(actions.nextImage())}/>
       </>

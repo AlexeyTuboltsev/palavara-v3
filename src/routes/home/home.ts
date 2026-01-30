@@ -29,6 +29,7 @@ export function* home(screenDimensions: TResizeEventPayload): Generator<any, voi
     menu: menu(routeName),
     url: imageUrls[0],
     lqipUrl: imageLqipUrls[0],
+    totalImages: urls.length,
   }
   yield put(setAppState(initialState))
 

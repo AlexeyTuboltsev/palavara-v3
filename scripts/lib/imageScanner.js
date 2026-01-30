@@ -45,13 +45,15 @@ async function scanImages(input, defaultDir = './public/img') {
     absolute: true
   });
 
-  // Filter out files in optimized or lqip directories (extra safety)
+  // Filter out files in optimized or lqip directories, and files with .lqip. in name
   const filtered = files.filter(file => {
     const normalized = path.normalize(file);
+    const basename = path.basename(file);
     return !normalized.includes('/optimized/') &&
            !normalized.includes('/lqip/') &&
            !normalized.includes('\\optimized\\') &&
-           !normalized.includes('\\lqip\\');
+           !normalized.includes('\\lqip\\') &&
+           !basename.includes('.lqip.'); // Exclude any .lqip.* files
   });
 
   console.log(`   Found ${filtered.length} images to process`);
