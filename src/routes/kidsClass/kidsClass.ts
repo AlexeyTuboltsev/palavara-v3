@@ -26,7 +26,7 @@ export function* kidsClass(screenDimensions: TResizeEventPayload): Generator<any
     menuIsCollapsible:true,
     sectionMenu: sectionMenu(routeName),
     menu: menu(routeName),
-    ...createImageState(urls[0])
+    ...createImageState(urls[0], urls.length)
   }
   yield put(setAppState(initialState))
 
