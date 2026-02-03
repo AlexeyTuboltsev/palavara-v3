@@ -12,7 +12,7 @@
   align-items: flex-start;
 
   @media (max-width: $breakpoint-mobile) {
-    grid-template: auto 1fr / 1fr;
+    grid-template: auto 1fr / 100%;
   }
 }
 
@@ -43,7 +43,7 @@
 
   @media (max-width: $breakpoint-mobile) {
     overflow: auto;
-    grid-template: auto 1fr / 1fr;
+    grid-template: 1fr / 1fr;
     padding: 0 10px;
   }
 }
@@ -65,12 +65,13 @@
   }
 
   @media (max-width: $breakpoint-mobile) {
-    grid-row: 2;
-    grid-column: 1;
+    display: none;
+    // grid-row: 2;
+    // grid-column: 1;
 
-    overflow: initial;
-    width: 100%;
-    left: 0;
+    // overflow: initial;
+    // width: 100%;
+    // left: 0;
   }
 }
 
@@ -110,6 +111,11 @@
   width: 100%;
   grid-template: auto 1fr / 1fr;
   overflow: auto;
+  
+  @media (max-width: $breakpoint-mobile) {
+    padding: 0;
+    grid-column: 1;
+  }
 
 }
 
