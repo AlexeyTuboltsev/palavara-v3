@@ -161,10 +161,11 @@
     margin: 0;
     font-size: 17px;
     padding: 0 10px;
+    color: $color-blue;
 
     @media (max-width: $breakpoint-mobile) {
       padding-top: 10px;
-      color: $color-blue;
+      color: $color-white;
 
       &:first-child {
         padding-top: 0;
@@ -182,11 +183,17 @@
     margin-top: 20px;
   }
 
-  p {
+  p, li, .small {
     line-height: 1.5;
     margin: 0;
     font-size: 17px;
     padding: 0 10px;
+  }
+
+  .small {
+    font-size: 12px;
+    line-height: 15px;
+    margin-top: 10px;
   }
 
   .italic {
@@ -201,15 +208,55 @@
   .main-text {
     padding-bottom: 10px; 
 
+      ul {
+        padding-left: 0;
+        list-style-type: none;
+        margin: 0;
+      }
+
+    li {
+        margin: 0 0 0 10px;
+        padding: 0;
+      }
+
+    li::before {
+      content: '■'; 
+      font-size: 11px;
+      display: inline;
+      color: $color-blue;
+      margin: 0 5px 0 0;
+      vertical-align: 1px;
+    }
+
     @media (max-width: $breakpoint-mobile) {
       background: $color-blue;
       padding: 10px 0 5px;
 
       h1,
       h2,
+      li,
       p {
         color: $color-white;
       }
+
+      ul {
+        padding-left: 0;
+        list-style-type: none;
+        margin: 0;
+      }
+
+      li {
+        margin: 0 0 0 10px;
+        padding: 0;
+      }
+
+      li::before {
+        content: '■'; 
+        font-size: 12px;
+        color: $color-white;
+        vertical-align: 1.5px;
+      }
+      
     }
   }
 }
@@ -220,6 +267,10 @@
   padding-left: 20px;
   grid-template: 1fr / 124px minmax(324px, 20%) 30px 1fr;
   grid-gap: 20px;
+
+    @media (max-width: $breakpoint-mobile) {
+    display: none;
+  }
 }
 
 .plus {

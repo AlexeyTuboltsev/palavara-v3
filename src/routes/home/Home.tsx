@@ -34,7 +34,7 @@ const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}
   }
 
   return <>
-    <img alt="" src={imgLqipUrl} aria-hidden={true} className={styles.backgroundImgLowRes}/>
+    {/* <img alt="" src={imgLqipUrl} aria-hidden={true} className={styles.backgroundImgLowRes}/> */}
     <img
       aria-hidden={true}
       loading="lazy"

@@ -17,23 +17,23 @@ export const BirthdayParties: FC<{
       <br/>
       <h3>Children’s party, general information:</h3>
       <ul>
-        <li><p>Duration of the workshop: 1.5 hours (depending on the age of the participants, the time can be discussed individually)</p></li>
-        <li><p>Cost for a group of up to 6 children: €250</p></li>
-        <li><p>Each additional participant: +€35</p></li>
-        <li><p>Price includes materials for one piece per participant, transparent or white glaze, and firing. Finished pieces can be picked up in 2 weeks.</p></li>
-        <li><p>The workshop theme is flexible and can be tailored to the participants’ wishes.</p></li>
-        <li><p>The price also includes one extra hour after the workshop, where you can enjoy tea and any snacks or cake you bring with you.</p></li>
+        <li>Duration of the workshop: 1.5 hours (depending on the age of the participants, the time can be discussed individually)</li>
+        <li>Cost for a group of up to 6 children: €250</li>
+        <li>Each additional participant: +€35</li>
+        <li>Price includes materials for one piece per participant, transparent or white glaze, and firing. Finished pieces can be picked up in 2 weeks</li>
+        <li>The workshop theme is flexible and can be tailored to the participants’ wishes</li>
+        <li>The price also includes one extra hour after the workshop, where you can enjoy tea and any snacks or cake you bring with you</li>
       </ul>
 
       <br/>
       <h3>Adult party, general information:</h3>
       <ul>
-        <li><p>Duration of the workshop: 2.5 hours</p></li>
-        <li><p>Cost for a group of up to 4 people: €300</p></li>
-        <li><p>Each additional participant: +€50</p></li>
-        <li><p>Price includes materials for one piece per participant, transparent or white glaze, and firing. Finished pieces can be picked up in 2 weeks.</p></li>
-        <li><p>The workshop theme is flexible and can be tailored to the participants’ wishes.</p></li>
-        <li><p>The price also includes one extra hour after the workshop, where you can enjoy tea and any snacks or cake you bring with you.</p></li>
+        <li>Duration of the workshop: 2.5 hours</li>
+        <li>Cost for a group of up to 4 people: €300</li>
+        <li>Each additional participant: +€50</li>
+        <li>Price includes materials for one piece per participant, transparent or white glaze, and firing. Finished pieces can be picked up in 2 weeks.</li>
+        <li>The workshop theme is flexible and can be tailored to the participants’ wishes.</li>
+        <li>The price also includes one extra hour after the workshop, where you can enjoy tea and any snacks or cake you bring with you.</li>
       </ul>
     </div>
   </Section>
