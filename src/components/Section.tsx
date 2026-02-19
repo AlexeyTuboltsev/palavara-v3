@@ -71,6 +71,16 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
       <div className={styles.text}>
         {children}
       </div>
+      {hasImages && (state as any).screenSize === EScreenSize.MOBILE &&
+        <div className={styles.mobileImage}>
+          <Images
+            filename={(state as any).currentImage}
+            screenSize={(state as any).screenSize}
+            manifest={manifest}
+            imageLoaded={(state as any).imageLoaded}
+          />
+        </div>
+      }
      </div>
     </div>
   </div>
