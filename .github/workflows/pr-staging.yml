@@ -1,0 +1,45 @@
+name: PR Staging
+
+on:
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy-staging:
+    if: github.event.action != 'closed'
+    uses: ./.github/workflows/deploy-staging.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      ref: ${{ github.event.pull_request.head.sha }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      REACT_APP_SENTRY: ${{ secrets.REACT_APP_SENTRY }}
+      STAGING_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }}
+
+  cleanup-staging:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Delete PR prefix from S3
+        run: |
+          aws s3 rm s3://staging.studio.palavara.com/pr-${{ github.event.pull_request.number }}/ \
+            --recursive
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/pr-${{ github.event.pull_request.number }}/*"

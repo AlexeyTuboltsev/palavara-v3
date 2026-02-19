@@ -115,6 +115,26 @@ Configure these in repo Settings → Secrets and variables → Actions:
 3. Click "Run workflow" → Run workflow
 4. Monitor deployment progress in Actions tab
 
+### Staging Environment (PR Previews)
+
+Each PR automatically gets a staging preview at `https://pr-{number}.staging.studio.palavara.com`.
+
+**Architecture:**
+- Single S3 bucket `staging.studio.palavara.com` with per-PR prefixes (`/pr-49/`, `/pr-50/`, etc.)
+- Single CloudFront distribution with wildcard alias `*.staging.studio.palavara.com`
+- CloudFront Function handles basic auth, subdomain→S3 prefix routing, and SPA fallback
+- ACM wildcard cert for `*.staging.studio.palavara.com` (us-east-1)
+
+**Workflows:**
+- `.github/workflows/pr-staging.yml` — triggers on PR events (open/sync/reopen/close)
+- `.github/workflows/deploy-staging.yml` — reusable workflow for build + deploy to staging
+- On PR close: S3 prefix is cleaned up automatically
+
+**CloudFront Function source:** `infra/staging-cloudfront-function.js`
+
+**Additional GitHub Secrets (beyond production ones):**
+- `STAGING_CLOUDFRONT_DISTRIBUTION_ID` — staging CloudFront distribution ID
+
 ### Manual Deployment (Local)
 
 For manual deployments from local machine:

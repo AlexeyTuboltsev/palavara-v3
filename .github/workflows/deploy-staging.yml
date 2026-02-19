@@ -1,0 +1,108 @@
+name: Deploy to Staging
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        description: 'PR number for S3 prefix and PR comment'
+        required: true
+        type: string
+      ref:
+        description: 'Git ref to checkout'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      REACT_APP_SENTRY:
+        required: true
+      STAGING_CLOUDFRONT_DISTRIBUTION_ID:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build production bundle
+        run: yarn build
+        env:
+          REACT_APP_SENTRY: ${{ secrets.REACT_APP_SENTRY }}
+          REACT_APP_IMG_PREFIX: https://be.palavara.com/img/studio
+          REACT_APP_USE_OPTIMIZED_IMAGES: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Sync to S3
+        run: |
+          aws s3 sync build/ s3://staging.studio.palavara.com/pr-${{ inputs.pr_number }}/ \
+            --delete \
+            --cache-control "public, max-age=300"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/pr-${{ inputs.pr_number }}/*"
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = parseInt('${{ inputs.pr_number }}');
+            if (isNaN(prNumber)) return;
+
+            const sha = '${{ inputs.ref }}' || context.sha;
+            const body = [
+              '### 🔍 Staging Deployment',
+              '',
+              `**URL:** https://pr-${prNumber}.staging.studio.palavara.com`,
+              `**Commit:** \`${sha.substring(0, 7)}\``,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.find(c =>
+              c.body && c.body.includes('### 🔍 Staging Deployment')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
