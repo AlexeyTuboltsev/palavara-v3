@@ -2,25 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Node.js Environment Setup
-
-This project uses **fnm** (Fast Node Manager) for Node.js version management. Before running any node/yarn/npm commands, initialize fnm:
-
-```bash
-eval "$(/home/lexey/.local/share/fnm/fnm env)"
-```
-
-**Why this is needed:** Claude Code's shell doesn't automatically source `~/.bashrc`, which contains the fnm initialization. All commands using node, yarn, or npm must be prefixed with the fnm initialization.
-
-**Example:**
-```bash
-# Wrong (will fail with "command not found")
-yarn start
-
-# Correct
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn start
-```
-
 Use **yarn** (not npm) for all package management and script execution in this project.
 
 ## Git & GitHub Workflow
@@ -140,7 +121,7 @@ For manual deployments from local machine:
 
 ```bash
 # Deploy to production (builds and syncs to S3 + invalidates CloudFront)
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn deploy-prod
+yarn deploy-prod
 ```
 
 **Note:** Requires AWS CLI configured with credentials locally. Automated deployment via GitHub Actions is preferred.
@@ -149,13 +130,13 @@ eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn deploy-prod
 
 ```bash
 # Start development server (opens in Google Chrome)
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn start
+yarn start
 
 # Build for production
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn build
+yarn build
 
 # Run tests
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test
+yarn test
 ```
 
 Test files live in `tests/` directory (not `src/`), with setup in `tests/setupTests.ts`. Test file pattern: `tests/**/*.test.{js,jsx,ts,tsx}`
@@ -168,16 +149,16 @@ Playwright-based visual regression tests ensure UI consistency across all pages 
 
 ```bash
 # Run visual tests (compares screenshots to baseline)
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test:visual
+yarn test:visual
 
 # Update baseline screenshots (after intentional UI changes)
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test:visual:update
+yarn test:visual:update
 
 # Open Playwright UI mode for interactive debugging
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test:visual:ui
+yarn test:visual:ui
 
 # View HTML report of last test run
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn test:visual:report
+yarn test:visual:report
 ```
 
 ### Visual Test Mode
@@ -294,12 +275,12 @@ When `REACT_APP_USE_OPTIMIZED_IMAGES=true`:
 
 To optimize new images:
 ```bash
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn optimize-images
+yarn optimize-images
 ```
 
 To deploy optimized images to CDN:
 ```bash
-eval "$(/home/lexey/.local/share/fnm/fnm env)" && yarn deploy-images
+yarn deploy-images
 ```
 
 ## Code Conventions
