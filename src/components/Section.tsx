@@ -78,6 +78,7 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
             screenSize={(state as any).screenSize}
             manifest={manifest}
             imageLoaded={(state as any).imageLoaded}
+            eager
           />
         </div>
       }
