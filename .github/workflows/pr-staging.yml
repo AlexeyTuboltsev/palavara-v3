@@ -30,7 +30,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Run visual regression tests
-        run: HOME=/root yarn test:visual
+        run: HOME=/root npx playwright test
         env:
           CI: true
 
