@@ -11,7 +11,6 @@ export const WheelThrowing: FC<{
   return <Section state={state} anchorMenu={  <div className={styles.anchorMenu}>
   <a href="#4-session-wheel-throwing-class" className={styles.anchorMenuItem}>A 4-session Wheel-Throwing class</a>
   <a href="#private-4-session-workshop" className={styles.anchorMenuItem}>Private 4-Session Workshop</a>
-  <a href="#one-time-workshop" className={styles.anchorMenuItem}>One-Time Workshops</a>
   <a href="#group-one-time-workshop" className={styles.anchorMenuItem}>Group One-Time Workshop</a>
   <a href="#private-one-time-workshop" className={styles.anchorMenuItem}>Private One-Time Workshop</a>
 </div>
@@ -75,8 +74,7 @@ export const WheelThrowing: FC<{
     <h2>The class can be taught in Russian or English</h2>
     <br/>
     <div className={styles.mainText}>
-      <h1 id="one-time-workshop">One-Time Workshops</h1>
-      <h1 id="group-one-time-workshop" className={styles.sub}>Group One-Time Workshop</h1>
+      <h2 id="group-one-time-workshop">Group One-Time Workshop</h2>
       <p>A 2.5-hour introductory wheel-throwing session.</p>
     </div>
     <br/>
@@ -107,7 +105,7 @@ export const WheelThrowing: FC<{
     <h2>The class can be taught in Russian or English</h2>
     <br/>
     <div className={styles.mainText}>
-    <h1 id="private-one-time-workshop" className={styles.sub}>Private One-Time Workshop</h1>
+    <h2 id="private-one-time-workshop">Private One-Time Workshop</h2>
       <p>A personalised 2.5-hour pottery wheel session tailored just for you</p>
     </div>
     <br/>

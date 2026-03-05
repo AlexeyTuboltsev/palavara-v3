@@ -43,11 +43,19 @@
 
   @media (max-width: $breakpoint-mobile) {
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
     grid-template: 1fr / 1fr;
     padding: 0 10px;
+    padding-bottom: max(env(safe-area-inset-bottom), 30px);
   }
 }
 
+
+.divider {
+  @media (max-width: $breakpoint-mobile) {
+    display: none;
+  }
+}
 
 .visual {
   position: relative;
@@ -111,10 +119,11 @@
   width: 100%;
   grid-template: auto 1fr / 1fr;
   overflow: auto;
-  
+
   @media (max-width: $breakpoint-mobile) {
     padding: 0;
     grid-column: 1;
+    overflow: visible;
   }
 
 }
@@ -165,7 +174,6 @@
 
     @media (max-width: $breakpoint-mobile) {
       padding-top: 10px;
-      color: $color-white;
 
       &:first-child {
         padding-top: 0;
@@ -229,34 +237,7 @@
     }
 
     @media (max-width: $breakpoint-mobile) {
-      background: $color-blue;
       padding: 10px 0 5px;
-
-      h1,
-      h2,
-      li,
-      p {
-        color: $color-white;
-      }
-
-      ul {
-        padding-left: 0;
-        list-style-type: none;
-        margin: 0;
-      }
-
-      li {
-        margin: 0 0 0 10px;
-        padding: 0;
-      }
-
-      li::before {
-        content: '■'; 
-        font-size: 12px;
-        color: $color-white;
-        vertical-align: 1.5px;
-      }
-      
     }
   }
 }
@@ -304,8 +285,12 @@
   padding: 40px 0; 
 
   @media (max-width: $breakpoint-mobile) {
-    padding: 10 0;
+    padding: 10px 0;
     line-height: 1.5;
+    position: sticky;
+    top: 0;
+    background: $color-white;
+    z-index: 1;
   }
 }
 
@@ -325,4 +310,23 @@
     border-right: 2px solid $color-black;
   }
 
+}
+
+.mobile-image {
+  display: none;
+
+  @media (max-width: $breakpoint-mobile) {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
 }
