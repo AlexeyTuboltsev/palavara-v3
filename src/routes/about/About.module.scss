@@ -13,7 +13,7 @@
   align-items: flex-start;
 
   @media (max-width: $breakpoint-mobile) {
-    grid-template: auto auto 1fr / 1fr;
+    grid-template: auto 1fr / 1fr;
   }
 }
 
@@ -175,4 +175,6 @@
 .content-wrapper {
   height: 100%;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: max(env(safe-area-inset-bottom), 30px);
 }

@@ -13,7 +13,8 @@ export const Images: FC<{
   screenSize: EScreenSize;
   manifest: TImageManifest | null;
   imageLoaded: boolean;
-}> = ({filename, screenSize, manifest, imageLoaded}) => {
+  eager?: boolean;
+}> = ({filename, screenSize, manifest, imageLoaded, eager}) => {
   const dispatch = useDispatch();
 
   // In visual test mode, show gray placeholder instead of actual images
@@ -42,7 +43,7 @@ export const Images: FC<{
       <source srcSet={src.webp} type="image/webp" />
       <img
         src={src.jpeg}
-        loading="lazy"
+        loading={eager ? "eager" : "lazy"}
         className={styles.img}
         alt=""
         aria-hidden={true}

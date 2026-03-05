@@ -33,3 +33,9 @@ yarn-error.log*
 
 # Optimized images (deployed to CDN, not committed)
 /public/img/optimized/
+
+# Firecrawl output
+.firecrawl/
+
+# Playwright MCP
+.playwright-mcp/
