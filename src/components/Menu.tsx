@@ -6,9 +6,9 @@ import { useDispatch } from "react-redux";
 import cn from 'classnames'
 import { EScreenSize } from "../routes/common/screenSize";
 import { SectionMenuSecondary } from "./SectionMenu";
-import { actions, EActionType, TAction } from "../actions";
+import { EActionType, TAction } from "../actions";
 import { Link } from "./Link";
-import { TRoute } from "../router";
+import { ERoute, TRoute } from "../router";
 
 const MenuItemWrapper: FC<{
   action: TAction
@@ -35,11 +35,9 @@ const MenuItemWrapper: FC<{
 }
 
 const MenuButton: FC<{ className?: string }> = ({ className }) => {
-  const dispatch = useDispatch();
-
-  return <div className={cn(styles.menuButton, className)} onClick={() => dispatch(actions.toggleMobileMenu())}>
+  return <Link to={{ routeName: ERoute.HOME }} className={cn(styles.menuButton, className)}>
     <span /><span /><span />
-  </div>
+  </Link>
 }
 
 const MenuItem: FC<{

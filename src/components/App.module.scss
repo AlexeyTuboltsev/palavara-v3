@@ -2,7 +2,7 @@
 
 .background {
   height: 100%;
-  background: center $color-white;
+  background: center #f0f0f0;
   background-size: cover;
 }
 
@@ -104,6 +104,9 @@
   }
 
   @media (max-width: $breakpoint-mobile) {
+    grid-column: 1;
     font-size: 20px;
+    position: relative;
+    z-index: 10;
   }
 }
