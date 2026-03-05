@@ -68,6 +68,17 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
 
       <MenuHome state={state} />
     </div>
-    <div className={styles.content} />
+    <div className={styles.content}>
+    <div className={styles.announcement}>
+      <h3>March 8 at Palavara Studio — Ceramic Market & More</h3>
+      <p>March 8, 12:00–19:00, Steegerstr. 1a, Berlin</p>
+      <br />
+      <p>We're celebrating March 8 the way we know best — with ceramics, workshops, lectures, tasty drinks, and special gifts!</p>
+      <p>Join us for a day filled with:</p>
+      <p><span style={{fontSize: '60%', position: 'relative', top: '-0.2em'}}>◆</span> Ceramic & porcelain market</p>
+      <p><span style={{fontSize: '60%', position: 'relative', top: '-0.2em'}}>◆</span> Jewelry by Katja John</p>
+      <p><span style={{fontSize: '60%', position: 'relative', top: '-0.2em'}}>◆</span> Candle Corner – handmade candles for sale and a chance to make your own candle using different scents</p>
+    </div>
+    </div>
     </Background>
 }
