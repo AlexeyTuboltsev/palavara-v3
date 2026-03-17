@@ -229,11 +229,11 @@
 
     li::before {
       content: '■'; 
-      font-size: 11px;
+      font-size: 8.8px;
       display: inline;
       color: $color-blue;
       margin: 0 5px 0 0;
-      vertical-align: 1px;
+      vertical-align: 3px;
     }
 
     @media (max-width: $breakpoint-mobile) {
