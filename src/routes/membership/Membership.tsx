@@ -21,6 +21,24 @@ export const Membership: FC<{
         regimes.</p>
 
       <p>Contact us and we'll send you the details: palavarastudio@gmail.com</p>
+
+      <br/>
+      <h3>Full Membership</h3>
+      <ul>
+        <li>Unlimited check-ins</li>
+        <li>Cancellation period: until the end of the current month + 1 full calendar month</li>
+        <li>Price: €180 per month</li>
+        <li>Material fee: €5 per kg of raw clay (this includes the clay itself, access to all studio glazes, and kiln firing)</li>
+      </ul>
+
+      <br/>
+      <h3>Flexible Membership</h3>
+      <ul>
+        <li>4 check-ins per month (you choose the days)</li>
+        <li>Cancellation period: until the end of the current month + 1 full calendar month</li>
+        <li>Price: €100 per month</li>
+        <li>Material fee: €5 per kg of raw clay (this includes the clay itself, access to all studio glazes, and kiln firing)</li>
+      </ul>
     </div>
   </Section>
 }
