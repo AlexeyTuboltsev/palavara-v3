@@ -69,6 +69,10 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
       <MenuHome state={state} />
     </div>
     <div className={styles.content}>
+      <div className={styles.announcement}>
+        <p>Pottery studio membership available!</p>
+        <p>Details are <a href="/membership">here</a></p>
+      </div>
     </div>
     </Background>
 }
