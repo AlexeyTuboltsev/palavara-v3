@@ -13,13 +13,15 @@ import {EScreenSize} from "../routes/common/screenSize";
 import {Images} from "./Images";
 import {getImageManifest} from "../sagas/imageManifestLoader";
 import {TImageManifest} from "../types/imageManifest";
+import {routeImageAlts} from "../services/imageAlts";
 
 export const SectionVisual: FC<{
   filename: string;
   screenSize: EScreenSize;
   manifest: TImageManifest | null;
   imageLoaded: boolean;
-}> = ({filename, screenSize, manifest, imageLoaded}) => {
+  alt: string;
+}> = ({filename, screenSize, manifest, imageLoaded, alt}) => {
   const dispatch = useDispatch();
 
   return <div className={styles.visual} onClick={() => dispatch(actions.nextImage())}>
@@ -28,6 +30,7 @@ export const SectionVisual: FC<{
       screenSize={screenSize}
       manifest={manifest}
       imageLoaded={imageLoaded}
+      alt={alt}
     />
   </div>
 }
@@ -39,6 +42,7 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
   const hasImages = totalImages > 0;
   const showImageButtons = totalImages > 1;
   const manifest = getImageManifest();
+  const imageAlt = routeImageAlts[state.route.routeName];
 
   return <div className={styles.sectionContainer}>
     <div className={styles.header}>
@@ -62,6 +66,7 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
             screenSize={(state as any).screenSize}
             manifest={manifest}
             imageLoaded={(state as any).imageLoaded}
+            alt={imageAlt}
           />}
      <div className={styles.textWrapper}>
       {anchorMenu && <div>
@@ -78,6 +83,7 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
             screenSize={(state as any).screenSize}
             manifest={manifest}
             imageLoaded={(state as any).imageLoaded}
+            alt={imageAlt}
             eager
           />
         </div>
