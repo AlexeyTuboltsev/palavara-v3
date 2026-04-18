@@ -7,6 +7,7 @@ import { MenuAbout } from "../../components/Menu";
 import { SectionHeaderAbout } from "../../components/SectionHeader";
 import { EScreenSize } from "../common/screenSize";
 import { getImageManifest } from "../../sagas/imageManifestLoader";
+import { routeImageAlts } from "../../services/imageAlts";
 
 
 export const About: FC<{
@@ -47,6 +48,7 @@ const Content: FC<{
           screenSize={(state as any).screenSize}
           manifest={manifest}
           imageLoaded={(state as any).imageLoaded}
+          alt={routeImageAlts[state.route.routeName]}
         />
         <div className={styles.colorBlock} />
       </div>

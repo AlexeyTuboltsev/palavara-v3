@@ -13,8 +13,9 @@ export const Images: FC<{
   screenSize: EScreenSize;
   manifest: TImageManifest | null;
   imageLoaded: boolean;
+  alt: string;
   eager?: boolean;
-}> = ({filename, screenSize, manifest, imageLoaded, eager}) => {
+}> = ({filename, screenSize, manifest, imageLoaded, alt, eager}) => {
   const dispatch = useDispatch();
 
   // In visual test mode, show gray placeholder instead of actual images
@@ -45,8 +46,7 @@ export const Images: FC<{
         src={src.jpeg}
         loading={eager ? "eager" : "lazy"}
         className={styles.img}
-        alt=""
-        aria-hidden={true}
+        alt={alt}
         onLoad={() => dispatch(actions.imageLoaded())}
       />
     </picture>
