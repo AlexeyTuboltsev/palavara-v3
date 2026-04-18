@@ -20,6 +20,7 @@ import {Agb} from "../routes/agb/Agb";
 import {Datenschutzerklaerung} from "../routes/datenschutzerklaerung/Datenschutzerklaerung";
 import { StartScreen } from './StartScreen';
 import { KidsClass } from '../routes/kidsClass/KidsClass';
+import { RouteHelmet } from './RouteHelmet';
 
 export const App = () => {
   const state = useSelector((store: TStore) => store.ui)
@@ -40,6 +41,13 @@ export const AppInProgress = () => <StartScreen />
 export const AppError = () => <div>error</div>
 
 export const AppReady: FC<TReadyAppState> = (state) => {
+  return <>
+    <RouteHelmet route={state.route} />
+    <AppRouteView state={state} />
+  </>
+}
+
+const AppRouteView: FC<{state: TReadyAppState}> = ({state}) => {
   switch (state.route.routeName) {
     case ERoute.HOME:
       return <Home state={state}/>;
