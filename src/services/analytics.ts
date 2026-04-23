@@ -24,6 +24,7 @@ const routeTitles: Record<ERoute, string> = {
   [ERoute.IMPRESSUM]: 'Impressum',
   [ERoute.AGB]: 'AGB',
   [ERoute.DATENSCHUTZ]: 'Datenschutz',
+  [ERoute.NOT_FOUND]: '404 Not Found',
 };
 
 function gtag(...args: any[]) {

@@ -21,6 +21,7 @@ import {Datenschutzerklaerung} from "../routes/datenschutzerklaerung/Datenschutz
 import { StartScreen } from './StartScreen';
 import { KidsClass } from '../routes/kidsClass/KidsClass';
 import { RouteHelmet } from './RouteHelmet';
+import { NotFound } from '../routes/notFound/NotFound';
 
 export const App = () => {
   const state = useSelector((store: TStore) => store.ui)
@@ -83,5 +84,7 @@ const AppRouteView: FC<{state: TReadyAppState}> = ({state}) => {
       return <Agb state={state} />
     case ERoute.DATENSCHUTZ:
       return <Datenschutzerklaerung state={state} />
+    case ERoute.NOT_FOUND:
+      return <NotFound state={state} />
   }
 }

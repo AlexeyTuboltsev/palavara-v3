@@ -64,7 +64,7 @@ const Content: FC<{
         <h2>See my work on Instagram: <a href="https://www.instagram.com/palavara_ceramics/">palavara_ceramics</a> </h2>
         <p>A few years ago I opened a Palavara-studio in Wedding, where I produce my ceramics and run workshops for
           children and adults.</p>
-        <h2>You can buy my ceramics in my Etsy shop: <a href="www.etsy.com/shop/PALAVARA">www.etsy.com/shop/PALAVARA</a></h2>
+        <h2>You can buy my ceramics in my Etsy shop: <a href="https://www.etsy.com/shop/PALAVARA" target="_blank" rel="noopener noreferrer">www.etsy.com/shop/PALAVARA</a></h2>
         <p>I'd be more than happy to discuss any potential projects or collaborations.</p>
 
         <p>Please contact me via e-mail: <a href="mailto:varya@palavara.com">varya@palavara.com</a></p>

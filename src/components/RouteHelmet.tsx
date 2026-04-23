@@ -13,7 +13,10 @@ export const RouteHelmet: FC<{route: TRoute}> = ({route}) => {
     <Helmet>
       <title>{meta.title}</title>
       <meta name="description" content={meta.description} />
-      <link rel="canonical" href={canonical} />
+      {meta.noindex
+        ? <meta name="robots" content="noindex, follow" />
+        : <link rel="canonical" href={canonical} />
+      }
 
       <meta property="og:title" content={meta.title} />
       <meta property="og:description" content={meta.description} />

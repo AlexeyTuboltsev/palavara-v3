@@ -16,6 +16,7 @@ export enum ERoute {
   IMPRESSUM = "impressum",
   AGB = "agb",
   DATENSCHUTZ = "datenschutz",
+  NOT_FOUND = "notFound",
 }
 
 export type TRouteDef = {
@@ -41,6 +42,7 @@ export type TRoute =
   | ({ routeName: ERoute.IMPRESSUM } )
   | ({ routeName: ERoute.AGB } )
   | ({ routeName: ERoute.DATENSCHUTZ } )
+  | ({ routeName: ERoute.NOT_FOUND } )
 
 export const routeDefs:TRouteDef[] = [
   {routeName: ERoute.HOME, routePattern: '/'},
