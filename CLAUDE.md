@@ -35,6 +35,20 @@ The GitHub MCP server is configured with bot credentials (k5qkop-bot) and handle
 
 The MCP server handles authentication with bot credentials automatically.
 
+### No force pushes
+
+**Never force-push** to any branch in this repo, including feature branches. This means no `git push --force`, no `--force-with-lease`, no `git push -f`.
+
+`main` is protected at the GitHub level; feature branches are technically not, but treat them the same way.
+
+**To bring a stale feature branch up to date with `main`:**
+- ✅ `git merge origin/main` on the branch, resolve conflicts, commit, `git push`
+- ❌ `git rebase origin/main` + `git push --force-with-lease`
+
+A merge commit on a feature branch is fine. Do not propose rebase-and-force-push as a way to "clean up" history.
+
+Only exception: if the user **explicitly** asks for a rebase (e.g. "rebase the analytics"), the follow-up force-push is implied and OK.
+
 ## GitHub Issue Workflow
 
 ### 1. Working on an Issue
