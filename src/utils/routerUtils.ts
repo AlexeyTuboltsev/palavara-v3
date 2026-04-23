@@ -40,6 +40,10 @@ function getRoutePattern(routes: TRouteDef[], route: TRoute) {
 }
 
 export function setLocation(history: BrowserHistory, routes: TRouteDef[], route: TRoute) {
+  // NOT_FOUND keeps the browser URL as-is (no redirect) so the user sees the
+  // path they typed while the app renders the 404 component.
+  if (route.routeName === ERoute.NOT_FOUND) return
+
   const routeDef = getRoutePattern(routes, route)
   if (routeDef) {
     const toPath = compile(routeDef.routePattern, {encode: encodeURIComponent});
@@ -65,14 +69,14 @@ export function getRoute(location: {pathname:string}): TRoute {
   }
 
   if (!routeMatch) {
-    return {routeName: ERoute.HOME}
+    return {routeName: ERoute.NOT_FOUND}
   } else {
     const parseResult = routeMatch.routeDef.paramsParser !== undefined
       ? routeMatch.routeDef.paramsParser(routeMatch.match.params)
       : {}
 
     return parseResult === null
-      ? {routeName: ERoute.HOME }
+      ? {routeName: ERoute.NOT_FOUND }
       : {routeName: routeMatch.routeDef.routeName, params: parseResult} as TRoute
   }
 }

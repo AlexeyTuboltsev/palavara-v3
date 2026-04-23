@@ -3,6 +3,7 @@ import {ERoute, routeDefs} from "../router";
 export type TPageMeta = {
   title: string;
   description: string;
+  noindex?: boolean;
 };
 
 const SITE_URL = 'https://studio.palavara.com';
@@ -72,6 +73,11 @@ export const pageMeta: Record<ERoute, TPageMeta> = {
   [ERoute.DATENSCHUTZ]: {
     title: 'Datenschutzerklärung | Palavara Pottery Studio',
     description: 'Datenschutzerklärung — privacy policy for Palavara Pottery Studio Berlin.',
+  },
+  [ERoute.NOT_FOUND]: {
+    title: 'Page not found | Palavara Pottery Studio',
+    description: 'The page you were looking for does not exist on the Palavara Pottery Studio site.',
+    noindex: true,
   },
 };
 

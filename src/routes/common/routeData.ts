@@ -15,6 +15,7 @@ import { teamEvents } from "../teamEvents/teamEvents";
 import { birthdayParties } from "../birthdayParties/birthdayParties";
 import { agb } from "../agb/agb";
 import { datenschutzerklaerung } from "../datenschutzerklaerung/datenschutzerklaerung";
+import { notFound } from "../notFound/notFound";
 
 export function findRouteGenerator(route: TRoute): any {
   switch (route.routeName) {
@@ -50,5 +51,7 @@ export function findRouteGenerator(route: TRoute): any {
       return agb;
     case ERoute.DATENSCHUTZ:
       return datenschutzerklaerung;
+    case ERoute.NOT_FOUND:
+      return notFound;
   }
 }

@@ -17,4 +17,5 @@ export const routeImageAlts: Record<ERoute, string> = {
   [ERoute.IMPRESSUM]: 'Palavara Pottery Studio Berlin',
   [ERoute.AGB]: 'Palavara Pottery Studio Berlin',
   [ERoute.DATENSCHUTZ]: 'Palavara Pottery Studio Berlin',
+  [ERoute.NOT_FOUND]: 'Palavara Pottery Studio Berlin',
 };
