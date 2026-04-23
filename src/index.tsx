@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {HelmetProvider} from 'react-helmet-async';
 import './styles/index.css';
 import {initStore} from './store'
 import {Provider} from 'react-redux'
@@ -18,13 +17,11 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <HelmetProvider>
-        <Provider store={initStore(rootElement, i18n)}>
-          <I18nextProvider i18n={i18n}>
-            <App/>
-          </I18nextProvider>
-        </Provider>
-      </HelmetProvider>
+      <Provider store={initStore(rootElement, i18n)}>
+        <I18nextProvider i18n={i18n}>
+          <App/>
+        </I18nextProvider>
+      </Provider>
     </ErrorBoundary>
   </React.StrictMode>
 );
