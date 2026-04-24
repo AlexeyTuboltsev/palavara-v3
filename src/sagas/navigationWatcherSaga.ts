@@ -15,7 +15,13 @@ export function* navigationWatcherSaga() {
     const currentRoute: TRoute | undefined = yield select(state => state.ui.route);
     const targetRoute = req.payload;
 
-    if (currentRoute && isEqual(currentRoute, targetRoute)) {
+    // Initial page load: user didn't navigate, they arrived — no overlay.
+    // StartScreen already covers the "app is booting" state.
+    if (!currentRoute) {
+      continue;
+    }
+
+    if (isEqual(currentRoute, targetRoute)) {
       continue; // same route, no overlay
     }
 
