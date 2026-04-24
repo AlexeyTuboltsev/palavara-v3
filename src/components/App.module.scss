@@ -100,7 +100,11 @@
   }
 
   a {
-    text-decoration: underline;  
+    text-decoration: none;
+  }
+
+  .announcementHighlight {
+    text-decoration: underline;
   }
 
   @media (max-width: $breakpoint-mobile) {

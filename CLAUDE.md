@@ -205,6 +205,20 @@ Visual tests run with `REACT_APP_VISUAL_TEST_MODE=true` environment variable, wh
 
 Implementation in `src/config.ts` and `src/components/Images.tsx`.
 
+### Updating baselines after a small UI change
+
+`yarn test:visual:update` calls Playwright with `--update-snapshots` and no argument — which in Playwright 1.58+ only regenerates **missing** baselines, not changed ones. A visible change that falls under the `maxDiffPixels: 6100` threshold in `e2e/visual-regression.spec.ts` will pass the test, so `:update` won't touch the snapshot, and the baseline ends up stale.
+
+To force-regenerate a snapshot that the test is "tolerating":
+
+```bash
+# Delete the specific baselines first, then run update
+rm e2e/visual-regression.spec.ts-snapshots/home-chromium-*.png
+yarn test:visual:update
+```
+
+The regenerated snapshots will be written as if they were missing.
+
 ### Test Coverage
 
 Tests run on 3 viewport sizes (desktop, tablet, mobile) across all 16 routes:
