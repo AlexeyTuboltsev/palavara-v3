@@ -6,8 +6,10 @@ import {ERoute} from "../router";
 import { StartScreen } from './StartScreen';
 import { BlurOverlay } from './BlurOverlay';
 import { useRouteHead } from '../hooks/useRouteHead';
+// Home is the entry point for almost every visit — keep it in the main
+// bundle so the initial render doesn't need a second round-trip.
+import { Home } from "../routes/home/Home";
 
-const Home = lazy(() => import("../routes/home/Home").then(m => ({default: m.Home})));
 const TeamEvents = lazy(() => import("../routes/teamEvents/TeamEvents").then(m => ({default: m.TeamEvents})));
 const BirthdayParties = lazy(() => import("../routes/birthdayParties/BirthdayParties").then(m => ({default: m.BirthdayParties})));
 const WheelThrowing = lazy(() => import("../routes/wheelThrowing/WheelThrowing").then(m => ({default: m.WheelThrowing})));
@@ -27,6 +29,7 @@ const NotFound = lazy(() => import("../routes/notFound/NotFound").then(m => ({de
 
 function preloadOtherRoutes() {
   // Fire-and-forget; if a chunk is already loaded the import is a no-op.
+  // Home is intentionally excluded — it's in the main bundle.
   import("../routes/kidsClass/KidsClass");
   import("../routes/wheelThrowing/WheelThrowing");
   import("../routes/familySaturday/FamilySaturday");
@@ -50,15 +53,15 @@ export const App = () => {
   const isNavigating = useSelector((store: TStore) => store.navigation.isNavigating)
 
   useEffect(() => {
-    // Wait for the initial route to settle, then warm all other chunks so
-    // subsequent navigations don't suspend.
-    const ric = (window as any).requestIdleCallback as undefined | ((cb: () => void, opts?: {timeout: number}) => number);
-    if (ric) {
-      ric(preloadOtherRoutes, {timeout: 4000});
-    } else {
-      const id = window.setTimeout(preloadOtherRoutes, 2000);
+    // Wait for the page load event before warming other route chunks — this
+    // guarantees we don't compete with the hero image for bandwidth during LCP.
+    if (document.readyState === 'complete') {
+      // Page already loaded (e.g. soft-nav came first); schedule on idle.
+      const id = window.setTimeout(preloadOtherRoutes, 0);
       return () => window.clearTimeout(id);
     }
+    window.addEventListener('load', preloadOtherRoutes, {once: true});
+    return () => window.removeEventListener('load', preloadOtherRoutes);
   }, []);
 
   let content: JSX.Element;
