@@ -69,8 +69,7 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
     </div>
     <div className={styles.content}>
       <div className={styles.announcement}>
-        <p>Pottery studio membership available!</p>
-        <p>Details are <a href="/membership">here</a></p>
+        <a href="/membership">Pottery studio membership available →</a>
       </div>
     </div>
     </Background>
