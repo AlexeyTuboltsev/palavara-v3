@@ -36,7 +36,8 @@ const Images: FC<{ imgUrl: string, imgLqipUrl: string }> = ({imgLqipUrl, imgUrl}
   return <>
     {/* <img alt="" src={imgLqipUrl} aria-hidden={true} className={styles.backgroundImgLowRes}/> */}
     <img
-      loading="lazy"
+      loading="eager"
+      {...({fetchpriority: 'high'} as any)}
       className={cn(styles.backgroundImg, {[styles.backgroundImgVisible]: loaded})}
       src={imgUrl}
       alt="Palavara Pottery Studio Berlin — handmade ceramics"
