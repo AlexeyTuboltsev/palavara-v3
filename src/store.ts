@@ -20,10 +20,23 @@ const ui = createSlice({
   }
 })
 
+const navigation = createSlice({
+  name: 'navigation',
+  initialState: {isNavigating: false},
+  reducers: {
+    startNavigation: (state) => {
+      state.isNavigating = true;
+    },
+    endNavigation: (state) => {
+      state.isNavigating = false;
+    },
+  }
+})
+
 const store = configureStore({
   devTools: true,
   middleware,
-  reducer: {ui: ui.reducer}
+  reducer: {ui: ui.reducer, navigation: navigation.reducer}
 })
 
 export function initStore(rootElement:HTMLElement, i18n:any){
@@ -33,3 +46,4 @@ export function initStore(rootElement:HTMLElement, i18n:any){
 
 
 export const {setAppState} = ui.actions
+export const {startNavigation, endNavigation} = navigation.actions

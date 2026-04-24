@@ -1,9 +1,10 @@
-import {FC, lazy, Suspense} from 'react';
+import {FC, lazy, Suspense, useEffect} from 'react';
 import {useSelector} from 'react-redux'
 import {EAppState, TReadyAppState} from "../types";
 import {TStore} from "../store";
 import {ERoute} from "../router";
 import { StartScreen } from './StartScreen';
+import { BlurOverlay } from './BlurOverlay';
 import { useRouteHead } from '../hooks/useRouteHead';
 
 const Home = lazy(() => import("../routes/home/Home").then(m => ({default: m.Home})));
@@ -24,28 +25,68 @@ const Datenschutzerklaerung = lazy(() => import("../routes/datenschutzerklaerung
 const KidsClass = lazy(() => import("../routes/kidsClass/KidsClass").then(m => ({default: m.KidsClass})));
 const NotFound = lazy(() => import("../routes/notFound/NotFound").then(m => ({default: m.NotFound})));
 
-export const App = () => {
-  const state = useSelector((store: TStore) => store.ui)
-  switch (state.appState) {
-    case EAppState.NOT_STARTED:
-      return <AppNotStarted/>
-    case EAppState.IN_PROGRESS:
-      return <AppInProgress/>
-    case EAppState.READY:
-      return <AppReady {...state} />
-    case EAppState.ERROR:
-      return <AppError/>
-  }
+function preloadOtherRoutes() {
+  // Fire-and-forget; if a chunk is already loaded the import is a no-op.
+  import("../routes/kidsClass/KidsClass");
+  import("../routes/wheelThrowing/WheelThrowing");
+  import("../routes/familySaturday/FamilySaturday");
+  import("../routes/openStudio/OpenStudio");
+  import("../routes/firingService/FiringService");
+  import("../routes/giftCerificate/GiftCertificate");
+  import("../routes/teamEvents/TeamEvents");
+  import("../routes/birthdayParties/BirthdayParties");
+  import("../routes/membership/Membership");
+  import("../routes/about/About");
+  import("../routes/rentASpace/RentASpace");
+  import("../routes/contact/Contact");
+  import("../routes/impressum/Impressum");
+  import("../routes/agb/Agb");
+  import("../routes/datenschutzerklaerung/Datenschutzerklaerung");
+  import("../routes/notFound/NotFound");
 }
 
-export const AppNotStarted = () => <StartScreen />
-export const AppInProgress = () => <StartScreen />
+export const App = () => {
+  const state = useSelector((store: TStore) => store.ui)
+  const isNavigating = useSelector((store: TStore) => store.navigation.isNavigating)
+
+  useEffect(() => {
+    // Wait for the initial route to settle, then warm all other chunks so
+    // subsequent navigations don't suspend.
+    const ric = (window as any).requestIdleCallback as undefined | ((cb: () => void, opts?: {timeout: number}) => number);
+    if (ric) {
+      ric(preloadOtherRoutes, {timeout: 4000});
+    } else {
+      const id = window.setTimeout(preloadOtherRoutes, 2000);
+      return () => window.clearTimeout(id);
+    }
+  }, []);
+
+  let content: JSX.Element;
+  switch (state.appState) {
+    case EAppState.NOT_STARTED:
+    case EAppState.IN_PROGRESS:
+      content = <StartScreen />;
+      break;
+    case EAppState.READY:
+      content = <AppReady {...state} />;
+      break;
+    case EAppState.ERROR:
+      content = <AppError/>;
+      break;
+  }
+
+  return <>
+    {content}
+    <BlurOverlay visible={isNavigating} />
+  </>
+}
+
 export const AppError = () => <div>error</div>
 
 export const AppReady: FC<TReadyAppState> = (state) => {
   useRouteHead(state.route);
   return (
-    <Suspense fallback={<StartScreen />}>
+    <Suspense fallback={null}>
       <AppRouteView state={state} />
     </Suspense>
   );
