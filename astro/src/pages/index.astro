@@ -1,0 +1,83 @@
+---
+import { SITE } from '../data/site';
+import HeadMeta from '../components/HeadMeta.astro';
+import AnalyticsScripts from '../components/AnalyticsScripts.astro';
+import HeroImage from '../components/HeroImage.astro';
+import '../styles/home.css';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+
+  <link rel="preconnect" href="https://be.palavara.com" />
+  <link rel="dns-prefetch" href="https://be.palavara.com" />
+  <link
+    rel="preload"
+    as="image"
+    type="image/avif"
+    fetchpriority="high"
+    imagesrcset={`${SITE.imgPrefix}/home-1-640.avif 640w, ${SITE.imgPrefix}/home-1-1280.avif 1280w, ${SITE.imgPrefix}/home-1.avif 1920w`}
+    imagesizes="100vw"
+  />
+
+  <link rel="icon" type="image/png" href="/favicon/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="/favicon/favicon-192x192.png" sizes="192x192" />
+
+  <HeadMeta
+    title={SITE.title}
+    description={SITE.description}
+    canonicalPath="/"
+  />
+
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": `${SITE.url}/#studio`,
+    name: "Palavara Pottery Studio",
+    alternateName: "Palavara Töpferei und Atelier",
+    description: "Pottery studio in Berlin offering wheel throwing classes, kids classes, open studio sessions, memberships, team events, and gift certificates.",
+    url: `${SITE.url}/`,
+    image: `${SITE.url}/img/home-1.jpg`,
+    email: SITE.email,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: SITE.address.street,
+      postalCode: SITE.address.postalCode,
+      addressLocality: SITE.address.city,
+      addressCountry: SITE.address.country,
+    },
+    sameAs: [SITE.instagram.studio, SITE.instagram.ceramics],
+    founder: { "@type": "Person", name: "Varvara Polyakova" },
+    areaServed: { "@type": "City", name: "Berlin" },
+  })} />
+
+  <AnalyticsScripts />
+</head>
+
+<body>
+  <div class="background">
+    <HeroImage base="home-1" alt="Palavara Pottery Studio Berlin — handmade ceramics" />
+
+    <div class="layout">
+      <header>
+        <h1>Pottery classes<br/>for kids and adults</h1>
+      </header>
+
+      <main>
+        <!-- Menu, navigation links, etc. would go here in the real port -->
+      </main>
+
+      <aside class="announcement">
+        <a href="/membership">
+          Pottery studio membership<br/>
+          <span class="underline">available!</span>&nbsp;→
+        </a>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

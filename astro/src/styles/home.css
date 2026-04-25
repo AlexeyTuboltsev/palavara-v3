@@ -1,0 +1,77 @@
+/* Trimmed-down home styles for the spike. The real port would copy the
+   existing SCSS modules; this is just enough to show the layout works. */
+
+:root {
+  --color-yellow: #ffff00;
+  --color-blue: #0054CF;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  background: #000;
+  color: var(--color-yellow);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+.background {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.background picture,
+.background img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.layout {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+  padding: 24px;
+  gap: 24px;
+  color: var(--color-yellow);
+}
+
+.layout h1 {
+  font-size: 48px;
+  margin: 0;
+  line-height: 1.05;
+}
+
+.announcement {
+  background-color: rgba(255, 255, 0, 0.85);
+  color: var(--color-blue);
+  padding: 20px;
+  font-size: 30px;
+  align-self: start;
+  justify-self: end;
+  max-width: 360px;
+}
+
+.announcement a {
+  color: var(--color-blue);
+  text-decoration: none;
+}
+
+.announcement a .underline {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .layout h1 { font-size: 32px; }
+  .announcement { font-size: 20px; max-width: 100%; justify-self: stretch; }
+}

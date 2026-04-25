@@ -1,0 +1,42 @@
+---
+import { SITE } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  /** Optional path relative to imgPrefix, e.g. "home-1" — used as OG image base. */
+  ogImageBase?: string;
+  noindex?: boolean;
+}
+
+const { title, description, canonicalPath, ogImageBase = 'home-1', noindex } = Astro.props;
+
+const canonical = `${SITE.url}${canonicalPath}`;
+const ogImage = `${SITE.url}/img/${ogImageBase}.jpg`;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="keywords" content={SITE.keywords} />
+<meta name="author" content="Palavara Pottery Studio" />
+{noindex
+  ? <meta name="robots" content="noindex, follow" />
+  : <>
+      <meta name="robots" content="index, follow" />
+      <link rel="canonical" href={canonical} />
+    </>
+}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Palavara Pottery Studio" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:locale" content="en_US" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
