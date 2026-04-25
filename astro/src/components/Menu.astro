@@ -1,109 +1,102 @@
 ---
-import { ROUTES, NAV_GROUPS, type RouteKey } from '../data/routes';
+import { ROUTES, type RouteKey } from '../data/routes';
+import styles from '../components-styles/Menu.module.scss';
 
 interface Props {
   active: RouteKey;
-  variant?: 'home' | 'section';
+  /** 'blue' = section pages, 'yellow' = about, 'home' = home */
+  variant: 'blue' | 'yellow' | 'home';
 }
-const { active, variant = 'section' } = Astro.props;
+const { active, variant } = Astro.props;
+
+// Variant class chooses the menu's background + text colour.
+// menuHome is a translucent blue background used on Home only.
+const menuVariantClass =
+  variant === 'home' ? styles.menuHome :
+  variant === 'yellow' ? styles.menuYellow : styles.menuBlue;
+
+// Items inside the menu are coloured per-item using the same variant
+// (blue items on blue background, white items on home etc.).
+const itemVariantClass =
+  variant === 'home' || variant === 'yellow' ? styles.menuYellow : styles.menuBlue;
+
+// Menu structure mirroring src/routes/common/menu.ts.
+type Item =
+  | { kind: 'simple'; key: RouteKey; label: string }
+  | { kind: 'parent'; label: string; children: { key: RouteKey; label: string }[] };
+
+const ITEMS: Item[] = [
+  { kind: 'parent', label: 'classes', children: [
+    { key: 'kidsClass', label: 'kids class' },
+    { key: 'wheelThrowing', label: 'wheel-throwing' },
+  ]},
+  { kind: 'simple', key: 'familySaturday', label: 'family saturday' },
+  { kind: 'simple', key: 'openStudio', label: 'open studio' },
+  { kind: 'simple', key: 'firingService', label: 'firing service' },
+  { kind: 'simple', key: 'giftCertificate', label: 'gift certificate' },
+  { kind: 'simple', key: 'membership', label: 'membership' },
+  { kind: 'parent', label: 'event workshops', children: [
+    { key: 'teamEvents', label: 'team events' },
+    { key: 'birthdayParties', label: 'birthday parties' },
+  ]},
+];
+
+const isParentActive = (children: { key: RouteKey }[]) =>
+  children.some((c) => c.key === active);
 ---
 
-<nav class:list={['palavara-menu', `palavara-menu--${variant}`]} data-menu>
-  <button class="palavara-menu__toggle" type="button" aria-controls="palavara-menu-list" aria-expanded="false" data-menu-toggle>
-    <span class="palavara-menu__toggle-line"></span>
-    <span class="palavara-menu__toggle-line"></span>
-    <span class="palavara-menu__toggle-line"></span>
-  </button>
-  <ul id="palavara-menu-list" class="palavara-menu__list">
-    {NAV_GROUPS.map(({label, children}) => (
-      <li class="palavara-menu__group">
-        {children.length === 1 ? (
-          <a href={ROUTES[children[0]].path} class:list={['palavara-menu__link', children[0] === active && 'is-active']}>
-            {label}
-          </a>
-        ) : (
-          <>
-            <span class="palavara-menu__group-label">{label}</span>
-            <ul class="palavara-menu__sublist">
-              {children.map((key) => (
-                <li>
-                  <a href={ROUTES[key].path} class:list={['palavara-menu__link', key === active && 'is-active']}>
-                    {ROUTES[key].title.split(' | ')[0].split(' — ')[0]}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </li>
-    ))}
-  </ul>
-</nav>
+<div class:list={[styles.menu, menuVariantClass]} data-menu>
+  {ITEMS.map((item) => (
+    item.kind === 'simple' ? (
+      <a
+        href={ROUTES[item.key].path}
+        class:list={[
+          styles.menuItem,
+          item.key === active && styles.menuItemActive,
+          itemVariantClass,
+        ]}
+      >{item.label}</a>
+    ) : (
+      <div class:list={[
+        styles.parentMenuItemWrapper,
+        isParentActive(item.children) && styles.parentMenuItemWrapperActive,
+        itemVariantClass,
+      ]}>
+        <span class:list={[
+          isParentActive(item.children) ? styles.parentMenuItem : styles.menuItem,
+          itemVariantClass,
+        ]}>{item.label}{isParentActive(item.children) ? ':' : ''}</span>
+        {isParentActive(item.children) && item.children.map((c) => (
+          <a
+            href={ROUTES[c.key].path}
+            class:list={[
+              styles.childMenuItem,
+              c.key === active && styles.childMenuItemActive,
+              itemVariantClass,
+            ]}
+          >{c.label}</a>
+        ))}
+      </div>
+    )
+  ))}
+  <a
+    href="/"
+    class:list={[styles.menuButton, variant !== 'home' && styles.menuButtonBlue]}
+    aria-label="Toggle menu"
+    data-menu-button
+  ><span></span><span></span><span></span></a>
+</div>
 
-<script>
-  // Mobile menu toggle — tiny vanilla JS, no framework.
-  document.querySelectorAll<HTMLButtonElement>('[data-menu-toggle]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const expanded = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-      const menu = btn.closest('[data-menu]');
-      menu?.classList.toggle('is-open');
+<script define:vars={{ hiddenClass: styles.menuHidden }}>
+  // Mobile collapse: tap the hamburger to toggle.
+  document.querySelectorAll('[data-menu-button]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      // Only intercept on mobile widths; desktop click follows href.
+      if (window.matchMedia('(max-width: 500px)').matches) {
+        e.preventDefault();
+        const menu = btn.closest('[data-menu]');
+        if (menu) menu.classList.toggle(hiddenClass);
+      }
     });
   });
 </script>
-
-<style>
-  .palavara-menu { font-size: 18px; }
-  .palavara-menu__toggle {
-    display: none;
-    background: transparent;
-    border: 0;
-    padding: 8px;
-    cursor: pointer;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .palavara-menu__toggle-line {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: currentColor;
-  }
-  .palavara-menu__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .palavara-menu__group { padding: 4px 0; }
-  .palavara-menu__group-label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 4px;
-  }
-  .palavara-menu__sublist {
-    list-style: none;
-    margin: 0;
-    padding-left: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: 16px;
-    opacity: 0.85;
-  }
-  .palavara-menu__link {
-    display: inline-block;
-    padding: 2px 0;
-    text-decoration: none;
-  }
-  .palavara-menu__link:hover { text-decoration: underline; }
-  .palavara-menu__link.is-active { font-weight: 700; text-decoration: underline; }
-
-  @media (max-width: 600px) {
-    .palavara-menu__toggle { display: flex; }
-    .palavara-menu__list { display: none; }
-    .palavara-menu.is-open .palavara-menu__list { display: flex; }
-  }
-</style>

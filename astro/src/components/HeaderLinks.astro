@@ -1,20 +1,22 @@
 ---
 import { SITE } from '../data/site';
----
-<div class="header-links">
-  <a href={SITE.instagram.studio} target="_blank" rel="noopener noreferrer">palavara_potterystudio</a>
-  <a href={SITE.instagram.ceramics} target="_blank" rel="noopener noreferrer">palavara_ceramics</a>
-</div>
+import styles from '../components-styles/HeaderLinks.module.scss';
 
-<style>
-  .header-links {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 14px;
-  }
-  .header-links a { text-decoration: underline; }
-  @media (max-width: 600px) {
-    .header-links { font-size: 12px; }
-  }
-</style>
+interface Props {
+  variant: 'home' | 'section';
+}
+const { variant } = Astro.props;
+const variantClass = variant === 'home' ? styles.linksHome : styles.linksSection;
+---
+
+<div class:list={[styles.links, variantClass]}>
+  <a href={SITE.instagram.studio} target="_blank" rel="noopener noreferrer">palavara_potterystudio</a>
+  <div class:list={[styles.instagramLogo, variantClass]}>
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke-width="2"></rect>
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" fill="none" stroke-width="2"></path>
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2"></line>
+    </svg>
+  </div>
+  <a class={styles.hiddenOnMobile} href={SITE.instagram.ceramics} target="_blank" rel="noopener noreferrer">palavara_ceramics</a>
+</div>
