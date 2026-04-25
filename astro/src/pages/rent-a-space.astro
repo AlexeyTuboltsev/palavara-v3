@@ -1,13 +1,11 @@
 ---
 import SectionLayout from '../layouts/SectionLayout.astro';
+import sectionStyles from '../components-styles/Section.module.scss';
 ---
 
 <SectionLayout routeKey="rentASpace">
-  <h1>Rent a Space</h1>
-  <p>Rent studio space for your pottery practice in Berlin. Wheels, kilns and workspace at Palavara, Steegerstr. 1A, 13359 Berlin.</p>
-
-  <h2>How to enquire</h2>
-  <p><a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
-
-  <p><em>(Full content to be ported from <code>src/routes/rentASpace/RentASpace.tsx</code>.)</em></p>
+  <div class={sectionStyles.mainText}>
+    <h1>RENT A SPACE</h1>
+    <p>Contact us if you would like to rent our studio for your event, be it a workshop or a birthday party.</p>
+  </div>
 </SectionLayout>

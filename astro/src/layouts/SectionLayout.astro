@@ -29,7 +29,20 @@ const route = ROUTES[routeKey];
         <Logo />
       </a>
       <Menu active={routeKey} variant="blue" />
-      <SectionHeader variant="section" />
+      <SectionHeader variant="section" active={routeKey} />
+    </div>
+    <div class={sectionStyles.buttons}>
+      {route.heroBase ? (
+        <>
+          <svg class={sectionStyles.minus} viewBox="0 0 38 1" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line y1="0.5" x2="38" y2="0.5"></line>
+          </svg>
+          <svg class={sectionStyles.plus} viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line y1="18.5" x2="38" y2="18.5"></line>
+            <line x1="19.5" y1="2.18557e-08" x2="19.5" y2="38"></line>
+          </svg>
+        </>
+      ) : null}
     </div>
     <div class={sectionStyles.sectionContent}>
       {route.heroBase ? (

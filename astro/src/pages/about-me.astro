@@ -1,16 +1,63 @@
 ---
-import SectionLayout from '../layouts/SectionLayout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Logo from '../components/Logo.astro';
+import Menu from '../components/Menu.astro';
+import HeaderLinks from '../components/HeaderLinks.astro';
+import SectionMenu from '../components/SectionMenu.astro';
+import { ROUTES, type RouteKey } from '../data/routes';
+import aboutStyles from '../components-styles/About.module.scss';
+import sectionHeaderStyles from '../components-styles/SectionHeader.module.scss';
+import logoStyles from '../components-styles/Logo.module.scss';
+
+const routeKey: RouteKey = 'about';
+const route = ROUTES[routeKey];
+const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
 ---
 
-<SectionLayout routeKey="about">
-  <h1>About Me</h1>
-  <p>My name is Varvara Polyakova.</p>
-  <p>I am a diverse visual artist working across the fields of graphic design, illustration and ceramics.</p>
-  <p>I graduated from the Moscow State University of Printing Arts. After graduation, I worked successfully for a long time in the field of magazine and book illustration and design.</p>
-  <p>In 2012 I moved from Moscow to Berlin and I also started creating ceramics under the brand name Palavara.</p>
-  <h2>See my work on Instagram: <a href="https://www.instagram.com/palavara_ceramics/" target="_blank" rel="noopener">palavara_ceramics</a></h2>
-  <p>A few years ago I opened a Palavara-studio in Wedding, where I produce my ceramics and run workshops for children and adults.</p>
-  <h2>You can buy my ceramics in my Etsy shop: <a href="https://www.etsy.com/shop/PALAVARA" target="_blank" rel="noopener">www.etsy.com/shop/PALAVARA</a></h2>
-  <p>I'd be more than happy to discuss any potential projects or collaborations.</p>
-  <p>Please contact me via e-mail: <a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
-</SectionLayout>
+<BaseLayout
+  title={route.title}
+  description={route.description}
+  canonicalPath={route.path}
+  ogImageBase={route.heroBase}
+  noindex={route.noindex}
+  preloadHeroBase={route.heroBase}
+>
+  <div class={aboutStyles.sectionContainer}>
+    <div class={aboutStyles.headerWrapper}>
+      <div class={aboutStyles.headerBackground}></div>
+      <div class={aboutStyles.header}>
+        <a href="/" class:list={[logoStyles.logo, logoStyles.logoBlue]} aria-label="Palavara — home">
+          <Logo />
+        </a>
+        <Menu active={routeKey} variant="yellow" />
+        <div class={sectionHeaderStyles.sectionHeader}>
+          <HeaderLinks variant="home" />
+          <SectionMenu variant="white" active={routeKey} />
+        </div>
+      </div>
+    </div>
+    {route.heroBase ? (
+      <div class={aboutStyles.visual}>
+        {visualTestMode ? (
+          <div style="background-color:#e0e0e0;width:100%;height:100%;" aria-hidden="true"></div>
+        ) : (
+          <img src={`https://be.palavara.com/img/studio/${route.heroBase}.jpg`} alt={route.imageAlt || ''} loading="eager" />
+        )}
+        <div class={aboutStyles.colorBlock}></div>
+      </div>
+    ) : null}
+    <div class={aboutStyles.text}>
+      <h1>ABOUT ME</h1>
+      <p>My name is Varvara Polyakova,</p>
+      <p>I am a diverse visual artist working across the fields of graphic design, illustration and ceramics.</p>
+      <p>I graduated from the Moscow State University of Printing Arts. After graduation, I worked successfully for a long time in the field of magazine and book illustration and design.</p>
+      <p>In 2012 I moved from Moscow to Berlin and I also started creating ceramics under the brand name Palavara.</p>
+      <h2>See my work on Instagram: <a href="https://www.instagram.com/palavara_ceramics/">palavara_ceramics</a> </h2>
+      <p>A few years ago I opened a Palavara-studio in Wedding, where I produce my ceramics and run workshops for children and adults.</p>
+      <h2>You can buy my ceramics in my Etsy shop: <a href="https://www.etsy.com/shop/PALAVARA" target="_blank" rel="noopener noreferrer">www.etsy.com/shop/PALAVARA</a></h2>
+      <p>I'd be more than happy to discuss any potential projects or collaborations.</p>
+
+      <p>Please contact me via e-mail: <a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
+    </div>
+  </div>
+</BaseLayout>

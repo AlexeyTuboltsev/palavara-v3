@@ -9,4 +9,14 @@ export default defineConfig({
   build: {
     format: 'directory', // /about-me/index.html instead of /about-me.html
   },
+  vite: {
+    css: {
+      modules: {
+        // Ported SCSS modules use kebab-case (`.menu-item`, `.logo-blue`)
+        // but the components reference them via camelCase (`styles.menuItem`).
+        // Expose both keys so the lookups resolve.
+        localsConvention: 'camelCase',
+      },
+    },
+  },
 });

@@ -1,13 +1,16 @@
 ---
 import { ROUTES, type RouteKey } from '../data/routes';
 import styles from '../components-styles/Menu.module.scss';
+import secondaryStyles from '../components-styles/SectionMenu.module.scss';
 
 interface Props {
   active: RouteKey;
   /** 'blue' = section pages, 'yellow' = about, 'home' = home */
   variant: 'blue' | 'yellow' | 'home';
+  /** Whether the menu can collapse on mobile. Home is non-collapsible. */
+  collapsible?: boolean;
 }
-const { active, variant } = Astro.props;
+const { active, variant, collapsible = true } = Astro.props;
 
 // Variant class chooses the menu's background + text colour.
 // menuHome is a translucent blue background used on Home only.
@@ -45,7 +48,7 @@ const isParentActive = (children: { key: RouteKey }[]) =>
   children.some((c) => c.key === active);
 ---
 
-<div class:list={[styles.menu, menuVariantClass]} data-menu>
+<div class:list={[styles.menu, menuVariantClass]} data-menu data-collapsible={collapsible ? '' : undefined}>
   {ITEMS.map((item) => (
     item.kind === 'simple' ? (
       <a
@@ -79,19 +82,54 @@ const isParentActive = (children: { key: RouteKey }[]) =>
       </div>
     )
   ))}
-  <a
-    href="/"
-    class:list={[styles.menuButton, variant !== 'home' && styles.menuButtonBlue]}
-    aria-label="Toggle menu"
-    data-menu-button
-  ><span></span><span></span><span></span></a>
+  {collapsible && (
+    <a
+      href="/"
+      class:list={[styles.menuButton, variant !== 'home' && styles.menuButtonBlue]}
+      aria-label="Toggle menu"
+      data-menu-button
+    ><span></span><span></span><span></span></a>
+  )}
+  <div class={secondaryStyles.mobileSecondaryMenu} data-mobile-secondary>
+    <a
+      href={ROUTES.rentASpace.path}
+      class:list={[secondaryStyles.sectionMenuItemSecondary, secondaryStyles.sectionMenuBlue]}
+    >rent a space</a>
+    <a
+      href={ROUTES.contact.path}
+      class:list={[secondaryStyles.sectionMenuItemSecondary, secondaryStyles.sectionMenuBlue]}
+    >contact</a>
+  </div>
 </div>
 
+<style>
+  /* Mobile-only secondary menu inside the main menu wrapper. */
+  [data-mobile-secondary] {
+    display: none;
+  }
+  @media (max-width: 500px) {
+    [data-mobile-secondary] {
+      display: grid;
+    }
+  }
+</style>
+
 <script define:vars={{ hiddenClass: styles.menuHidden }}>
-  // Mobile collapse: tap the hamburger to toggle.
+  // Only collapsible menus start collapsed on mobile. Home menu is always shown.
+  const applyHidden = () => {
+    const isMobile = window.matchMedia('(max-width: 500px)').matches;
+    document.querySelectorAll('[data-menu]').forEach((menu) => {
+      const collapsible = menu.hasAttribute('data-collapsible');
+      if (isMobile && collapsible) menu.classList.add(hiddenClass);
+      else menu.classList.remove(hiddenClass);
+    });
+  };
+  applyHidden();
+  window.addEventListener('resize', applyHidden);
+
+  // Tap the hamburger to toggle on mobile.
   document.querySelectorAll('[data-menu-button]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
-      // Only intercept on mobile widths; desktop click follows href.
       if (window.matchMedia('(max-width: 500px)').matches) {
         e.preventDefault();
         const menu = btn.closest('[data-menu]');

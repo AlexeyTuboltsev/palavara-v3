@@ -1,0 +1,51 @@
+---
+import { ROUTES, type RouteKey } from '../data/routes';
+import styles from '../components-styles/SectionMenu.module.scss';
+
+interface Props {
+  /** 'blue' = section pages, 'white' = about page, 'yellow' = unused for now */
+  variant: 'blue' | 'white' | 'yellow';
+  active?: RouteKey;
+}
+const { variant, active } = Astro.props;
+
+const variantClass =
+  variant === 'white' ? styles.sectionMenuWhite :
+  variant === 'yellow' ? styles.sectionMenuYellow :
+  styles.sectionMenuBlue;
+
+type Item =
+  | { label: string; href: string; key?: RouteKey; external?: boolean; secondary?: boolean };
+
+const ITEMS: Item[] = [
+  { label: 'about', href: ROUTES.about.path, key: 'about' },
+  { label: 'shop', href: 'https://www.etsy.com/shop/PALAVARA', external: true },
+  { label: 'rent a space', href: ROUTES.rentASpace.path, key: 'rentASpace', secondary: true },
+  { label: 'contact', href: ROUTES.contact.path, key: 'contact', secondary: true },
+];
+---
+
+<div class={styles.sectionMenu}>
+  {ITEMS.map((item) => (
+    <a
+      href={item.href}
+      target={item.external ? '_blank' : undefined}
+      rel={item.external ? 'noopener noreferrer' : undefined}
+      data-secondary={item.secondary ? '' : undefined}
+      class:list={[
+        styles.sectionMenuItem,
+        variantClass,
+        item.key && active === item.key && styles.active,
+      ]}
+    >{item.label}</a>
+  ))}
+</div>
+
+<style>
+  /* SECONDARY items are not shown in the inline section menu on mobile. */
+  @media (max-width: 500px) {
+    [data-secondary] {
+      display: none;
+    }
+  }
+</style>
