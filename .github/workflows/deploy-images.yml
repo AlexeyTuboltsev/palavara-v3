@@ -12,6 +12,9 @@ on:
 jobs:
   optimize-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -48,25 +51,22 @@ jobs:
           echo "🚀 Deploying optimized images to CDN..."
           ./scripts/deploy-images.sh
 
-      - name: Commit updated manifest
-        run: |
-          git config --local user.email "tblz+k5qkop-bot@proton.me"
-          git config --local user.name "k5qkop-bot"
-          git add public/img/image-manifest.json
-
-          # Only commit if there are changes
-          if ! git diff --staged --quiet; then
-            git commit -m "Update image manifest after optimization
-
-            Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
-            echo "📝 Manifest updated and committed"
-          else
-            echo "ℹ️  No manifest changes to commit"
-          fi
-
-      - name: Push changes
-        if: success()
-        uses: ad-m/github-push-action@master
+      - name: Open PR with updated manifest
+        # Pushing directly to protected main is denied to github-actions[bot].
+        # Instead, open a PR from a bot branch — easy to merge or close.
+        # No-ops if there are no manifest changes.
+        uses: peter-evans/create-pull-request@v6
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: public/img/image-manifest.json
+          commit-message: "Update image manifest after optimization"
+          author: "k5qkop-bot <tblz+k5qkop-bot@proton.me>"
+          branch: bot/update-image-manifest
+          delete-branch: true
+          title: "Update image manifest after optimization"
+          body: |
+            Automated update from the **Deploy Optimized Images** workflow run #${{ github.run_number }}.
+
+            The image variants and the manifest have already been deployed to the CDN.
+            Merging this PR keeps the repo's `public/img/image-manifest.json` in sync so
+            local `yarn optimize-images` runs don't re-process already-optimized images.
