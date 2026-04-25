@@ -2,10 +2,13 @@
 <html lang="en">
 
 <head>
-  <!-- Google tag (gtag.js) — injected on the next idle window after page
-       load so it never competes with React or the hero image paint
-       during the LCP window. Events queued into dataLayer are flushed
-       when the real gtag.js arrives. -->
+  <!-- Google tag (gtag.js) — injected 4 s after window.load so it never
+       competes with the hero image paint. Events queued into dataLayer
+       are flushed when the real gtag.js arrives.
+       Note: requestIdleCallback was tried first but fires during the
+       LCP wait window (browser is idle waiting for the image), so gtag
+       was still parsed before LCP committed. A plain timeout is more
+       predictable on Slow-4G-style traces. -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
@@ -18,13 +21,7 @@
       document.head.appendChild(s);
     }
     window.addEventListener('load', function() {
-      // requestIdleCallback (no timeout) only fires when main thread is
-      // truly idle — guaranteed to be after LCP commits.
-      if (window.requestIdleCallback) {
-        window.requestIdleCallback(loadGtag);
-      } else {
-        setTimeout(loadGtag, 3000);
-      }
+      setTimeout(loadGtag, 4000);
     });
   </script>
   <meta charset="utf-8" />
