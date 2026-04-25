@@ -1,0 +1,85 @@
+name: Deploy CloudFront Function (staging)
+
+# Auto-deploys infra/staging-cloudfront-function.js to AWS whenever the
+# file changes on main. Also exposes workflow_dispatch so the function
+# can be deployed manually from any branch.
+#
+# One-time setup needed (already done if these secrets exist):
+#   STAGING_BASIC_AUTH_BASE64 — base64 of "username:password" for
+#       staging basic auth. Created by:  echo -n "user:pass" | base64
+#   STAGING_CLOUDFRONT_FUNCTION_NAME — the AWS CloudFront Function
+#       name, e.g. "palavara-staging-auth"
+#   AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY — already used by other
+#       workflows; needs IAM permissions for cloudfront:DescribeFunction,
+#       cloudfront:UpdateFunction, cloudfront:PublishFunction.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/staging-cloudfront-function.js'
+      - '.github/workflows/deploy-cloudfront-function.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # CloudFront Functions live in us-east-1
+
+      - name: Substitute basic-auth placeholder
+        env:
+          AUTH: ${{ secrets.STAGING_BASIC_AUTH_BASE64 }}
+        run: |
+          if [ -z "$AUTH" ]; then
+            echo "::error::STAGING_BASIC_AUTH_BASE64 secret is not set."
+            echo "Create it with: echo -n 'user:pass' | base64"
+            exit 1
+          fi
+          # Use a delimiter unlikely to appear in base64 output.
+          sed "s|REPLACE_WITH_BASE64_CREDENTIALS|${AUTH}|" \
+            infra/staging-cloudfront-function.js > /tmp/function.js
+          echo "Function size: $(wc -c < /tmp/function.js) bytes (limit: 10240)"
+
+      - name: Get current function ETag
+        id: etag
+        run: |
+          FN_NAME="${{ secrets.STAGING_CLOUDFRONT_FUNCTION_NAME }}"
+          if [ -z "$FN_NAME" ]; then
+            echo "::error::STAGING_CLOUDFRONT_FUNCTION_NAME secret is not set."
+            exit 1
+          fi
+          ETAG=$(aws cloudfront describe-function \
+            --name "$FN_NAME" \
+            --query 'ETag' --output text)
+          echo "etag=$ETAG" >> $GITHUB_OUTPUT
+          echo "Current ETag: $ETAG"
+
+      - name: Update function code
+        id: update
+        run: |
+          FN_NAME="${{ secrets.STAGING_CLOUDFRONT_FUNCTION_NAME }}"
+          OUT=$(aws cloudfront update-function \
+            --name "$FN_NAME" \
+            --if-match "${{ steps.etag.outputs.etag }}" \
+            --function-config Comment="Staging routing + basic auth",Runtime=cloudfront-js-2.0 \
+            --function-code fileb:///tmp/function.js)
+          NEW_ETAG=$(echo "$OUT" | jq -r '.ETag')
+          echo "new_etag=$NEW_ETAG" >> $GITHUB_OUTPUT
+          echo "Updated ETag (DEVELOPMENT stage): $NEW_ETAG"
+
+      - name: Publish function to LIVE stage
+        run: |
+          FN_NAME="${{ secrets.STAGING_CLOUDFRONT_FUNCTION_NAME }}"
+          aws cloudfront publish-function \
+            --name "$FN_NAME" \
+            --if-match "${{ steps.update.outputs.new_etag }}"
+          echo "✅ Function published to LIVE — staging requests now use the new code."
