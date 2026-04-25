@@ -2,20 +2,29 @@
 <html lang="en">
 
 <head>
-  <!-- Google tag (gtag.js) — loaded after window.load so it doesn't
-       compete with React / the hero image during the LCP window. The
-       inline stub queues events into dataLayer; the real gtag.js
-       processes the queue when it arrives. -->
+  <!-- Google tag (gtag.js) — injected on the next idle window after page
+       load so it never competes with React or the hero image paint
+       during the LCP window. Events queued into dataLayer are flushed
+       when the real gtag.js arrives. -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-WEFKKD2KC8');
-    window.addEventListener('load', function() {
+    function loadGtag() {
       var s = document.createElement('script');
       s.async = true;
       s.src = 'https://www.googletagmanager.com/gtag/js?id=G-WEFKKD2KC8';
       document.head.appendChild(s);
+    }
+    window.addEventListener('load', function() {
+      // requestIdleCallback (no timeout) only fires when main thread is
+      // truly idle — guaranteed to be after LCP commits.
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(loadGtag);
+      } else {
+        setTimeout(loadGtag, 3000);
+      }
     });
   </script>
   <meta charset="utf-8" />
