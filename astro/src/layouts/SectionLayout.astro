@@ -1,0 +1,44 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Logo from '../components/Logo.astro';
+import HeaderLinks from '../components/HeaderLinks.astro';
+import Menu from '../components/Menu.astro';
+import SectionVisual from '../components/SectionVisual.astro';
+import { ROUTES, type RouteKey } from '../data/routes';
+
+interface Props {
+  routeKey: RouteKey;
+}
+const { routeKey } = Astro.props;
+const route = ROUTES[routeKey];
+---
+
+<BaseLayout
+  title={route.title}
+  description={route.description}
+  canonicalPath={route.path}
+  ogImageBase={route.heroBase}
+  noindex={route.noindex}
+  preloadHeroBase={route.heroBase}
+  preloadHeroResponsive={routeKey === 'home'}
+>
+  <div class="section-container">
+    <header class="section-header">
+      <a href="/" class="brand-link" aria-label="Palavara — home">
+        <Logo />
+      </a>
+      <Menu active={routeKey} variant="section" />
+      <HeaderLinks />
+    </header>
+    <div class="section-content-wrapper">
+      <div class="section-visual">
+        {route.heroBase ? (
+          <SectionVisual base={route.heroBase} images={route.images} alt={route.imageAlt || ''} />
+        ) : null}
+      </div>
+      <div class="section-text">
+        <slot />
+      </div>
+    </div>
+  </div>
+</BaseLayout>

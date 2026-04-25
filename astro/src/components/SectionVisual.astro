@@ -1,0 +1,64 @@
+---
+import { SITE } from '../data/site';
+
+interface Props {
+  /** First image filename (no extension), e.g. "02-01" */
+  base: string;
+  /** Other images for click-to-cycle (optional) */
+  images?: string[];
+  alt: string;
+}
+const { base, images = [base], alt } = Astro.props;
+const prefix = SITE.imgPrefix;
+const has640 = base.startsWith('home-'); // only home images have 640/1280 variants in this spike
+---
+
+<picture class="section-hero" data-section-hero data-images={JSON.stringify(images)} data-prefix={prefix}>
+  <source
+    srcset={has640
+      ? `${prefix}/${base}-640.avif 640w, ${prefix}/${base}-1280.avif 1280w, ${prefix}/${base}.avif 1920w`
+      : `${prefix}/${base}.avif`}
+    sizes="50vw"
+    type="image/avif"
+    data-section-source="avif"
+  />
+  <source
+    srcset={has640
+      ? `${prefix}/${base}-640.webp 640w, ${prefix}/${base}-1280.webp 1280w, ${prefix}/${base}.webp 1920w`
+      : `${prefix}/${base}.webp`}
+    sizes="50vw"
+    type="image/webp"
+    data-section-source="webp"
+  />
+  <img
+    src={`${prefix}/${base}.jpg`}
+    srcset={has640 ? `${prefix}/${base}-640.jpg 640w, ${prefix}/${base}-1280.jpg 1280w, ${prefix}/${base}.jpg 1920w` : undefined}
+    sizes="50vw"
+    alt={alt}
+    loading="eager"
+  />
+</picture>
+
+<script>
+  // Click-to-advance for section page images (only swaps the 1920w base).
+  document.querySelectorAll<HTMLPictureElement>('[data-section-hero]').forEach((picture) => {
+    const images: string[] = JSON.parse(picture.dataset.images || '[]');
+    const prefix = picture.dataset.prefix || '';
+    if (images.length <= 1) return;
+
+    const img = picture.querySelector<HTMLImageElement>('img');
+    const avif = picture.querySelector<HTMLSourceElement>('[data-section-source="avif"]');
+    const webp = picture.querySelector<HTMLSourceElement>('[data-section-source="webp"]');
+    if (!img || !avif || !webp) return;
+
+    let i = 0;
+    picture.style.cursor = 'pointer';
+    picture.addEventListener('click', () => {
+      i = (i + 1) % images.length;
+      const base = images[i];
+      avif.srcset = `${prefix}/${base}.avif`;
+      webp.srcset = `${prefix}/${base}.webp`;
+      img.src = `${prefix}/${base}.jpg`;
+    });
+  });
+</script>

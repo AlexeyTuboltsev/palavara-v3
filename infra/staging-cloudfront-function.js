@@ -40,12 +40,18 @@ function handler(event) {
         var prefix = '/' + match[1];
         var uri = request.uri;
 
-        // Static assets (have file extension) → prepend prefix
-        // SPA routes (no file extension) → serve index.html from prefix
+        // Static assets (have file extension) → prepend prefix as-is.
+        // Otherwise, treat as a route: serve <route>/index.html
+        // (works for SPA-fallback and Astro multi-page builds alike).
         if (uri.match(/\.\w+$/)) {
             request.uri = prefix + uri;
-        } else {
+        } else if (uri === '/' || uri === '') {
             request.uri = prefix + '/index.html';
+        } else {
+            // /about-me  or  /about-me/  →  /pr-49/about-me/index.html
+            var path = uri;
+            if (path.charAt(path.length - 1) !== '/') path += '/';
+            request.uri = prefix + path + 'index.html';
         }
     }
 

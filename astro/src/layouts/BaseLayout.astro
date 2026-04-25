@@ -1,0 +1,57 @@
+---
+import { SITE } from '../data/site';
+import HeadMeta from '../components/HeadMeta.astro';
+import AnalyticsScripts from '../components/AnalyticsScripts.astro';
+import '../styles/global.css';
+import '../styles/layouts.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  ogImageBase?: string;
+  noindex?: boolean;
+  /** Optional preload for the LCP image (responsive AVIF). */
+  preloadHeroBase?: string;
+  /** If true, hero variants 640/1280/1920 are preloaded. Otherwise just the .avif. */
+  preloadHeroResponsive?: boolean;
+}
+const {
+  title, description, canonicalPath, ogImageBase, noindex,
+  preloadHeroBase, preloadHeroResponsive = false,
+} = Astro.props;
+
+const heroPreloadSrcset = preloadHeroBase && preloadHeroResponsive
+  ? `${SITE.imgPrefix}/${preloadHeroBase}-640.avif 640w, ${SITE.imgPrefix}/${preloadHeroBase}-1280.avif 1280w, ${SITE.imgPrefix}/${preloadHeroBase}.avif 1920w`
+  : null;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+
+  <link rel="preconnect" href="https://be.palavara.com" />
+  <link rel="dns-prefetch" href="https://be.palavara.com" />
+
+  {heroPreloadSrcset
+    ? <link rel="preload" as="image" type="image/avif" fetchpriority="high" imagesrcset={heroPreloadSrcset} imagesizes="100vw" />
+    : preloadHeroBase
+      ? <link rel="preload" as="image" type="image/avif" fetchpriority="high" href={`${SITE.imgPrefix}/${preloadHeroBase}.avif`} />
+      : null
+  }
+
+  <link rel="icon" type="image/png" href="/favicon/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="/favicon/favicon-192x192.png" sizes="192x192" />
+
+  <HeadMeta title={title} description={description} canonicalPath={canonicalPath} ogImageBase={ogImageBase} noindex={noindex} />
+  <AnalyticsScripts />
+
+  <slot name="head" />
+</head>
+<body>
+  <slot />
+</body>
+</html>

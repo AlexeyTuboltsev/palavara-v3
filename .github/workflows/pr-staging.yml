@@ -11,7 +11,10 @@ permissions:
 
 jobs:
   tests:
-    if: github.event.action != 'closed'
+    # Visual regression tests are CRA-specific (need yarn start dev server).
+    # Skip them automatically on branches that ship the Astro spike — those
+    # don't have a CRA dev server to test against.
+    if: github.event.action != 'closed' && hashFiles('astro/package.json') == ''
     timeout-minutes: 60
     runs-on: ubuntu-latest
     container:
@@ -54,7 +57,11 @@ jobs:
 
   deploy-staging:
     needs: tests
-    if: github.event.action != 'closed'
+    # Run after tests succeed, or run unconditionally on Astro branches
+    # where the tests job was skipped.
+    if: |
+      github.event.action != 'closed' &&
+      (needs.tests.result == 'success' || needs.tests.result == 'skipped')
     uses: ./.github/workflows/deploy-staging.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}

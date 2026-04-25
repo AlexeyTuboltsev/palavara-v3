@@ -38,15 +38,38 @@ jobs:
           node-version: '18'
           cache: 'yarn'
 
-      - name: Install dependencies
+      - name: Detect Astro spike
+        id: detect_build
+        run: |
+          if [ -f astro/package.json ]; then
+            echo "kind=astro" >> $GITHUB_OUTPUT
+            echo "dir=astro/dist" >> $GITHUB_OUTPUT
+          else
+            echo "kind=cra" >> $GITHUB_OUTPUT
+            echo "dir=build" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies (CRA)
+        if: steps.detect_build.outputs.kind == 'cra'
         run: yarn install --frozen-lockfile
 
-      - name: Build production bundle
+      - name: Build CRA bundle
+        if: steps.detect_build.outputs.kind == 'cra'
         run: yarn build
         env:
           REACT_APP_SENTRY: ${{ secrets.REACT_APP_SENTRY }}
           REACT_APP_IMG_PREFIX: https://be.palavara.com/img/studio
           REACT_APP_USE_OPTIMIZED_IMAGES: true
+
+      - name: Install dependencies (Astro)
+        if: steps.detect_build.outputs.kind == 'astro'
+        working-directory: astro
+        run: yarn install --frozen-lockfile
+
+      - name: Build Astro
+        if: steps.detect_build.outputs.kind == 'astro'
+        working-directory: astro
+        run: yarn build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -57,7 +80,7 @@ jobs:
 
       - name: Sync to S3
         run: |
-          aws s3 sync build/ s3://staging.studio.palavara.com/pr-${{ inputs.pr_number }}/ \
+          aws s3 sync ${{ steps.detect_build.outputs.dir }}/ s3://staging.studio.palavara.com/pr-${{ inputs.pr_number }}/ \
             --delete \
             --cache-control "public, max-age=300"
 
