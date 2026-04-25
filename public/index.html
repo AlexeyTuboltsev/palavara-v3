@@ -31,9 +31,18 @@
 
   <link rel="preconnect" href="https://be.palavara.com" />
   <link rel="dns-prefetch" href="https://be.palavara.com" />
-  <!-- Only AVIF is preloaded; type= makes non-AVIF browsers skip. The
-       <picture> in Home.tsx still serves WebP/JPEG to older browsers. -->
-  <link rel="preload" as="image" href="https://be.palavara.com/img/studio/home-1.avif" type="image/avif" fetchpriority="high" />
+  <!-- Responsive AVIF preload: browser picks the right size before any
+       <img> exists. Mobile (sub-640w viewport) gets ~32 KiB instead of
+       ~140 KiB. type=image/avif causes non-AVIF browsers to skip; the
+       <picture> in Home.tsx still serves WebP/JPEG to those. -->
+  <link
+    rel="preload"
+    as="image"
+    type="image/avif"
+    fetchpriority="high"
+    imagesrcset="https://be.palavara.com/img/studio/home-1-640.avif 640w, https://be.palavara.com/img/studio/home-1-1280.avif 1280w, https://be.palavara.com/img/studio/home-1.avif 1920w"
+    imagesizes="100vw"
+  />
 
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon/favicon-16x16.png" sizes="16x16">
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon/favicon-32x32.png" sizes="32x32">
