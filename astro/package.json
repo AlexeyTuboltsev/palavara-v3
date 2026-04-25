@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "build:test": "VISUAL_TEST_MODE=true astro build",
+    "preview": "astro preview",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots=all"
   },
   "dependencies": {
     "astro": "^4.16.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "sass": "^1.99.0"
   }
 }
