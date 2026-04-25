@@ -1,11 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Logo from '../components/Logo.astro';
-import HeaderLinks from '../components/HeaderLinks.astro';
 import Menu from '../components/Menu.astro';
+import SectionHeader from '../components/SectionHeader.astro';
 import HomeHeroCarousel from '../components/HomeHeroCarousel.astro';
 import { ROUTES } from '../data/routes';
 import { SITE } from '../data/site';
+import appStyles from '../components-styles/App.module.scss';
+import logoStyles from '../components-styles/Logo.module.scss';
 
 const route = ROUTES.home;
 ---
@@ -42,19 +44,25 @@ const route = ROUTES.home;
     })} />
   </Fragment>
 
-  <div class="home-background">
+  <div class={appStyles.background}>
     <HomeHeroCarousel />
-    <div class="home-layout">
-      <div class="logo-area"><Logo fill="#ffff00" /></div>
-      <div class="links-area"><HeaderLinks /></div>
-      <h1 class="title">Pottery classes<br/>for kids and adults</h1>
-      <div class="menu-area"><Menu active="home" variant="home" /></div>
-      <aside class="announcement">
+    <div class={appStyles.header}>
+      <a href="/" class:list={[logoStyles.logo, logoStyles.logoYellow]} aria-label="Palavara — home">
+        <Logo />
+      </a>
+      <div class={appStyles.title}>
+        Pottery classes <br/> for kids and adults
+      </div>
+      <SectionHeader variant="home" />
+      <Menu active="home" variant="home" />
+    </div>
+    <div class={appStyles.content}>
+      <div class={appStyles.announcement}>
         <a href="/membership">
           Pottery studio membership<br/>
-          <span class="underline">available!</span>&nbsp;→
+          <span class={appStyles.announcementHighlight}>available!</span>&nbsp;→
         </a>
-      </aside>
+      </div>
     </div>
   </div>
 </BaseLayout>

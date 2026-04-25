@@ -1,0 +1,237 @@
+@import "../styles/global.module";
+
+.menu {
+  position: relative;
+  align-self: flex-start;
+  grid-column: 2;
+  min-width: 324px;
+
+  padding: 20px 0 20px 0;
+  color: $color-white;
+  font-size: 20px;
+  text-transform: uppercase;
+
+  &.menu-blue {
+    @media (max-width: $breakpoint-mobile) {
+
+      background-color: $color-blue;
+    }
+  }
+
+  &.menuHome {
+    background-color: $color-blue;
+    opacity: 0.8;
+  }
+
+  &.menu-yellow {
+    background-color: $color-yellow;
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    font-size: 22px;
+    grid-column: 1 / span 2;
+    padding: 0 0 5px 0;
+  }
+}
+
+
+.menu-item {
+  display: block;
+  padding: 5px 10px;
+  line-height: 1;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  cursor: pointer;
+
+  &.menu-blue {
+    color: $color-black;
+    border-bottom: 1px solid $color-black;
+
+    @media (max-width: $breakpoint-mobile) {
+      color: $color_white;
+      border-bottom: 1px solid $color-white;
+    }
+  }
+
+  &.menu-yellow {
+    color: $color_white;
+    border-bottom: 1px solid $color-white;
+  }
+
+  &.menu-about {
+    @media (max-width: $breakpoint-mobile) {
+      color: $color_blue;
+      border-bottom: 1px solid $color_blue;
+    }
+  }
+}
+
+.menu-item-active {
+  cursor: default;
+  font-weight: 500;
+
+  &.menu-blue {
+    color: $color-blue;
+
+    @media (max-width: $breakpoint-mobile) {
+      color: $color-yellow
+    }
+  }
+
+  &.menu-yellow {
+    color: $color-yellow
+  }
+}
+
+
+.parent-menu-item-wrapper-active {
+  border-bottom: none;
+
+  &.menu-blue {
+    color: $color-blue;
+
+  }
+
+  &.menu-yellow {
+    color: $color-yellow;
+  }
+
+
+}
+
+.parent-menu-item {
+  display: block;
+  font-weight: 500;
+  padding: 5px 10px;
+  line-height: 1;
+  cursor: pointer;
+
+  &.menu-blue {
+    color: $color-black;
+
+    @media (max-width: $breakpoint-mobile) {
+      color: $color-white;
+    }
+  }
+
+  &.menu-yellow {
+    color: $color-yellow;
+  }
+
+  &.menu-about {
+    @media (max-width: $breakpoint-mobile) {
+      color: $color_blue;
+    }
+  }
+}
+
+.child-menu-item {
+  display: block;
+  padding: 5px 57px;
+  line-height: 1;
+  font-weight: 300;
+  text-transform: lowercase;
+  position: relative;
+  cursor: pointer;
+
+  &.menu-blue {
+    color: $color-black;
+
+    @media (max-width: $breakpoint-mobile) {
+      color: $color-white;
+    }
+  }
+
+  &.menu-yellow {
+    color: $color-white;
+  }
+
+  &.menu-about {
+    @media (max-width: $breakpoint-mobile) {
+      color: $color_blue;
+    }
+  } 
+
+  &:before {
+    content: "";
+    position: absolute;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+    height: 10px;
+    top: 11px;
+    left: 0;
+    width: 47px;
+
+    &.menu-blue {
+      border-color: $color-black;
+    }
+
+    &.menu-yellow {
+      border-color: $color-white;
+    }
+
+    &.menu-about {
+      @media (max-width: $breakpoint-mobile) {
+        border-color: $color_blue;
+      }
+    }
+  }
+}
+
+.child-menu-item-active {
+  font-weight: 500;
+
+  &.menu-blue {
+    color: $color-blue;
+
+    @media (max-width: $breakpoint-mobile) {
+      color: $color-yellow;
+    }
+  }
+
+  &.menu-yellow {
+    color: $color-yellow;
+  }
+}
+
+.menu-button {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+  padding: 8px;
+  height: 30px;
+  width: 50px;
+  background: transparent;
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  & span {
+    border-bottom: 2px solid $color-white;
+    padding: 0;
+    width: 100%;
+  }
+
+  &.menuButtonBlue span {
+    border-bottom: 2px solid $color-blue;
+  }
+}
+
+.menu-hidden {
+  height: 28px;
+
+  & * {
+    display: none;
+  }
+
+  & .menu-button {
+    display: flex;
+
+    & * {
+      display: initial;
+    }
+  }
+}

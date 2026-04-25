@@ -1,0 +1,35 @@
+@import '../styles/global.module';
+
+.logo {
+  width: $logo-size;
+  height: $logo-size;
+  background-color: transparent;
+  cursor: pointer;
+
+  @media (max-width: $breakpoint-mobile) {
+    width: $logo-size-small;
+    height: $logo-size-small;
+  }
+
+}
+
+.logo-blue {
+  svg {
+    fill: $color-blue;
+    stroke: $color-blue;
+  }
+}
+
+.logo-yellow {
+  svg {
+    fill: $color-yellow;
+    stroke: $color-yellow;
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    svg {
+      fill: $color-blue;
+      stroke: $color-blue;
+    }
+  }
+}

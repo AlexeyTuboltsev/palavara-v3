@@ -1,0 +1,129 @@
+@import "../styles/global.module";
+
+.section-menu {
+  display: flex;
+  flex-wrap: wrap;
+  grid-auto-flow: column;
+  justify-content: flex-end;
+  white-space: nowrap;
+  grid-row: 2;
+
+  @media (max-width: $breakpoint-mobile) {
+    border-top: 1px solid $color-dark-grey;
+    padding-top: 4px;
+  }
+}
+
+.section-menu-item {
+  position: relative;
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 10px;
+  color: $color-white;
+
+  mix-blend-mode: normal;
+
+  cursor: pointer;
+
+  &:after {
+    content: "|";
+    position: absolute;
+    right: -7px;
+    width: 0;
+    cursor: default;
+  }
+
+  &:last-child {
+    padding-right: 0;
+
+    &:after {
+      content: "";
+      right: 0;
+    }
+  }
+
+  @media (max-width: $breakpoint-mobile) {
+    color: $color-blue;
+    font-size: 16px;
+  }
+
+  &.section-menu-white {
+    color: $color-white;
+ 
+    &.active {
+      color: $color-yellow ;
+    }
+
+    &:after {
+      color: $color-white;
+    }
+    
+    @media (max-width: $breakpoint-mobile) {
+      color: $color-black;
+      font-size: 16px;
+
+      &:after {
+        color: $color-black;
+      }
+    }
+
+  }
+
+  &.section-menu-blue {
+    color: $color-blue;
+
+    &.active {
+      color: $color-black ;
+    }
+
+    &:after {
+      color: $color-blue;
+    }
+  }
+
+  &.section-menu-yellow {
+    color: $color-yellow;
+
+    @media (max-width: $breakpoint-mobile) {
+      color: $color-black;
+    }
+  }
+
+}
+
+.mobile-secondary-menu {
+  padding: 15px 10px 0;
+  display: grid;
+  grid-column-gap: 10px;
+  grid-auto-columns: auto;
+  grid-auto-flow: column;
+  justify-content: flex-start;
+}
+
+.section-menu-item-secondary {
+  position: relative;
+  color: $color-white;
+  font-size: 16px;
+  text-transform: none;
+
+
+  &:not(:last-child):after {
+    content: "/";
+    position: absolute;
+    right: -2px;
+    width: 0;
+    cursor: default;
+  }
+
+  &.section-menu-blue {
+    color: $color-white;
+
+    &.active {
+      color: $color-black;
+    }
+  }
+
+  &.menu-about {
+    color: $color-blue;
+  }
+}

@@ -1,10 +1,12 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import Logo from '../components/Logo.astro';
-import HeaderLinks from '../components/HeaderLinks.astro';
 import Menu from '../components/Menu.astro';
+import SectionHeader from '../components/SectionHeader.astro';
 import SectionVisual from '../components/SectionVisual.astro';
 import { ROUTES, type RouteKey } from '../data/routes';
+import sectionStyles from '../components-styles/Section.module.scss';
+import logoStyles from '../components-styles/Logo.module.scss';
 
 interface Props {
   routeKey: RouteKey;
@@ -20,24 +22,25 @@ const route = ROUTES[routeKey];
   ogImageBase={route.heroBase}
   noindex={route.noindex}
   preloadHeroBase={route.heroBase}
-  preloadHeroResponsive={routeKey === 'home'}
 >
-  <div class="section-container">
-    <header class="section-header">
-      <a href="/" class="brand-link" aria-label="Palavara — home">
+  <div class={sectionStyles.sectionContainer}>
+    <div class={sectionStyles.header}>
+      <a href="/" class:list={[logoStyles.logo, logoStyles.logoBlue]} aria-label="Palavara — home">
         <Logo />
       </a>
-      <Menu active={routeKey} variant="section" />
-      <HeaderLinks />
-    </header>
-    <div class="section-content-wrapper">
-      <div class="section-visual">
-        {route.heroBase ? (
+      <Menu active={routeKey} variant="blue" />
+      <SectionHeader variant="section" />
+    </div>
+    <div class={sectionStyles.sectionContent}>
+      {route.heroBase ? (
+        <div class={sectionStyles.visual}>
           <SectionVisual base={route.heroBase} images={route.images} alt={route.imageAlt || ''} />
-        ) : null}
-      </div>
-      <div class="section-text">
-        <slot />
+        </div>
+      ) : null}
+      <div class={sectionStyles.textWrapper}>
+        <div class={sectionStyles.text}>
+          <slot />
+        </div>
       </div>
     </div>
   </div>

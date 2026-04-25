@@ -1,0 +1,13 @@
+---
+import HeaderLinks from './HeaderLinks.astro';
+import styles from '../components-styles/SectionHeader.module.scss';
+
+interface Props {
+  variant: 'home' | 'section';
+}
+const { variant } = Astro.props;
+---
+
+<div class={styles.sectionHeader}>
+  <HeaderLinks variant={variant} />
+</div>
