@@ -2,14 +2,21 @@
 <html lang="en">
 
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WEFKKD2KC8"></script>
+  <!-- Google tag (gtag.js) — loaded after window.load so it doesn't
+       compete with React / the hero image during the LCP window. The
+       inline stub queues events into dataLayer; the real gtag.js
+       processes the queue when it arrives. -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'G-WEFKKD2KC8');
+    window.addEventListener('load', function() {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-WEFKKD2KC8';
+      document.head.appendChild(s);
+    });
   </script>
   <meta charset="utf-8" />
 
