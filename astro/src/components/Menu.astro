@@ -18,10 +18,12 @@ const menuVariantClass =
   variant === 'home' ? styles.menuHome :
   variant === 'yellow' ? styles.menuYellow : styles.menuBlue;
 
-// Items inside the menu are coloured per-item using the same variant
-// (blue items on blue background, white items on home etc.).
+// Item color class. Home renders with menuYellow (white text); section and
+// about both render with menuBlue (black text). On about, the yellow header
+// overlay uses mix-blend-mode: multiply so the underlying black/blue text
+// stays visible.
 const itemVariantClass =
-  variant === 'home' || variant === 'yellow' ? styles.menuYellow : styles.menuBlue;
+  variant === 'home' ? styles.menuYellow : styles.menuBlue;
 
 // Menu structure mirroring src/routes/common/menu.ts.
 type Item =
@@ -48,7 +50,7 @@ const isParentActive = (children: { key: RouteKey }[]) =>
   children.some((c) => c.key === active);
 ---
 
-<div class:list={[styles.menu, menuVariantClass]} data-menu data-collapsible={collapsible ? '' : undefined}>
+<div class:list={[styles.menu, menuVariantClass]} data-menu data-collapsible={collapsible ? '' : undefined} data-hidden-class={styles.menuHidden}>
   {ITEMS.map((item) => (
     item.kind === 'simple' ? (
       <a
@@ -85,7 +87,7 @@ const isParentActive = (children: { key: RouteKey }[]) =>
   {collapsible && (
     <a
       href="/"
-      class:list={[styles.menuButton, variant !== 'home' && styles.menuButtonBlue]}
+      class:list={[styles.menuButton, variant === 'yellow' && styles.menuButtonBlue]}
       aria-label="Toggle menu"
       data-menu-button
     ><span></span><span></span><span></span></a>
@@ -114,27 +116,33 @@ const isParentActive = (children: { key: RouteKey }[]) =>
   }
 </style>
 
-<script define:vars={{ hiddenClass: styles.menuHidden }}>
-  // Only collapsible menus start collapsed on mobile. Home menu is always shown.
-  const applyHidden = () => {
-    const isMobile = window.matchMedia('(max-width: 500px)').matches;
-    document.querySelectorAll('[data-menu]').forEach((menu) => {
-      const collapsible = menu.hasAttribute('data-collapsible');
-      if (isMobile && collapsible) menu.classList.add(hiddenClass);
-      else menu.classList.remove(hiddenClass);
-    });
-  };
-  applyHidden();
-  window.addEventListener('resize', applyHidden);
-
-  // Tap the hamburger to toggle on mobile.
-  document.querySelectorAll('[data-menu-button]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      if (window.matchMedia('(max-width: 500px)').matches) {
-        e.preventDefault();
-        const menu = btn.closest('[data-menu]');
-        if (menu) menu.classList.toggle(hiddenClass);
+<script is:inline>
+  (function () {
+    function applyHidden() {
+      var isMobile = window.matchMedia('(max-width: 500px)').matches;
+      var menus = document.querySelectorAll('[data-menu]');
+      for (var i = 0; i < menus.length; i++) {
+        var menu = menus[i];
+        var hiddenClass = menu.getAttribute('data-hidden-class');
+        if (!hiddenClass) continue;
+        var collapsible = menu.hasAttribute('data-collapsible');
+        if (isMobile && collapsible) menu.classList.add(hiddenClass);
+        else menu.classList.remove(hiddenClass);
       }
-    });
-  });
+    }
+    applyHidden();
+    window.addEventListener('resize', applyHidden);
+
+    var buttons = document.querySelectorAll('[data-menu-button]');
+    for (var j = 0; j < buttons.length; j++) {
+      buttons[j].addEventListener('click', function (e) {
+        if (!window.matchMedia('(max-width: 500px)').matches) return;
+        e.preventDefault();
+        var menu = e.currentTarget.closest('[data-menu]');
+        if (!menu) return;
+        var hiddenClass = menu.getAttribute('data-hidden-class');
+        if (hiddenClass) menu.classList.toggle(hiddenClass);
+      });
+    }
+  })();
 </script>

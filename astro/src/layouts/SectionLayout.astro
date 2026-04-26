@@ -13,6 +13,7 @@ interface Props {
 }
 const { routeKey } = Astro.props;
 const route = ROUTES[routeKey];
+const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
 ---
 
 <BaseLayout
@@ -54,6 +55,15 @@ const route = ROUTES[routeKey];
         <div class={sectionStyles.text}>
           <slot />
         </div>
+        {route.heroBase ? (
+          <div class={sectionStyles.mobileImage}>
+            {visualTestMode ? (
+              <div style="background-color:#e0e0e0;width:100%;height:100%;" aria-hidden="true"></div>
+            ) : (
+              <img src={`https://be.palavara.com/img/studio/${route.heroBase}.jpg`} alt={route.imageAlt || ''} loading="lazy" />
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
   </div>

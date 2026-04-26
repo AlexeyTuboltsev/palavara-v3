@@ -37,7 +37,7 @@ for (const route of routes) {
     await expect(page).toHaveScreenshot(`${route.name}.png`, {
       fullPage: true,
       animations: 'disabled',
-      maxDiffPixels: 6100,
+      maxDiffPixels: 0,
     });
   });
 }
