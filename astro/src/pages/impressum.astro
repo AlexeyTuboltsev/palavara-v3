@@ -1,23 +1,8 @@
 ---
 import SectionLayout from '../layouts/SectionLayout.astro';
+import sectionStyles from '../components-styles/Section.module.scss';
 ---
 
 <SectionLayout routeKey="impressum">
-  <h2>Impressum</h2>
-  <br />
-  <h3>Angaben gemäß §5 TMG</h3>
-  <br />
-  <p>Palavara Studio</p>
-  <p>Freiberuflerin: Varvara Polyakova</p>
-  <p>Studio address:</p>
-  <p>Steegerstr. 1A</p>
-  <p>13359 Berlin</p>
-  <p>Deutschland</p>
-  <br />
-  <p>E-Mail: varya@palavara.com</p>
-  <br />
-  <p>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</p>
-  <p>Varvara Polyakova</p>
-  <p>Steegerstr. 1A</p>
-  <p>13359 Berlin</p>
+  <div class={sectionStyles.text}><h2>Impressum</h2><br /><h3>Angaben gemäß §5 TMG</h3><br /><p>Palavara Studio</p><p>Freiberuflerin: Varvara Polyakova</p><p>Studio address:</p><p>Steegerstr. 1A</p><p>13359 Berlin</p><p>Deutschland</p><br /><p>E-Mail: varya@palavara.com</p><br /><p>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</p><p>Varvara Polyakova</p><p>Steegerstr. 1A</p><p>13359 Berlin</p></div>
 </SectionLayout>
