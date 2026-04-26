@@ -65,12 +65,11 @@ const isParentActive = (children: { key: RouteKey }[]) =>
       <div class:list={[
         styles.parentMenuItemWrapper,
         isParentActive(item.children) && styles.parentMenuItemWrapperActive,
-        itemVariantClass,
       ]}>
-        <span class:list={[
+        <div class:list={[
           isParentActive(item.children) ? styles.parentMenuItem : styles.menuItem,
           itemVariantClass,
-        ]}>{item.label}{isParentActive(item.children) ? ':' : ''}</span>
+        ]}>{item.label}{isParentActive(item.children) ? ':' : ''}</div>
         {isParentActive(item.children) && item.children.map((c) => (
           <a
             href={ROUTES[c.key].path}
