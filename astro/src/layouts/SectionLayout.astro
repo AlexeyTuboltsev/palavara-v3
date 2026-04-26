@@ -33,7 +33,7 @@ const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
       <SectionHeader variant="section" active={routeKey} />
     </div>
     <div class={sectionStyles.buttons}>
-      {route.heroBase ? (
+      {route.images && route.images.length > 1 ? (
         <>
           <svg class={sectionStyles.minus} viewBox="0 0 38 1" fill="none" xmlns="http://www.w3.org/2000/svg">
             <line y1="0.5" x2="38" y2="0.5"></line>
