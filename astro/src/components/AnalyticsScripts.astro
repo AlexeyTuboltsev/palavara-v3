@@ -1,0 +1,21 @@
+---
+import { SITE } from '../data/site';
+---
+
+<!-- Google tag (gtag.js) — injected 4 s after window.load so it never
+     competes with the hero image paint. Same approach as the CRA build. -->
+<script is:inline define:vars={{ gaId: SITE.gaId }}>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { window.dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', gaId);
+  function loadGtag() {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+    document.head.appendChild(s);
+  }
+  window.addEventListener('load', function() {
+    setTimeout(loadGtag, 4000);
+  });
+</script>

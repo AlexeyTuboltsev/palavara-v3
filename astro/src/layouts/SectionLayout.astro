@@ -1,0 +1,70 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Logo from '../components/Logo.astro';
+import Menu from '../components/Menu.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import SectionVisual from '../components/SectionVisual.astro';
+import { ROUTES, type RouteKey } from '../data/routes';
+import sectionStyles from '../components-styles/Section.module.scss';
+import logoStyles from '../components-styles/Logo.module.scss';
+
+interface Props {
+  routeKey: RouteKey;
+}
+const { routeKey } = Astro.props;
+const route = ROUTES[routeKey];
+const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
+---
+
+<BaseLayout
+  title={route.title}
+  description={route.description}
+  canonicalPath={route.path}
+  ogImageBase={route.heroBase}
+  noindex={route.noindex}
+  preloadHeroBase={route.heroBase}
+>
+  <div class={sectionStyles.sectionContainer}>
+    <div class={sectionStyles.header}>
+      <a href="/" class:list={[logoStyles.logo, logoStyles.logoBlue]} aria-label="Palavara — home">
+        <Logo />
+      </a>
+      <Menu active={routeKey} variant="blue" />
+      <SectionHeader variant="section" active={routeKey} />
+    </div>
+    <div class={sectionStyles.buttons}>
+      {route.heroBase ? (
+        <>
+          <svg class={sectionStyles.minus} viewBox="0 0 38 1" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line y1="0.5" x2="38" y2="0.5"></line>
+          </svg>
+          <svg class={sectionStyles.plus} viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line y1="18.5" x2="38" y2="18.5"></line>
+            <line x1="19.5" y1="2.18557e-08" x2="19.5" y2="38"></line>
+          </svg>
+        </>
+      ) : null}
+    </div>
+    <div class={sectionStyles.sectionContent}>
+      {route.heroBase ? (
+        <div class={sectionStyles.visual}>
+          <SectionVisual base={route.heroBase} images={route.images} alt={route.imageAlt || ''} />
+        </div>
+      ) : null}
+      <div class={sectionStyles.textWrapper}>
+        <div class={sectionStyles.text}>
+          <slot />
+        </div>
+        {route.heroBase ? (
+          <div class={sectionStyles.mobileImage}>
+            {visualTestMode ? (
+              <div style="background-color:#e0e0e0;width:100%;height:100%;" aria-hidden="true"></div>
+            ) : (
+              <img src={`https://be.palavara.com/img/studio/${route.heroBase}.jpg`} alt={route.imageAlt || ''} loading="lazy" />
+            )}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

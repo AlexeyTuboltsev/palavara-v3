@@ -1,0 +1,17 @@
+---
+import HeaderLinks from './HeaderLinks.astro';
+import SectionMenu from './SectionMenu.astro';
+import type { RouteKey } from '../data/routes';
+import styles from '../components-styles/SectionHeader.module.scss';
+
+interface Props {
+  variant: 'home' | 'section';
+  active?: RouteKey;
+}
+const { variant, active } = Astro.props;
+---
+
+<div class={styles.sectionHeader}>
+  <HeaderLinks variant={variant} />
+  <SectionMenu variant="blue" active={active} />
+</div>

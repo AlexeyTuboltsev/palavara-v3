@@ -1,0 +1,62 @@
+---
+import { SITE } from '../data/site';
+import { ROUTES } from '../data/routes';
+import appStyles from '../components-styles/App.module.scss';
+
+const home = ROUTES.home;
+const prefix = SITE.imgPrefix;
+const images = home.images || ['home-1'];
+const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
+
+const buildSet = (base: string, ext: 'avif' | 'webp' | 'jpg') =>
+  `${prefix}/${base}-640.${ext} 640w, ${prefix}/${base}-1280.${ext} 1280w, ${prefix}/${base}.${ext} 1920w`;
+---
+
+{visualTestMode ? (
+  <div
+    class={appStyles.backgroundImg}
+    style="background-color:#e0e0e0;width:100%;height:100%;position:absolute;top:0;left:0;"
+    aria-hidden="true"
+  ></div>
+) : (
+  <picture data-hero data-images={JSON.stringify(images)} data-prefix={prefix}>
+    <source srcset={buildSet(images[0], 'avif')} sizes="100vw" type="image/avif" data-source="avif" />
+    <source srcset={buildSet(images[0], 'webp')} sizes="100vw" type="image/webp" data-source="webp" />
+    <img
+      src={`${prefix}/${images[0]}.jpg`}
+      srcset={buildSet(images[0], 'jpg')}
+      sizes="100vw"
+      alt={home.imageAlt || ''}
+      loading="eager"
+      fetchpriority="high"
+      class={appStyles.backgroundImg}
+    />
+  </picture>
+)}
+
+{!visualTestMode && (
+  <script>
+    // Cycle the home hero every 5 s. Same behaviour as the CRA saga.
+    const PERIOD_MS = 5000;
+    document.querySelectorAll<HTMLPictureElement>('[data-hero]').forEach((picture) => {
+      const images: string[] = JSON.parse(picture.dataset.images || '[]');
+      const prefix = picture.dataset.prefix || '';
+      if (images.length <= 1) return;
+      const avifSrc = picture.querySelector<HTMLSourceElement>('[data-source="avif"]');
+      const webpSrc = picture.querySelector<HTMLSourceElement>('[data-source="webp"]');
+      const img = picture.querySelector<HTMLImageElement>('img');
+      if (!avifSrc || !webpSrc || !img) return;
+      const buildSet = (base: string, ext: string) =>
+        `${prefix}/${base}-640.${ext} 640w, ${prefix}/${base}-1280.${ext} 1280w, ${prefix}/${base}.${ext} 1920w`;
+      let i = 0;
+      setInterval(() => {
+        i = (i + 1) % images.length;
+        const base = images[i];
+        avifSrc.srcset = buildSet(base, 'avif');
+        webpSrc.srcset = buildSet(base, 'webp');
+        img.srcset = buildSet(base, 'jpg');
+        img.src = `${prefix}/${base}.jpg`;
+      }, PERIOD_MS);
+    });
+  </script>
+)}

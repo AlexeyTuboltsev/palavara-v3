@@ -1,0 +1,147 @@
+---
+import { ROUTES, type RouteKey } from '../data/routes';
+import styles from '../components-styles/Menu.module.scss';
+import secondaryStyles from '../components-styles/SectionMenu.module.scss';
+
+interface Props {
+  active: RouteKey;
+  /** 'blue' = section pages, 'yellow' = about, 'home' = home */
+  variant: 'blue' | 'yellow' | 'home';
+  /** Whether the menu can collapse on mobile. Home is non-collapsible. */
+  collapsible?: boolean;
+}
+const { active, variant, collapsible = true } = Astro.props;
+
+// Variant class chooses the menu's background + text colour.
+// menuHome is a translucent blue background used on Home only.
+const menuVariantClass =
+  variant === 'home' ? styles.menuHome :
+  variant === 'yellow' ? styles.menuYellow : styles.menuBlue;
+
+// Item color class. Home renders with menuYellow (white text); section and
+// about both render with menuBlue (black text). On about, the yellow header
+// overlay uses mix-blend-mode: multiply so the underlying black/blue text
+// stays visible.
+const itemVariantClass =
+  variant === 'home' ? styles.menuYellow : styles.menuBlue;
+
+// Menu structure mirroring src/routes/common/menu.ts.
+type Item =
+  | { kind: 'simple'; key: RouteKey; label: string }
+  | { kind: 'parent'; label: string; children: { key: RouteKey; label: string }[] };
+
+const ITEMS: Item[] = [
+  { kind: 'parent', label: 'classes', children: [
+    { key: 'kidsClass', label: 'kids class' },
+    { key: 'wheelThrowing', label: 'wheel-throwing' },
+  ]},
+  { kind: 'simple', key: 'familySaturday', label: 'family saturday' },
+  { kind: 'simple', key: 'openStudio', label: 'open studio' },
+  { kind: 'simple', key: 'firingService', label: 'firing service' },
+  { kind: 'simple', key: 'giftCertificate', label: 'gift certificate' },
+  { kind: 'simple', key: 'membership', label: 'membership' },
+  { kind: 'parent', label: 'event workshops', children: [
+    { key: 'teamEvents', label: 'team events' },
+    { key: 'birthdayParties', label: 'birthday parties' },
+  ]},
+];
+
+const isParentActive = (children: { key: RouteKey }[]) =>
+  children.some((c) => c.key === active);
+---
+
+<div class:list={[styles.menu, menuVariantClass]} data-menu data-collapsible={collapsible ? '' : undefined} data-hidden-class={styles.menuHidden}>
+  {ITEMS.map((item) => (
+    item.kind === 'simple' ? (
+      <a
+        href={ROUTES[item.key].path}
+        class:list={[
+          styles.menuItem,
+          item.key === active && styles.menuItemActive,
+          itemVariantClass,
+        ]}
+      >{item.label}</a>
+    ) : (
+      <div class:list={[
+        styles.parentMenuItemWrapper,
+        isParentActive(item.children) && styles.parentMenuItemWrapperActive,
+      ]}>
+        <div class:list={[
+          isParentActive(item.children) ? styles.parentMenuItem : styles.menuItem,
+          itemVariantClass,
+        ]}>{item.label}{isParentActive(item.children) ? ':' : ''}</div>
+        {isParentActive(item.children) && item.children.map((c) => (
+          <a
+            href={ROUTES[c.key].path}
+            class:list={[
+              styles.childMenuItem,
+              c.key === active && styles.childMenuItemActive,
+              itemVariantClass,
+            ]}
+          >{c.label}</a>
+        ))}
+      </div>
+    )
+  ))}
+  {collapsible && (
+    <a
+      href="/"
+      class:list={[styles.menuButton, variant === 'yellow' && styles.menuButtonBlue]}
+      aria-label="Toggle menu"
+      data-menu-button
+    ><span></span><span></span><span></span></a>
+  )}
+  <div class={secondaryStyles.mobileSecondaryMenu} data-mobile-secondary>
+    <a
+      href={ROUTES.rentASpace.path}
+      class:list={[secondaryStyles.sectionMenuItemSecondary, secondaryStyles.sectionMenuBlue]}
+    >rent a space</a>
+    <a
+      href={ROUTES.contact.path}
+      class:list={[secondaryStyles.sectionMenuItemSecondary, secondaryStyles.sectionMenuBlue]}
+    >contact</a>
+  </div>
+</div>
+
+<style>
+  /* Mobile-only secondary menu inside the main menu wrapper. */
+  [data-mobile-secondary] {
+    display: none;
+  }
+  @media (max-width: 500px) {
+    [data-mobile-secondary] {
+      display: grid;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    function applyHidden() {
+      var isMobile = window.matchMedia('(max-width: 500px)').matches;
+      var menus = document.querySelectorAll('[data-menu]');
+      for (var i = 0; i < menus.length; i++) {
+        var menu = menus[i];
+        var hiddenClass = menu.getAttribute('data-hidden-class');
+        if (!hiddenClass) continue;
+        var collapsible = menu.hasAttribute('data-collapsible');
+        if (isMobile && collapsible) menu.classList.add(hiddenClass);
+        else menu.classList.remove(hiddenClass);
+      }
+    }
+    applyHidden();
+    window.addEventListener('resize', applyHidden);
+
+    var buttons = document.querySelectorAll('[data-menu-button]');
+    for (var j = 0; j < buttons.length; j++) {
+      buttons[j].addEventListener('click', function (e) {
+        if (!window.matchMedia('(max-width: 500px)').matches) return;
+        e.preventDefault();
+        var menu = e.currentTarget.closest('[data-menu]');
+        if (!menu) return;
+        var hiddenClass = menu.getAttribute('data-hidden-class');
+        if (hiddenClass) menu.classList.toggle(hiddenClass);
+      });
+    }
+  })();
+</script>
