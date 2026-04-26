@@ -198,7 +198,7 @@
 }
 
 .menu-button {
-  display: flex;
+  display: none;
   flex-flow: column;
   justify-content: space-between;
   padding: 8px;
@@ -208,6 +208,10 @@
   position: absolute;
   top: 0;
   right: 0;
+
+  @media (max-width: $breakpoint-mobile) {
+    display: flex;
+  }
 
   & span {
     border-bottom: 2px solid $color-white;
