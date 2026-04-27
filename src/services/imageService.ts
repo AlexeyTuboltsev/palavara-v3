@@ -100,7 +100,7 @@ export function getImageSources(
   }
 
   const variant = (ext: 'avif' | 'webp' | 'jpg') =>
-    `${imgPrefix}/${base}-640.${ext} 640w, ${imgPrefix}/${base}-1280.${ext} 1280w, ${imgPrefix}/${base}.${ext} 1920w`;
+    `${imgPrefix}/${base}-640.${ext} 640w, ${imgPrefix}/${base}-768.${ext} 768w, ${imgPrefix}/${base}-1280.${ext} 1280w, ${imgPrefix}/${base}.${ext} 1920w`;
 
   return {
     avif, webp, jpeg,

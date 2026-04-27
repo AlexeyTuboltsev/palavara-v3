@@ -58,7 +58,7 @@ const Images: FC<{filename: string, legacyUrl: string}> = ({filename, legacyUrl}
     const baseUrl = sources[extension]; // e.g. https://.../home-1.avif
     const ext = extension === 'jpeg' ? 'jpg' : extension;
     const baseNoExt = baseUrl.replace(new RegExp(`\\.${ext}$`), '');
-    return `${baseNoExt}-640.${ext} 640w, ${baseNoExt}-1280.${ext} 1280w, ${baseUrl} 1920w`;
+    return `${baseNoExt}-640.${ext} 640w, ${baseNoExt}-768.${ext} 768w, ${baseNoExt}-1280.${ext} 1280w, ${baseUrl} 1920w`;
   };
 
   return (

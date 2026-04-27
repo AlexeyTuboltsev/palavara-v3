@@ -20,7 +20,9 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const WIDTHS = [640, 1280];
+// 768w covers the gap between 640w and 1280w that mattered most for
+// Lighthouse mobile (412 viewport × 1.75 DPR = 721 device px → picks 768w).
+const WIDTHS = [640, 768, 1280];
 const QUALITY = { jpeg: 85, webp: 80, avif: 65 };
 const SOURCE_DIR = path.join(__dirname, '..', 'public', 'img');
 
