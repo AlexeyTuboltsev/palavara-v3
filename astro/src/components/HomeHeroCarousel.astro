@@ -11,13 +11,6 @@ const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
 
 const manifest = visualTestMode ? null : await getManifest();
 const initialLqip = manifest?.images[`${images[0]}.jpg`]?.lqip.base64 ?? null;
-const lqipMap: Record<string, string> = {};
-if (manifest) {
-  for (const base of images) {
-    const lqip = manifest.images[`${base}.jpg`]?.lqip.base64;
-    if (lqip) lqipMap[base] = lqip;
-  }
-}
 
 const buildSet = (base: string, ext: 'avif' | 'webp' | 'jpg') =>
   `${prefix}/${base}-640.${ext} 640w, ${prefix}/${base}-1280.${ext} 1280w, ${prefix}/${base}.${ext} 1920w`;
@@ -33,14 +26,13 @@ const buildSet = (base: string, ext: 'avif' | 'webp' | 'jpg') =>
   <>
     {initialLqip && (
       <img
-        data-hero-lqip
         src={initialLqip}
         alt=""
         aria-hidden="true"
         class={appStyles.backgroundImgLowRes}
       />
     )}
-    <picture data-hero data-images={JSON.stringify(images)} data-prefix={prefix} data-lqips={JSON.stringify(lqipMap)}>
+    <picture data-hero data-images={JSON.stringify(images)} data-prefix={prefix}>
       <source srcset={buildSet(images[0], 'avif')} sizes="100vw" type="image/avif" data-source="avif" />
       <source srcset={buildSet(images[0], 'webp')} sizes="100vw" type="image/webp" data-source="webp" />
       <img
@@ -65,11 +57,9 @@ const buildSet = (base: string, ext: 'avif' | 'webp' | 'jpg') =>
         (function (picture) {
           var images = JSON.parse(picture.getAttribute('data-images') || '[]');
           var prefix = picture.getAttribute('data-prefix') || '';
-          var lqips = JSON.parse(picture.getAttribute('data-lqips') || '{}');
           var avifSrc = picture.querySelector('[data-source="avif"]');
           var webpSrc = picture.querySelector('[data-source="webp"]');
           var img = picture.querySelector('img');
-          var lqipImg = document.querySelector('[data-hero-lqip]');
           if (!avifSrc || !webpSrc || !img) return;
 
           function buildSet(base, ext) {
@@ -78,22 +68,32 @@ const buildSet = (base: string, ext: 'avif' | 'webp' | 'jpg') =>
               prefix + '/' + base + '.' + ext + ' 1920w';
           }
 
+          // Initial fade-in once the first image finishes loading.
           function markVisible() { img.classList.add(visibleClass); }
           if (img.complete && img.naturalWidth > 0) markVisible();
-          else img.addEventListener('load', markVisible);
+          else img.addEventListener('load', markVisible, { once: true });
 
           if (images.length <= 1) return;
+
           var i = 0;
-          setInterval(function () {
-            i = (i + 1) % images.length;
-            var base = images[i];
-            if (lqipImg && lqips[base]) lqipImg.src = lqips[base];
-            img.classList.remove(visibleClass);
+          function swap(base) {
             avifSrc.srcset = buildSet(base, 'avif');
             webpSrc.srcset = buildSet(base, 'webp');
             img.srcset = buildSet(base, 'jpg');
             img.src = prefix + '/' + base + '.jpg';
-            img.addEventListener('load', markVisible, { once: true });
+          }
+          function preloadAndSwap(base) {
+            var pre = new Image();
+            pre.sizes = '100vw';
+            pre.srcset = buildSet(base, 'jpg');
+            pre.onload = function () { swap(base); };
+            pre.onerror = function () { swap(base); };
+            pre.src = prefix + '/' + base + '.jpg';
+          }
+
+          setInterval(function () {
+            i = (i + 1) % images.length;
+            preloadAndSwap(images[i]);
           }, PERIOD_MS);
         })(pictures[p]);
       }
