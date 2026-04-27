@@ -36,9 +36,32 @@ jobs:
 
       - name: Sync to S3
         run: |
+          # Two-pass sync. Without this, index.html inherits the immutable
+          # 1-year cache and clients keep loading stale HTML after a deploy
+          # (CloudFront invalidation only refreshes the edge, not browsers).
+
+          # 1. Hashed assets — content-addressed, cache for a year.
           aws s3 sync build/ s3://studio.palavara.com \
             --delete \
-            --cache-control "public, max-age=31536000, immutable"
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html" \
+            --exclude "asset-manifest.json" \
+            --exclude "manifest.json" \
+            --exclude "robots.txt" \
+            --exclude "sitemap.xml" \
+            --exclude "*.html"
+
+          # 2. SPA shell + meta — short cache, must revalidate.
+          aws s3 cp build/index.html s3://studio.palavara.com/index.html \
+            --cache-control "public, max-age=300, must-revalidate" \
+            --content-type "text/html; charset=utf-8"
+
+          for f in asset-manifest.json manifest.json robots.txt sitemap.xml 404.html; do
+            if [ -f "build/$f" ]; then
+              aws s3 cp "build/$f" "s3://studio.palavara.com/$f" \
+                --cache-control "public, max-age=300, must-revalidate"
+            fi
+          done
 
       - name: Invalidate CloudFront cache
         run: |
