@@ -31,9 +31,12 @@ async function waitForPageStable(page: any) {
 }
 
 for (const route of routes) {
-  test(`${route.name} - visual regression`, async ({ page }) => {
+  test(`${route.name} - visual regression`, async ({ page }, testInfo) => {
     await page.goto(route.path);
     await waitForPageStable(page);
+    const actualPath = testInfo.outputPath(`${route.name}-actual.png`);
+    await page.screenshot({ path: actualPath, fullPage: true, animations: 'disabled' });
+    await testInfo.attach(`${route.name}-actual`, { path: actualPath, contentType: 'image/png' });
     await expect(page).toHaveScreenshot(`${route.name}.png`, {
       fullPage: true,
       animations: 'disabled',
