@@ -1,5 +1,6 @@
 ---
 import { SITE } from '../data/site';
+import { getManifest } from '../data/imageManifest';
 import sectionStyles from '../components-styles/Section.module.scss';
 
 interface Props {
@@ -11,6 +12,16 @@ const { base, images = [base], alt } = Astro.props;
 const prefix = SITE.imgPrefix;
 const has640 = base.startsWith('home-');
 const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
+
+const manifest = visualTestMode ? null : await getManifest();
+const initialLqip = manifest?.images[`${base}.jpg`]?.lqip.base64 ?? null;
+const lqipMap: Record<string, string> = {};
+if (manifest) {
+  for (const b of images) {
+    const lqip = manifest.images[`${b}.jpg`]?.lqip.base64;
+    if (lqip) lqipMap[b] = lqip;
+  }
+}
 ---
 
 {visualTestMode ? (
@@ -20,53 +31,91 @@ const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
     aria-hidden="true"
   ></div>
 ) : (
-  <picture data-section-hero data-images={JSON.stringify(images)} data-prefix={prefix}>
-    <source
-      srcset={has640
-        ? `${prefix}/${base}-640.avif 640w, ${prefix}/${base}-1280.avif 1280w, ${prefix}/${base}.avif 1920w`
-        : `${prefix}/${base}.avif`}
-      sizes="50vw"
-      type="image/avif"
-      data-section-source="avif"
-    />
-    <source
-      srcset={has640
-        ? `${prefix}/${base}-640.webp 640w, ${prefix}/${base}-1280.webp 1280w, ${prefix}/${base}.webp 1920w`
-        : `${prefix}/${base}.webp`}
-      sizes="50vw"
-      type="image/webp"
-      data-section-source="webp"
-    />
-    <img
-      src={`${prefix}/${base}.jpg`}
-      srcset={has640 ? `${prefix}/${base}-640.jpg 640w, ${prefix}/${base}-1280.jpg 1280w, ${prefix}/${base}.jpg 1920w` : undefined}
-      sizes="50vw"
-      alt={alt}
-      loading="eager"
-      class={sectionStyles.img}
-    />
-  </picture>
+  <>
+    <picture data-section-hero data-images={JSON.stringify(images)} data-prefix={prefix} data-lqips={JSON.stringify(lqipMap)}>
+      <source
+        srcset={has640
+          ? `${prefix}/${base}-640.avif 640w, ${prefix}/${base}-1280.avif 1280w, ${prefix}/${base}.avif 1920w`
+          : `${prefix}/${base}.avif`}
+        sizes="50vw"
+        type="image/avif"
+        data-section-source="avif"
+      />
+      <source
+        srcset={has640
+          ? `${prefix}/${base}-640.webp 640w, ${prefix}/${base}-1280.webp 1280w, ${prefix}/${base}.webp 1920w`
+          : `${prefix}/${base}.webp`}
+        sizes="50vw"
+        type="image/webp"
+        data-section-source="webp"
+      />
+      <img
+        src={`${prefix}/${base}.jpg`}
+        srcset={has640 ? `${prefix}/${base}-640.jpg 640w, ${prefix}/${base}-1280.jpg 1280w, ${prefix}/${base}.jpg 1920w` : undefined}
+        sizes="50vw"
+        alt={alt}
+        loading="eager"
+        class={sectionStyles.img}
+      />
+    </picture>
+    {initialLqip && (
+      <img
+        data-section-lqip
+        src={initialLqip}
+        alt=""
+        aria-hidden="true"
+        class={sectionStyles.imgLowRes}
+      />
+    )}
+  </>
 )}
 
 {!visualTestMode && (
-  <script>
-    document.querySelectorAll<HTMLPictureElement>('[data-section-hero]').forEach((picture) => {
-      const images: string[] = JSON.parse(picture.dataset.images || '[]');
-      const prefix = picture.dataset.prefix || '';
-      if (images.length <= 1) return;
-      const img = picture.querySelector<HTMLImageElement>('img');
-      const avif = picture.querySelector<HTMLSourceElement>('[data-section-source="avif"]');
-      const webp = picture.querySelector<HTMLSourceElement>('[data-section-source="webp"]');
-      if (!img || !avif || !webp) return;
-      let i = 0;
-      picture.style.cursor = 'pointer';
-      picture.addEventListener('click', () => {
-        i = (i + 1) % images.length;
-        const base = images[i];
-        avif.srcset = `${prefix}/${base}.avif`;
-        webp.srcset = `${prefix}/${base}.webp`;
-        img.src = `${prefix}/${base}.jpg`;
-      });
-    });
+  <script define:vars={{ lqipVisibleClass: sectionStyles.lqipVisible }} is:inline>
+    (function () {
+      var pictures = document.querySelectorAll('[data-section-hero]');
+      for (var p = 0; p < pictures.length; p++) {
+        (function (picture) {
+          var images = JSON.parse(picture.getAttribute('data-images') || '[]');
+          var prefix = picture.getAttribute('data-prefix') || '';
+          var lqips = JSON.parse(picture.getAttribute('data-lqips') || '{}');
+          var img = picture.querySelector('img');
+          var avif = picture.querySelector('[data-section-source="avif"]');
+          var webp = picture.querySelector('[data-section-source="webp"]');
+          var lqipImg = document.querySelector('[data-section-lqip]');
+          if (!img || !avif || !webp) return;
+
+          function markLoaded() {
+            if (lqipImg) lqipImg.classList.add(lqipVisibleClass);
+          }
+          if (img.complete && img.naturalWidth > 0) markLoaded();
+          else img.addEventListener('load', markLoaded);
+
+          if (images.length <= 1) return;
+          var i = 0;
+          function show(idx) {
+            i = ((idx % images.length) + images.length) % images.length;
+            var base = images[i];
+            if (lqipImg) {
+              if (lqips[base]) lqipImg.src = lqips[base];
+              lqipImg.classList.remove(lqipVisibleClass);
+            }
+            avif.srcset = prefix + '/' + base + '.avif';
+            webp.srcset = prefix + '/' + base + '.webp';
+            img.src = prefix + '/' + base + '.jpg';
+            img.addEventListener('load', markLoaded, { once: true });
+          }
+
+          picture.style.cursor = 'pointer';
+          picture.addEventListener('click', function () { show(i + 1); });
+
+          // Wire +/- buttons (rendered by SectionLayout outside the picture).
+          var plus = document.querySelector('[data-section-next]');
+          var minus = document.querySelector('[data-section-prev]');
+          if (plus) plus.addEventListener('click', function () { show(i + 1); });
+          if (minus) minus.addEventListener('click', function () { show(i - 1); });
+        })(pictures[p]);
+      }
+    })();
   </script>
 )}

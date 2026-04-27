@@ -12,26 +12,19 @@ interface Props {
 }
 const { active, variant, collapsible = true } = Astro.props;
 
-// Variant class chooses the menu's background + text colour.
-// menuHome is a translucent blue background used on Home only.
 const menuVariantClass =
   variant === 'home' ? styles.menuHome :
   variant === 'yellow' ? styles.menuYellow : styles.menuBlue;
 
-// Item color class. Home renders with menuYellow (white text); section and
-// about both render with menuBlue (black text). On about, the yellow header
-// overlay uses mix-blend-mode: multiply so the underlying black/blue text
-// stays visible.
 const itemVariantClass =
   variant === 'home' ? styles.menuYellow : styles.menuBlue;
 
-// Menu structure mirroring src/routes/common/menu.ts.
 type Item =
   | { kind: 'simple'; key: RouteKey; label: string }
-  | { kind: 'parent'; label: string; children: { key: RouteKey; label: string }[] };
+  | { kind: 'parent'; id: string; label: string; children: { key: RouteKey; label: string }[] };
 
 const ITEMS: Item[] = [
-  { kind: 'parent', label: 'classes', children: [
+  { kind: 'parent', id: 'classes', label: 'classes', children: [
     { key: 'kidsClass', label: 'kids class' },
     { key: 'wheelThrowing', label: 'wheel-throwing' },
   ]},
@@ -40,7 +33,7 @@ const ITEMS: Item[] = [
   { kind: 'simple', key: 'firingService', label: 'firing service' },
   { kind: 'simple', key: 'giftCertificate', label: 'gift certificate' },
   { kind: 'simple', key: 'membership', label: 'membership' },
-  { kind: 'parent', label: 'event workshops', children: [
+  { kind: 'parent', id: 'eventWorkshops', label: 'event workshops', children: [
     { key: 'teamEvents', label: 'team events' },
     { key: 'birthdayParties', label: 'birthday parties' },
   ]},
@@ -62,16 +55,26 @@ const isParentActive = (children: { key: RouteKey }[]) =>
         ]}
       >{item.label}</a>
     ) : (
-      <div class:list={[
-        styles.parentMenuItemWrapper,
-        isParentActive(item.children) && styles.parentMenuItemWrapperActive,
-      ]}>
-        <div class:list={[
-          isParentActive(item.children) ? styles.parentMenuItem : styles.menuItem,
-          itemVariantClass,
-        ]}>{item.label}{isParentActive(item.children) ? ':' : ''}</div>
-        {isParentActive(item.children) && item.children.map((c) => (
+      <div
+        data-parent={item.id}
+        data-active-class={styles.parentMenuItemWrapperActive}
+        data-parent-label-active={styles.parentMenuItem}
+        data-parent-label-inactive={styles.menuItem}
+        class:list={[
+          styles.parentMenuItemWrapper,
+          isParentActive(item.children) && styles.parentMenuItemWrapperActive,
+        ]}
+      >
+        <div
+          data-parent-label
+          class:list={[
+            isParentActive(item.children) ? styles.parentMenuItem : styles.menuItem,
+            itemVariantClass,
+          ]}
+        >{item.label}<span data-parent-colon>{isParentActive(item.children) ? ':' : ''}</span></div>
+        {item.children.map((c) => (
           <a
+            data-child-of={item.id}
             href={ROUTES[c.key].path}
             class:list={[
               styles.childMenuItem,
@@ -104,7 +107,12 @@ const isParentActive = (children: { key: RouteKey }[]) =>
 </div>
 
 <style>
-  /* Mobile-only secondary menu inside the main menu wrapper. */
+  /* Children are in the DOM but only shown when their parent wrapper has the active class. */
+  [data-child-of] { display: none; }
+  [data-menu] [data-parent].is-open [data-child-of],
+  [data-menu] [data-parent][class*="parent-menu-item-wrapper-active"] [data-child-of] {
+    display: block;
+  }
   [data-mobile-secondary] {
     display: none;
   }
@@ -142,6 +150,31 @@ const isParentActive = (children: { key: RouteKey }[]) =>
         var hiddenClass = menu.getAttribute('data-hidden-class');
         if (hiddenClass) menu.classList.toggle(hiddenClass);
       });
+    }
+
+    // Parent toggle: clicking the parent label toggles `is-open`. The active-class
+    // (when a child route is the current page) keeps the children visible regardless.
+    var parents = document.querySelectorAll('[data-parent]');
+    for (var k = 0; k < parents.length; k++) {
+      (function (wrapper) {
+        var label = wrapper.querySelector('[data-parent-label]');
+        if (!label) return;
+        var activeClass = wrapper.getAttribute('data-active-class') || '';
+        var labelActiveClass = wrapper.getAttribute('data-parent-label-active') || '';
+        var labelInactiveClass = wrapper.getAttribute('data-parent-label-inactive') || '';
+        var colon = wrapper.querySelector('[data-parent-colon]');
+        label.style.cursor = 'pointer';
+        label.addEventListener('click', function () {
+          // Don't toggle if a child is active (the current page).
+          if (wrapper.classList.contains(activeClass)) return;
+          var open = wrapper.classList.toggle('is-open');
+          if (labelActiveClass && labelInactiveClass) {
+            label.classList.toggle(labelActiveClass, open);
+            label.classList.toggle(labelInactiveClass, !open);
+          }
+          if (colon) colon.textContent = open ? ':' : '';
+        });
+      })(parents[k]);
     }
   })();
 </script>

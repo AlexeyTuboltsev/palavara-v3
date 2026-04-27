@@ -1,12 +1,23 @@
 ---
 import { SITE } from '../data/site';
 import { ROUTES } from '../data/routes';
+import { getManifest } from '../data/imageManifest';
 import appStyles from '../components-styles/App.module.scss';
 
 const home = ROUTES.home;
 const prefix = SITE.imgPrefix;
 const images = home.images || ['home-1'];
 const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
+
+const manifest = visualTestMode ? null : await getManifest();
+const initialLqip = manifest?.images[`${images[0]}.jpg`]?.lqip.base64 ?? null;
+const lqipMap: Record<string, string> = {};
+if (manifest) {
+  for (const base of images) {
+    const lqip = manifest.images[`${base}.jpg`]?.lqip.base64;
+    if (lqip) lqipMap[base] = lqip;
+  }
+}
 
 const buildSet = (base: string, ext: 'avif' | 'webp' | 'jpg') =>
   `${prefix}/${base}-640.${ext} 640w, ${prefix}/${base}-1280.${ext} 1280w, ${prefix}/${base}.${ext} 1920w`;
@@ -15,48 +26,77 @@ const buildSet = (base: string, ext: 'avif' | 'webp' | 'jpg') =>
 {visualTestMode ? (
   <div
     class={appStyles.backgroundImg}
-    style="background-color:#e0e0e0;width:100%;height:100%;position:absolute;top:0;left:0;"
+    style="background-color:#e0e0e0;width:100%;height:100%;position:absolute;top:0;left:0;opacity:1;"
     aria-hidden="true"
   ></div>
 ) : (
-  <picture data-hero data-images={JSON.stringify(images)} data-prefix={prefix}>
-    <source srcset={buildSet(images[0], 'avif')} sizes="100vw" type="image/avif" data-source="avif" />
-    <source srcset={buildSet(images[0], 'webp')} sizes="100vw" type="image/webp" data-source="webp" />
-    <img
-      src={`${prefix}/${images[0]}.jpg`}
-      srcset={buildSet(images[0], 'jpg')}
-      sizes="100vw"
-      alt={home.imageAlt || ''}
-      loading="eager"
-      fetchpriority="high"
-      class={appStyles.backgroundImg}
-    />
-  </picture>
+  <>
+    {initialLqip && (
+      <img
+        data-hero-lqip
+        src={initialLqip}
+        alt=""
+        aria-hidden="true"
+        class={appStyles.backgroundImgLowRes}
+      />
+    )}
+    <picture data-hero data-images={JSON.stringify(images)} data-prefix={prefix} data-lqips={JSON.stringify(lqipMap)}>
+      <source srcset={buildSet(images[0], 'avif')} sizes="100vw" type="image/avif" data-source="avif" />
+      <source srcset={buildSet(images[0], 'webp')} sizes="100vw" type="image/webp" data-source="webp" />
+      <img
+        src={`${prefix}/${images[0]}.jpg`}
+        srcset={buildSet(images[0], 'jpg')}
+        sizes="100vw"
+        alt={home.imageAlt || ''}
+        loading="eager"
+        fetchpriority="high"
+        class={appStyles.backgroundImg}
+      />
+    </picture>
+  </>
 )}
 
 {!visualTestMode && (
-  <script>
-    // Cycle the home hero every 5 s. Same behaviour as the CRA saga.
-    const PERIOD_MS = 5000;
-    document.querySelectorAll<HTMLPictureElement>('[data-hero]').forEach((picture) => {
-      const images: string[] = JSON.parse(picture.dataset.images || '[]');
-      const prefix = picture.dataset.prefix || '';
-      if (images.length <= 1) return;
-      const avifSrc = picture.querySelector<HTMLSourceElement>('[data-source="avif"]');
-      const webpSrc = picture.querySelector<HTMLSourceElement>('[data-source="webp"]');
-      const img = picture.querySelector<HTMLImageElement>('img');
-      if (!avifSrc || !webpSrc || !img) return;
-      const buildSet = (base: string, ext: string) =>
-        `${prefix}/${base}-640.${ext} 640w, ${prefix}/${base}-1280.${ext} 1280w, ${prefix}/${base}.${ext} 1920w`;
-      let i = 0;
-      setInterval(() => {
-        i = (i + 1) % images.length;
-        const base = images[i];
-        avifSrc.srcset = buildSet(base, 'avif');
-        webpSrc.srcset = buildSet(base, 'webp');
-        img.srcset = buildSet(base, 'jpg');
-        img.src = `${prefix}/${base}.jpg`;
-      }, PERIOD_MS);
-    });
+  <script define:vars={{ visibleClass: appStyles.backgroundImgVisible }} is:inline>
+    (function () {
+      var PERIOD_MS = 5000;
+      var pictures = document.querySelectorAll('[data-hero]');
+      for (var p = 0; p < pictures.length; p++) {
+        (function (picture) {
+          var images = JSON.parse(picture.getAttribute('data-images') || '[]');
+          var prefix = picture.getAttribute('data-prefix') || '';
+          var lqips = JSON.parse(picture.getAttribute('data-lqips') || '{}');
+          var avifSrc = picture.querySelector('[data-source="avif"]');
+          var webpSrc = picture.querySelector('[data-source="webp"]');
+          var img = picture.querySelector('img');
+          var lqipImg = document.querySelector('[data-hero-lqip]');
+          if (!avifSrc || !webpSrc || !img) return;
+
+          function buildSet(base, ext) {
+            return prefix + '/' + base + '-640.' + ext + ' 640w, ' +
+              prefix + '/' + base + '-1280.' + ext + ' 1280w, ' +
+              prefix + '/' + base + '.' + ext + ' 1920w';
+          }
+
+          function markVisible() { img.classList.add(visibleClass); }
+          if (img.complete && img.naturalWidth > 0) markVisible();
+          else img.addEventListener('load', markVisible);
+
+          if (images.length <= 1) return;
+          var i = 0;
+          setInterval(function () {
+            i = (i + 1) % images.length;
+            var base = images[i];
+            if (lqipImg && lqips[base]) lqipImg.src = lqips[base];
+            img.classList.remove(visibleClass);
+            avifSrc.srcset = buildSet(base, 'avif');
+            webpSrc.srcset = buildSet(base, 'webp');
+            img.srcset = buildSet(base, 'jpg');
+            img.src = prefix + '/' + base + '.jpg';
+            img.addEventListener('load', markVisible, { once: true });
+          }, PERIOD_MS);
+        })(pictures[p]);
+      }
+    })();
   </script>
 )}
