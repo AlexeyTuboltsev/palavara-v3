@@ -113,6 +113,8 @@ export const ROUTES: Record<RouteKey, RouteInfo> = {
     key: 'rentASpace', path: '/rent-a-space',
     title: 'Rent Pottery Studio Space in Berlin | Palavara',
     description: 'Rent studio space for your pottery practice in Berlin. Wheels, kilns and workspace at Palavara, Steegerstr. 1A, 13359 Berlin.',
+    heroBase: '09-01',
+    images: ['09-01', '09-02', '09-03'],
     imageAlt: 'Palavara Pottery Studio space for rent in Berlin',
   },
   contact: {
