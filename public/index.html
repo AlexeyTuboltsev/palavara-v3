@@ -28,18 +28,52 @@
 
   <link rel="preconnect" href="https://be.palavara.com" />
   <link rel="dns-prefetch" href="https://be.palavara.com" />
-  <!-- Responsive AVIF preload: browser picks the right size before any
-       <img> exists. Mobile (sub-640w viewport) gets ~32 KiB instead of
-       ~140 KiB. type=image/avif causes non-AVIF browsers to skip; the
-       <picture> in Home.tsx still serves WebP/JPEG to those. -->
-  <link
-    rel="preload"
-    as="image"
-    type="image/avif"
-    fetchpriority="high"
-    imagesrcset="https://be.palavara.com/img/studio/home-1-640.avif 640w, https://be.palavara.com/img/studio/home-1-1280.avif 1280w, https://be.palavara.com/img/studio/home-1.avif 1920w"
-    imagesizes="100vw"
-  />
+
+  <!-- Per-route hero preload. CRA serves the same index.html for every
+       route, so we can't use a static <link rel=preload> for section
+       heroes the way we can for home-1. Instead this inline script runs
+       synchronously during HTML parse, looks at location.pathname, and
+       injects the right preload BEFORE the main JS bundle begins
+       executing. The browser starts fetching the LCP image in parallel
+       with the bundle download — without it, LCP waits for React to
+       mount before discovering the image src.
+       Variants: 640/768/1280/1920. 768 covers the Lighthouse mobile
+       sweet spot (412×1.75 DPR = 721 device px, picks 768w). -->
+  <script>
+    (function () {
+      var heroes = {
+        '/':                       { base: 'home-1', sizes: '100vw' },
+        '/kids-class':             { base: '02-01' },
+        '/wheel-throwing':         { base: '04-01' },
+        '/family-saturday':        { base: '01-01' },
+        '/open-studio':            { base: '08-01' },
+        '/firing-service':         { base: '06-01' },
+        '/gift-certificate':       { base: '10-01' },
+        '/team-events':            { base: '2025-10-24-155119_002' },
+        '/birthday-parties':       { base: '2025-10-24-155119_002' },
+        '/membership':             { base: '07-01' },
+        '/about-me':               { base: '05-01' },
+        '/rent-a-space':           { base: '09-01' }
+      };
+      var path = location.pathname.replace(/\/$/, '') || '/';
+      var entry = heroes[path];
+      if (!entry) return;
+      var prefix = 'https://be.palavara.com/img/studio';
+      var b = entry.base;
+      var l = document.createElement('link');
+      l.rel = 'preload';
+      l.as = 'image';
+      l.type = 'image/avif';
+      l.setAttribute('fetchpriority', 'high');
+      l.setAttribute('imagesrcset',
+        prefix + '/' + b + '-640.avif 640w, ' +
+        prefix + '/' + b + '-768.avif 768w, ' +
+        prefix + '/' + b + '-1280.avif 1280w, ' +
+        prefix + '/' + b + '.avif 1920w');
+      l.setAttribute('imagesizes', entry.sizes || '(max-width: 500px) 100vw, 50vw');
+      document.head.appendChild(l);
+    })();
+  </script>
 
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon/favicon-16x16.png" sizes="16x16">
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon/favicon-32x32.png" sizes="32x32">
