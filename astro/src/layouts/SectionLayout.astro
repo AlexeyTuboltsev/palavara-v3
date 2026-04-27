@@ -5,6 +5,7 @@ import Menu from '../components/Menu.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import SectionVisual from '../components/SectionVisual.astro';
 import { ROUTES, type RouteKey } from '../data/routes';
+import { getManifest } from '../data/imageManifest';
 import sectionStyles from '../components-styles/Section.module.scss';
 import logoStyles from '../components-styles/Logo.module.scss';
 
@@ -14,6 +15,10 @@ interface Props {
 const { routeKey } = Astro.props;
 const route = ROUTES[routeKey];
 const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
+
+const mobileLqip = (!visualTestMode && route.heroBase)
+  ? (await getManifest())?.images[`${route.heroBase}.jpg`]?.lqip.base64 ?? null
+  : null;
 ---
 
 <BaseLayout
@@ -60,7 +65,24 @@ const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
             {visualTestMode ? (
               <div style="background-color:#e0e0e0;width:100%;height:100%;" aria-hidden="true"></div>
             ) : (
-              <img src={`https://be.palavara.com/img/studio/${route.heroBase}.jpg`} alt={route.imageAlt || ''} loading="lazy" />
+              <>
+                {mobileLqip && (
+                  <img
+                    data-mobile-lqip
+                    src={mobileLqip}
+                    alt=""
+                    aria-hidden="true"
+                    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(5px);transition:opacity 1s ease-out;"
+                  />
+                )}
+                <img
+                  data-mobile-main
+                  src={`https://be.palavara.com/img/studio/${route.heroBase}.jpg`}
+                  alt={route.imageAlt || ''}
+                  loading="lazy"
+                  style="position:relative;width:100%;height:100%;object-fit:cover;"
+                />
+              </>
             )}
           </div>
         ) : null}
@@ -68,3 +90,14 @@ const visualTestMode = process.env.VISUAL_TEST_MODE === 'true';
     </div>
   </div>
 </BaseLayout>
+
+<script is:inline>
+  (function () {
+    var main = document.querySelector('[data-mobile-main]');
+    var lqip = document.querySelector('[data-mobile-lqip]');
+    if (!main || !lqip) return;
+    function hideLqip() { lqip.style.opacity = '0'; }
+    if (main.complete && main.naturalWidth > 0) hideLqip();
+    else main.addEventListener('load', hideLqip, { once: true });
+  })();
+</script>
