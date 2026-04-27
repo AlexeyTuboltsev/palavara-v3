@@ -56,28 +56,58 @@ export function selectImageSource(
 }
 
 /**
+ * Bases for which scripts/generate-hero-variants.js produced 640w + 1280w
+ * variants alongside the 1920w original. Keep in sync with that script.
+ */
+const RESPONSIVE_HERO_BASES = new Set<string>([
+  'home-1', 'home-2', 'home-3', 'home-4', 'home-5', 'home-6', 'home-7',
+  '01-01', '02-01', '04-01', '05-01', '06-01', '07-01', '08-01', '09-01', '10-01',
+  '2025-10-24-155119_002',
+]);
+
+function stripExt(filename: string): string {
+  return filename.replace(/\.(jpg|jpeg|webp|avif)$/i, '');
+}
+
+/**
  * Get all format URLs for <picture> element
  *
  * @param filename - Image filename
  * @param manifest - Image manifest
- * @returns Object with URLs for each format
+ * @returns Object with URLs for each format and (when responsive variants
+ *          exist for this base) srcset strings for use with sizes=.
  */
 export function getImageSources(
   filename: string,
   manifest: TImageManifest | null
-): { avif: string; webp: string; jpeg: string; lqip: string } | null {
+): {
+  avif: string; webp: string; jpeg: string; lqip: string;
+  avifSrcSet?: string; webpSrcSet?: string; jpegSrcSet?: string;
+} | null {
   if (!manifest) return null;
 
   const entry = manifest.images[filename];
   if (!entry) return null;
 
   const imgPrefix = process.env.NODE_ENV === 'development' ? '/img' : config.imgPrefix;
+  const avif = `${imgPrefix}/${entry.optimized.avif.path}`;
+  const webp = `${imgPrefix}/${entry.optimized.webp.path}`;
+  const jpeg = `${imgPrefix}/${entry.optimized.jpeg.path}`;
+
+  const base = stripExt(filename);
+  if (!RESPONSIVE_HERO_BASES.has(base)) {
+    return { avif, webp, jpeg, lqip: entry.lqip.base64 };
+  }
+
+  const variant = (ext: 'avif' | 'webp' | 'jpg') =>
+    `${imgPrefix}/${base}-640.${ext} 640w, ${imgPrefix}/${base}-1280.${ext} 1280w, ${imgPrefix}/${base}.${ext} 1920w`;
 
   return {
-    avif: `${imgPrefix}/${entry.optimized.avif.path}`,
-    webp: `${imgPrefix}/${entry.optimized.webp.path}`,
-    jpeg: `${imgPrefix}/${entry.optimized.jpeg.path}`,
-    lqip: entry.lqip.base64
+    avif, webp, jpeg,
+    avifSrcSet: variant('avif'),
+    webpSrcSet: variant('webp'),
+    jpegSrcSet: variant('jpg'),
+    lqip: entry.lqip.base64,
   };
 }
 
