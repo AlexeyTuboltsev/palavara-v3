@@ -37,13 +37,19 @@ export const Images: FC<{
     return null;
   }
 
+  // Section visual occupies ~50vw on desktop, the full width on mobile.
+  // Use sizes accordingly so the browser picks the right responsive variant.
+  const sizes = '(max-width: 500px) 100vw, 50vw';
+
   return <>
     {/* Main image with format fallback (AVIF > WebP > JPEG) */}
     <picture>
-      <source srcSet={src.avif} type="image/avif" />
-      <source srcSet={src.webp} type="image/webp" />
+      <source srcSet={src.avifSrcSet || src.avif} sizes={src.avifSrcSet ? sizes : undefined} type="image/avif" />
+      <source srcSet={src.webpSrcSet || src.webp} sizes={src.webpSrcSet ? sizes : undefined} type="image/webp" />
       <img
         src={src.jpeg}
+        srcSet={src.jpegSrcSet}
+        sizes={src.jpegSrcSet ? sizes : undefined}
         loading={eager ? "eager" : "lazy"}
         className={styles.img}
         alt={alt}
