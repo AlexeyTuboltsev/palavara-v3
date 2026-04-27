@@ -55,13 +55,17 @@ jobs:
         # Pushing directly to protected main is denied to github-actions[bot].
         # Instead, open a PR from a bot branch — easy to merge or close.
         # No-ops if there are no manifest changes.
+        #
+        # Per-run branch (run_id suffix) avoids force-push to an existing
+        # branch — repo rules block force-push and would otherwise fail
+        # this step whenever a previous run's branch is still around.
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           add-paths: public/img/image-manifest.json
           commit-message: "Update image manifest after optimization"
           author: "k5qkop-bot <tblz+k5qkop-bot@proton.me>"
-          branch: bot/update-image-manifest
+          branch: bot/update-image-manifest-${{ github.run_id }}
           delete-branch: true
           title: "Update image manifest after optimization"
           body: |
