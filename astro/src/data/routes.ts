@@ -105,8 +105,8 @@ export const ROUTES: Record<RouteKey, RouteInfo> = {
     key: 'about', path: '/about-me',
     title: 'About Varya — Palavara Pottery Studio Berlin',
     description: 'Palavara is a ceramics studio founded by Varvara Polyakova in Berlin. Learn about the story, practice and community at Steegerstr. 1A.',
-    heroBase: '05-01',
-    images: ['05-01', '05-02', '05-03', '05-04', '05-05', '05-06', '05-07', '05-08', '05-09', '05-10'],
+    heroBase: '2025-10-24-155119',
+    images: ['2025-10-24-155119', '2025-10-24-155119_002', '2025-10-24-155119_003', '2025-10-24-155119_004'],
     imageAlt: 'Varvara Polyakova, founder of Palavara Pottery Studio Berlin',
   },
   rentASpace: {
