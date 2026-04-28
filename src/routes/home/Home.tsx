@@ -95,9 +95,9 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
   return <Background filename={filename} legacyUrl={legacyUrl}>
     <div className={styles.header}>
       <LogoHome/>
-      <div className={styles.title}>
+      <h1 className={styles.title}>
         Pottery classes <br/> for kids and adults
-      </div>
+      </h1>
       <HomeHeader state={state}/>
 
       <MenuHome state={state} />
