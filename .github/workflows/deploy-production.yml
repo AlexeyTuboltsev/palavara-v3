@@ -27,6 +27,13 @@ jobs:
           REACT_APP_IMG_PREFIX: https://be.palavara.com/img/studio
           REACT_APP_USE_OPTIMIZED_IMAGES: true
 
+      - name: Generate per-route prerendered HTML
+        # Writes build/<slug>.html for each non-home route with the
+        # route-specific <title>, <meta description>, OG tags, canonical
+        # baked in. Crawlers and link-preview scrapers (Telegram, FB, etc.)
+        # don't run JS, so without this they all see the home page meta.
+        run: node scripts/generate-route-html.js
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -36,31 +43,49 @@ jobs:
 
       - name: Sync to S3
         run: |
-          # Two-pass sync. Without this, index.html inherits the immutable
-          # 1-year cache and clients keep loading stale HTML after a deploy
-          # (CloudFront invalidation only refreshes the edge, not browsers).
-
-          # 1. Hashed assets — content-addressed, cache for a year.
-          aws s3 sync build/ s3://studio.palavara.com \
+          # 1. Hashed assets in /static/ — immutable, --delete to clean
+          #    up old content-addressed files from previous deploys.
+          aws s3 sync build/static/ s3://studio.palavara.com/static/ \
             --delete \
+            --cache-control "public, max-age=31536000, immutable"
+
+          # 2. Other long-cache root-level dirs (favicons etc.). No
+          #    --delete here — keys without local sources (the per-route
+          #    /<slug> keys we upload below) would otherwise be removed.
+          aws s3 sync build/ s3://studio.palavara.com \
             --cache-control "public, max-age=31536000, immutable" \
-            --exclude "index.html" \
+            --exclude "static/*" \
+            --exclude "*.html" \
             --exclude "asset-manifest.json" \
             --exclude "manifest.json" \
             --exclude "robots.txt" \
-            --exclude "sitemap.xml" \
-            --exclude "*.html"
+            --exclude "sitemap.xml"
 
-          # 2. SPA shell + meta — short cache, must revalidate.
+          # 3. SPA shell — short cache so a new deploy reaches users
+          #    quickly even though CloudFront's edge has been invalidated.
           aws s3 cp build/index.html s3://studio.palavara.com/index.html \
             --cache-control "public, max-age=300, must-revalidate" \
             --content-type "text/html; charset=utf-8"
 
+          # 4. Meta files (manifest, robots, sitemap, optional 404).
           for f in asset-manifest.json manifest.json robots.txt sitemap.xml 404.html; do
             if [ -f "build/$f" ]; then
               aws s3 cp "build/$f" "s3://studio.palavara.com/$f" \
                 --cache-control "public, max-age=300, must-revalidate"
             fi
+          done
+
+          # 5. Per-route prerendered HTML. Uploaded as s3://.../<slug>
+          #    (no extension) with Content-Type: text/html so CloudFront
+          #    serves it directly for /<slug>. The SPA's normal 404→
+          #    /index.html fallback still handles any unrouted URL.
+          for f in build/*.html; do
+            name=$(basename "$f" .html)
+            [ "$name" = "index" ] && continue
+            [ "$name" = "404" ] && continue
+            aws s3 cp "$f" "s3://studio.palavara.com/$name" \
+              --cache-control "public, max-age=300, must-revalidate" \
+              --content-type "text/html; charset=utf-8"
           done
 
       - name: Invalidate CloudFront cache
