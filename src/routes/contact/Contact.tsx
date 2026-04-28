@@ -13,7 +13,7 @@ export const Contact: FC<{
   return <Section state={state}>
     <div className={styles.mainText}>
 
-      <h1>Contact</h1>
+      <h1>Contact Palavara Pottery Studio in Berlin</h1>
       <h2>e-mail:</h2>
       <p><a href="mailto:palavarastudio@gmail.com">palavarastudio@gmail.com</a></p>
       <h2>address: </h2>
@@ -23,15 +23,11 @@ export const Contact: FC<{
       <p><a href="https://www.instagram.com/palavara_potterystudio">instagram.com/palavara_potterystudio/</a></p>
       <p><a href="https://www.instagram.com/palavara_ceramics">instagram.com/palavara_ceramics</a></p>
 
-      <h1 className={styles.impressum}>
-        <Link to={{routeName: ERoute.IMPRESSUM}}>Impressum</Link>
-      </h1>
-      <h1 className={styles.impressum}>
-        <Link to={{routeName: ERoute.AGB}}>AGB</Link>
-      </h1>
-      <h1 className={styles.impressum}>
-        <Link to={{routeName: ERoute.DATENSCHUTZ}}>Datenschutzerklärung</Link>
-      </h1>
+      <nav aria-label="Legal" className={styles.legalLinks}>
+        <Link to={{routeName: ERoute.IMPRESSUM}} className={styles.impressum}>Impressum</Link>
+        <Link to={{routeName: ERoute.AGB}} className={styles.impressum}>AGB</Link>
+        <Link to={{routeName: ERoute.DATENSCHUTZ}} className={styles.impressum}>Datenschutzerklärung</Link>
+      </nav>
     </div>
   </Section>
 }
