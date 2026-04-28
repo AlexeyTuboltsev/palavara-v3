@@ -53,6 +53,7 @@
   background-color: rgba($color-blue, 0.8);
   min-width: 324px;
   padding: 20px;
+  margin: 0; // overrides browser default h1 margin (used to be a <div>)
   color: $color-yellow;
   font-size: 20px;
   font-weight: 500;

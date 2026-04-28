@@ -11,7 +11,7 @@ export const FamilySaturday: FC<{
   return <Section state={state}>
     <div className={styles.mainText}>
 
-      <h1>FAMILY SATURDAYS</h1>
+      <h1>Family Saturdays</h1>
 
       <p>We find that a ceramic workshop is a great Saturday entertainment for the whole family!</p>
 

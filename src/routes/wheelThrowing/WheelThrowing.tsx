@@ -15,9 +15,11 @@ export const WheelThrowing: FC<{
   <a href="#private-one-time-workshop" className={styles.anchorMenuItem}>Private One-Time Workshop</a>
 </div>
 }>
-    
+
+    <h1>Wheel Throwing Classes in Berlin</h1>
+
     <div className={styles.mainText}>
-      <h1 id="4-session-wheel-throwing-class">A 4-session Wheel-Throwing class</h1>
+      <h2 id="4-session-wheel-throwing-class">A 4-session Wheel-Throwing class</h2>
       <p>A 4-session small group course (up to 3 participants in a group). The course covers preparing pottery clay, wedging and centring, pulling of walls, trimming, bisque firing, glazing and glaze firing. In 4 sessions you will go through all these basic steps of pottery making and afterwards will be able to take home unique and functional ceramic pieces.</p>
       <p>If after this introductory course you find yourself unable to stop and will want to learn more, you will be able to continue taking classes in our studio.</p>
     </div>
@@ -45,7 +47,7 @@ export const WheelThrowing: FC<{
     <h2>The class can be taught in Russian or English</h2>
     <br />
     <div className={styles.mainText}>
-      <h1 id="private-4-session-workshop">Private 4-Session Workshop</h1>
+      <h2 id="private-4-session-workshop">Private 4-Session Workshop</h2>
       <p>The course covers preparing pottery clay, wedging and centring, pulling of walls, trimming, bisque firing, glazing and glaze firing. In 4 sessions you will go through all these basic steps of pottery making and afterwards will be able to take home unique and functional ceramic pieces.</p>
       <p>If after this introductory course you find yourself unable to stop and will want to learn more, you will be able to continue taking classes in our studio.</p>
     </div>
