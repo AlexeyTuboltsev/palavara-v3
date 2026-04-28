@@ -4,7 +4,6 @@ import {EAppState, TReadyAppState} from "../types";
 import {TStore} from "../store";
 import {ERoute} from "../router";
 import { StartScreen } from './StartScreen';
-import { BlurOverlay } from './BlurOverlay';
 import { useRouteHead } from '../hooks/useRouteHead';
 // Home is the entry point for almost every visit — keep it in the main
 // bundle so the initial render doesn't need a second round-trip.
@@ -50,7 +49,6 @@ function preloadOtherRoutes() {
 
 export const App = () => {
   const state = useSelector((store: TStore) => store.ui)
-  const isNavigating = useSelector((store: TStore) => store.navigation.isNavigating)
 
   useEffect(() => {
     // Wait for the page load event before warming other route chunks — this
@@ -78,10 +76,7 @@ export const App = () => {
       break;
   }
 
-  return <>
-    {content}
-    <BlurOverlay visible={isNavigating} />
-  </>
+  return content
 }
 
 export const AppError = () => <div>error</div>

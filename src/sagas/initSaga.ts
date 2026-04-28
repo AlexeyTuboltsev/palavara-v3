@@ -14,7 +14,6 @@ import {EAppState} from "../types";
 import {actions} from "../actions";
 import {analyticsSaga} from "./analyticsSaga";
 import {setupLinkClickListener} from "../services/analytics";
-import {navigationWatcherSaga} from "./navigationWatcherSaga";
 
 
 export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: any) {
@@ -25,7 +24,6 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: an
   const initialRoute: TRoute = yield call(getRoute, history.location) //todo extract location to a service for testing etc
   yield fork(locationWatcherSaga, history, initialRoute)
   yield fork(analyticsSaga, initialRoute)
-  yield fork(navigationWatcherSaga)
   yield call(setupLinkClickListener)
 
   yield call(initI18n, i18n, ELang.EN)
