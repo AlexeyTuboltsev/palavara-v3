@@ -31,6 +31,8 @@ export const SectionVisual: FC<{
       manifest={manifest}
       imageLoaded={imageLoaded}
       alt={alt}
+      eager
+      isLcp
     />
   </div>
 }
@@ -85,6 +87,7 @@ export const Section: FC<{ state: TReadyAppState, anchorMenu?: ReactNode, childr
             imageLoaded={(state as any).imageLoaded}
             alt={imageAlt}
             eager
+            isLcp
           />
         </div>
       }

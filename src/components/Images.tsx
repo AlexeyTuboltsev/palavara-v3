@@ -15,7 +15,16 @@ export const Images: FC<{
   imageLoaded: boolean;
   alt: string;
   eager?: boolean;
-}> = ({filename, screenSize, manifest, imageLoaded, alt, eager}) => {
+  /**
+   * Set when this image is the LCP candidate for the route. Adds
+   * `fetchpriority="high"` so the browser starts the request ahead of
+   * non-critical resources, and shaves the LCP "resource load delay"
+   * gap (Lighthouse measured ~2 s on /firing-service before this).
+   * Passing it for non-LCP images defeats the purpose — only use on
+   * the hero/visible-on-load picture for the route.
+   */
+  isLcp?: boolean;
+}> = ({filename, screenSize, manifest, imageLoaded, alt, eager, isLcp}) => {
   const dispatch = useDispatch();
 
   // In visual test mode, show gray placeholder instead of actual images
@@ -54,6 +63,9 @@ export const Images: FC<{
         className={styles.img}
         alt={alt}
         onLoad={() => dispatch(actions.imageLoaded())}
+        // React 18.2 doesn't ship `fetchPriority` as a typed prop yet
+        // (added in 18.3). Spread the lowercase HTML attribute through.
+        {...(isLcp ? ({fetchpriority: 'high'} as any) : {})}
       />
     </picture>
 
