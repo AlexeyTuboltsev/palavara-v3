@@ -26,7 +26,12 @@
   </script>
   <meta charset="utf-8" />
 
-  <link rel="preconnect" href="https://be.palavara.com" />
+  <!-- crossorigin is required: image fetches from be.palavara.com use
+       CORS (anonymous credentials mode), and a preconnect without
+       crossorigin warms a *different* connection than the one the
+       images use, leaving the preconnect "unused" per Lighthouse and
+       costing ~330 ms on LCP. -->
+  <link rel="preconnect" href="https://be.palavara.com" crossorigin />
   <link rel="dns-prefetch" href="https://be.palavara.com" />
 
   <!-- Per-route hero preload. CRA serves the same index.html for every
