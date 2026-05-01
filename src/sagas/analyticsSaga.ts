@@ -1,6 +1,6 @@
 import {select, take} from "redux-saga/effects";
 import {PayloadAction} from "@reduxjs/toolkit";
-import isEqual from 'lodash.isequal';
+import isEqual from "fast-deep-equal";
 import {setAppState} from "../store";
 import {actions} from "../actions";
 import {TRoute} from "../router";

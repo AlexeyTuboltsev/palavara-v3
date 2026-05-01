@@ -3,7 +3,7 @@ import { actions, EActionType, TAction } from "../actions";
 import { call, cancel, fork, put, select, take, cancelled } from "redux-saga/effects";
 import { EMenuType, TMenuItem, TReadyAppState } from "../types";
 import { findRouteGenerator } from "../routes/common/routeData";
-import isEqual from "lodash.isequal";
+import isEqual from "fast-deep-equal";
 import { Task } from "redux-saga";
 import { produce } from "immer";
 import { setAppState } from "../store";
