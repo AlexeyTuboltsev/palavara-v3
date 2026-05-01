@@ -3,7 +3,7 @@ import {BrowserHistory} from "history";
 import {call, select, take} from "redux-saga/effects";
 import {PayloadAction} from "@reduxjs/toolkit";
 import {setLocation} from "../utils/routerUtils";
-import isEqual from 'lodash.isequal';
+import isEqual from "fast-deep-equal";
 import {TReadyAppState} from "../types";
 import {setAppState} from "../store";
 import {actions} from "../actions";
