@@ -43,10 +43,16 @@ jobs:
 
       - name: Sync to S3
         run: |
-          # 1. Hashed assets in /static/ — immutable, --delete to clean
-          #    up old content-addressed files from previous deploys.
+          # 1. Hashed assets in /static/ — immutable. Don't --delete:
+          #    a user whose tab has cached the previous deploy's HTML
+          #    will still be lazy-loading those old hashed chunks via
+          #    React.lazy. Deleting them on every deploy was producing
+          #    "Loading CSS chunk N failed" errors in Sentry (161 events
+          #    over 30d before this fix). Old chunks accumulate slowly;
+          #    a separate S3 lifecycle rule on the bucket can clean
+          #    them up after 30 days, by which point the HTML pointing
+          #    at them has long since aged out of any cache.
           aws s3 sync build/static/ s3://studio.palavara.com/static/ \
-            --delete \
             --cache-control "public, max-age=31536000, immutable"
 
           # 2. Other long-cache root-level dirs (favicons etc.). No

@@ -6,10 +6,12 @@ import {Provider} from 'react-redux'
 import {I18nextProvider} from 'react-i18next';
 import {i18n} from "./services/i18n"
 import {initSentry} from "./services/sentry";
+import {initChunkErrorRecovery} from "./services/chunkErrorRecovery";
 import {ErrorBoundary} from './components/ErrorBoundary';
 import {App} from './components/App'
 
 initSentry()
+initChunkErrorRecovery()
 
 export const rootElement = document.getElementById('root') as HTMLElement
 const root = ReactDOM.createRoot(rootElement);
