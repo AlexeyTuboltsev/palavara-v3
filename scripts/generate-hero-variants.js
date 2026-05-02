@@ -1,28 +1,40 @@
 #!/usr/bin/env node
 /**
- * Generate responsive variants of hero images at 640w and 1280w.
+ * Generate responsive variants of hero images.
  *
  * The full optimize-images pipeline produces single 1920w variants per format.
- * For mobile LCP we want a much smaller image — this one-off script creates
+ * For mobile LCP we want smaller images — this one-off script creates
  * the additional variants without touching the manifest schema.
  *
- * Output filenames: {base}-640.{avif,webp,jpg} and {base}-1280.{avif,webp,jpg}
- * alongside the existing {base}.{avif,webp,jpg}.
+ * Output filenames: {base}-{640,768,1024,1280}.{avif,webp,jpg} alongside
+ * the existing {base}.{avif,webp,jpg}.
  *
  * Bases covered:
  *   - home-1..home-7 (the home carousel)
  *   - The first image in every section's saga url[] (the LCP image for that page).
  *
  * Keep in sync with RESPONSIVE_HERO_BASES in src/services/imageService.ts.
+ *
+ * NOTE on Sharp version drift: The variants currently on the CDN
+ * (s3://palavara-front-api/img/studio/) were produced by an earlier
+ * Sharp version with effectively lower AVIF quality (~q47), giving
+ * smaller bytes than this script produces today at QUALITY.avif=65.
+ * Running `yarn deploy-images` with --delete will replace those
+ * smaller files with the larger ones produced here, regressing LCP
+ * across all hero pages. Until that's reconciled, only manually
+ * upload variants for missing widths/bases — don't sync the whole
+ * directory.
  */
 
 const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-// 768w covers the gap between 640w and 1280w that mattered most for
-// Lighthouse mobile (412 viewport × 1.75 DPR = 721 device px → picks 768w).
-const WIDTHS = [640, 768, 1280];
+// 768w covers the 412-viewport / DPR 1.75 sweet spot, 1024w covers
+// the 360-viewport / DPR 2.625 case that PSI actually emulates (Moto
+// G4: 360 × 2.625 = 945 device px → picks 1024w instead of jumping
+// straight to 1280w, saving ~25% on the LCP image transfer).
+const WIDTHS = [640, 768, 1024, 1280];
 const QUALITY = { jpeg: 85, webp: 80, avif: 65 };
 const SOURCE_DIR = path.join(__dirname, '..', 'public', 'img');
 

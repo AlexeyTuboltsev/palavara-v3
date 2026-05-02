@@ -26,12 +26,13 @@
   </script>
   <meta charset="utf-8" />
 
-  <!-- crossorigin is required: image fetches from be.palavara.com use
-       CORS (anonymous credentials mode), and a preconnect without
-       crossorigin warms a *different* connection than the one the
-       images use, leaving the preconnect "unused" per Lighthouse and
-       costing ~330 ms on LCP. -->
-  <link rel="preconnect" href="https://be.palavara.com" crossorigin />
+  <!-- be.palavara.com is only used for <img>/<picture> hero loads,
+       which fetch in no-CORS mode. A `crossorigin` preconnect warms
+       a different connection bucket than the one the images use, so
+       Lighthouse flags it "Unused preconnect" and the LCP image still
+       pays a fresh handshake (~330 ms on PSI mobile). Drop the
+       crossorigin so the warmed connection actually gets reused. -->
+  <link rel="preconnect" href="https://be.palavara.com" />
   <link rel="dns-prefetch" href="https://be.palavara.com" />
 
   <!-- Per-route hero preload. CRA serves the same index.html for every
@@ -42,8 +43,9 @@
        executing. The browser starts fetching the LCP image in parallel
        with the bundle download — without it, LCP waits for React to
        mount before discovering the image src.
-       Variants: 640/768/1280/1920. 768 covers the Lighthouse mobile
-       sweet spot (412×1.75 DPR = 721 device px, picks 768w). -->
+       Variants: 640/768/1024/1280/1920. 768 covers 412×1.75 DPR
+       (721 device px), 1024 covers PSI's 360×2.625 emulation
+       (945 device px → picks 1024w, ~25% smaller than 1280w). -->
   <script>
     (function () {
       var heroes = {
@@ -73,6 +75,7 @@
       l.setAttribute('imagesrcset',
         prefix + '/' + b + '-640.avif 640w, ' +
         prefix + '/' + b + '-768.avif 768w, ' +
+        prefix + '/' + b + '-1024.avif 1024w, ' +
         prefix + '/' + b + '-1280.avif 1280w, ' +
         prefix + '/' + b + '.avif 1920w');
       l.setAttribute('imagesizes', entry.sizes || '(max-width: 500px) 100vw, 50vw');
