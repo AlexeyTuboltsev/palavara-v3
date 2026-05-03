@@ -227,7 +227,7 @@
   }
 
   .main-text {
-    padding-bottom: 10px; 
+    padding-bottom: 10px;
 
       ul {
         padding-left: 0;
@@ -241,12 +241,22 @@
       }
 
     li::before {
-      content: '■'; 
+      content: '■';
       font-size: 8.8px;
       display: inline;
       color: $color-blue;
       margin: 0 5px 0 0;
       vertical-align: 3px;
+    }
+
+    // Section titles on multi-section pages (wheel-throwing, etc.):
+    // h2's inside .main-text are the anchored section headers that
+    // .anchor-menu links scroll to. Uppercase them so they read as
+    // first-class titles, matching h1's text-transform — the sibling
+    // h2's outside .main-text (Where? / When? / Cost) stay
+    // sentence-case.
+    h2 {
+      text-transform: uppercase;
     }
 
     @media (max-width: $breakpoint-mobile) {
