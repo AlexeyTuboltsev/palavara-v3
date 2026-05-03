@@ -61,7 +61,8 @@ const Content: FC<{
           long time in the field of magazine and book illustration and design.</p>
 
         <p>In 2012 I moved from Moscow to Berlin and I also started creating ceramics under the brand name Palavara.</p>
-        <h2>See my work on Instagram: <a href="https://www.instagram.com/palavara_ceramics/">palavara_ceramics</a> </h2>
+        <h2>See my ceramics on Instagram: <a href="https://www.instagram.com/palavara_ceramics/" target="_blank" rel="noopener noreferrer">palavara_ceramics</a></h2>
+        <h2>See my other work on <a href="https://palavara.com/" target="_blank" rel="noopener noreferrer">palavara.com</a></h2>
         <p>A few years ago I opened a Palavara-studio in Wedding, where I produce my ceramics and run workshops for
           children and adults.</p>
         <h2>You can buy my ceramics in my Etsy shop: <a href="https://www.etsy.com/shop/PALAVARA" target="_blank" rel="noopener noreferrer">www.etsy.com/shop/PALAVARA</a></h2>
