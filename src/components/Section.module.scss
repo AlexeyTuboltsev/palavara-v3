@@ -45,8 +45,7 @@
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     grid-template: 1fr / 1fr;
-    padding: 0 10px;
-    padding-bottom: max(env(safe-area-inset-bottom), 30px);
+    padding: 0 10px 50px 10px;
   }
 }
 
