@@ -204,12 +204,12 @@ bookingForm.addEventListener('submit', async (e) => {
       throw new Error(data.error || `Server error ${res.status}`);
     }
 
-    if (!data.paypalUrl) {
+    if (!data.approveUrl) {
       throw new Error('No payment URL returned. Please try again.');
     }
 
-    // Redirect to PayPal
-    window.location.href = data.paypalUrl;
+    // Redirect to PayPal's hosted approval page
+    window.location.href = data.approveUrl;
   } catch (err) {
     hideLoading();
     bookBtn.disabled = false;
