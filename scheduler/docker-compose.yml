@@ -1,0 +1,20 @@
+services:
+  sam:
+    build: .
+    image: palavara-scheduler-sam
+    working_dir: /workspace/scheduler
+    volumes:
+      # Mount the whole palavara-v3 tree so SAM can resolve relative paths
+      # (CodeUri: backend/ etc.) and write build artefacts to .aws-sam/.
+      - ..:/workspace
+      # Read-only AWS credentials from the host. The user's standard
+      # ~/.aws/{credentials,config} files are picked up unchanged.
+      - ${HOME}/.aws:/root/.aws:ro
+    environment:
+      # Pass through whatever the user has in their shell. Don't bake
+      # secrets into the image or compose file.
+      - AWS_PROFILE
+      - AWS_REGION=eu-central-1
+      - PAYPAL_CLIENT_ID
+      - PAYPAL_CLIENT_SECRET
+      - PAYPAL_WEBHOOK_ID
