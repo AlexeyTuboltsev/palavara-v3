@@ -3,58 +3,32 @@
 /**
  * POST /bookings
  *
- * Body (JSON):
- *   { date, timeSlot, studentName, studentEmail }
+ * Body (JSON): { date, timeSlot, studentName, studentEmail }
  *
- * 1. Validates the slot is still available (race condition guard via
- *    a conditional write — DynamoDB will reject a duplicate date+slot).
- * 2. Writes a "pending" booking to DynamoDB.
- * 3. Returns a PayPal Standard Checkout redirect URL.
+ * 1. Validates input.
+ * 2. Confirms the slot is still free (best-effort — see TOCTOU note below).
+ * 3. Creates a PayPal Order (Orders v2 REST, intent CAPTURE).
+ * 4. Writes a `pending` booking to DynamoDB carrying the order id.
+ * 5. Returns { bookingId, approveUrl } — frontend redirects user to approveUrl.
  *
- * The frontend immediately redirects the user to that URL.
+ * Note on race conditions: two concurrent requests for the same date+timeSlot
+ * can both pass the availability query and both insert. For an MVP studio with
+ * <5 bookings/day this is acceptable; switching to a SLOT#date#time PK is the
+ * fix when concurrency matters.
  */
 
 const { PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, serverError } = require('../utils/response');
 const { ALL_SLOTS, isValidFutureDate } = require('../utils/slots');
+const { createOrder } = require('../utils/paypal');
 const { v4: uuidv4 } = require('uuid');
 
-const TABLE = process.env.BOOKINGS_TABLE;
-const PAYPAL_CLIENT_ID   = process.env.PAYPAL_CLIENT_ID;
-const PAYPAL_MODE        = process.env.PAYPAL_MODE || 'sandbox';
-const PAYPAL_RETURN_URL  = process.env.PAYPAL_RETURN_URL;
-const PAYPAL_CANCEL_URL  = process.env.PAYPAL_CANCEL_URL;
-const PRICE_CENTS        = parseInt(process.env.PRICE_CENTS || '2000', 10);
-const PRICE_CURRENCY     = process.env.PRICE_CURRENCY || 'EUR';
-
-const PAYPAL_BASE = PAYPAL_MODE === 'live'
-  ? 'https://www.paypal.com'
-  : 'https://www.sandbox.paypal.com';
-
-/** Build the PayPal Standard Checkout redirect URL (no SDK needed). */
-function buildPayPalUrl(bookingId, amount, currency, returnUrl, cancelUrl) {
-  const price = (amount / 100).toFixed(2);
-  const notifyUrl = process.env.PAYPAL_NOTIFY_URL || ''; // filled in by API GW output
-
-  const params = new URLSearchParams({
-    cmd: '_xclick',
-    business: PAYPAL_CLIENT_ID,   // For sandbox: use your sandbox business email OR client ID
-    item_name: `Palavara Lesson — booking ${bookingId}`,
-    item_number: bookingId,
-    amount: price,
-    currency_code: currency,
-    return: returnUrl,
-    cancel_return: cancelUrl,
-    notify_url: notifyUrl,
-    no_shipping: '1',
-    no_note: '1',
-    charset: 'utf-8',
-    custom: bookingId,            // echoed back in IPN
-  });
-
-  return `${PAYPAL_BASE}/cgi-bin/webscr?${params.toString()}`;
-}
+const TABLE             = process.env.BOOKINGS_TABLE;
+const PAYPAL_RETURN_URL = process.env.PAYPAL_RETURN_URL;
+const PAYPAL_CANCEL_URL = process.env.PAYPAL_CANCEL_URL;
+const PRICE_CENTS       = parseInt(process.env.PRICE_CENTS || '2000', 10);
+const PRICE_CURRENCY    = process.env.PRICE_CURRENCY || 'EUR';
 
 exports.handler = async (event) => {
   try {
@@ -104,10 +78,22 @@ exports.handler = async (event) => {
       return badRequest('This time slot is no longer available. Please choose another.');
     }
 
-    // ── Create booking ────────────────────────────────────────────────────────
+    // ── Allocate booking id and create PayPal order ──────────────────────────
     const bookingId = uuidv4();
-    const now = new Date().toISOString();
 
+    const returnUrl = appendQuery(PAYPAL_RETURN_URL, { bookingId });
+    const cancelUrl = appendQuery(PAYPAL_CANCEL_URL, { bookingId });
+
+    const { orderId, approveUrl } = await createOrder({
+      bookingId,
+      amountCents: PRICE_CENTS,
+      currency:    PRICE_CURRENCY,
+      returnUrl,
+      cancelUrl,
+    });
+
+    // ── Persist booking ──────────────────────────────────────────────────────
+    const now = new Date().toISOString();
     const item = {
       PK:            `BOOKING#${bookingId}`,
       bookingId,
@@ -116,7 +102,7 @@ exports.handler = async (event) => {
       status:        'pending',
       studentName:   studentName.trim(),
       studentEmail:  studentEmail.trim().toLowerCase(),
-      paypalOrderId: '',             // filled in by IPN webhook
+      paypalOrderId: orderId,
       amountCents:   PRICE_CENTS,
       createdAt:     now,
     };
@@ -124,26 +110,20 @@ exports.handler = async (event) => {
     await ddb.send(new PutCommand({
       TableName: TABLE,
       Item: item,
-      ConditionExpression: 'attribute_not_exists(PK)',  // extra safety
+      ConditionExpression: 'attribute_not_exists(PK)',
     }));
 
-    // ── Build PayPal redirect URL ─────────────────────────────────────────────
-    const returnWithId = `${PAYPAL_RETURN_URL}?bookingId=${bookingId}`;
-    const paypalUrl = buildPayPalUrl(
-      bookingId,
-      PRICE_CENTS,
-      PRICE_CURRENCY,
-      returnWithId,
-      PAYPAL_CANCEL_URL,
-    );
-
-    return ok({
-      bookingId,
-      paypalUrl,
-      message: 'Booking created. Redirect user to paypalUrl to complete payment.',
-    });
+    return ok({ bookingId, approveUrl });
   } catch (err) {
     console.error('createBooking error:', err);
     return serverError();
   }
 };
+
+function appendQuery(url, params) {
+  const u = new URL(url);
+  for (const [k, v] of Object.entries(params)) {
+    u.searchParams.set(k, v);
+  }
+  return u.toString();
+}

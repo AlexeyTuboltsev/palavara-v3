@@ -5,12 +5,17 @@ stack_name = "palavara-scheduler"
 region = "eu-central-1"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
+# Real credentials are NOT in this file. Pass them on each deploy via:
+#   sam deploy --parameter-overrides \
+#     PayPalClientId=$PAYPAL_CLIENT_ID \
+#     PayPalClientSecret=$PAYPAL_CLIENT_SECRET \
+#     PayPalReturnUrl=https://studio.palavara.com/scheduler/confirm.html \
+#     PayPalCancelUrl=https://studio.palavara.com/scheduler/index.html \
+#     PayPalWebhookId=$PAYPAL_WEBHOOK_ID
+#
+# CloudFormation will reuse previously-supplied parameter values for any
+# parameter you don't pass on a subsequent deploy.
 parameter_overrides = [
-  "PayPalClientId=SANDBOX_CLIENT_ID_PLACEHOLDER",
-  "PayPalClientSecret=SANDBOX_CLIENT_SECRET_PLACEHOLDER",
-  "PayPalMode=sandbox",
-  "PayPalReturnUrl=https://REPLACE_WITH_YOUR_DOMAIN/scheduler/confirm.html",
-  "PayPalCancelUrl=https://REPLACE_WITH_YOUR_DOMAIN/scheduler/index.html",
-  "PayPalIpnVerifyUrl=https://ipnpb.sandbox.paypal.com/cgi-bin/webscr",
+  "PayPalApiBase=https://api-m.sandbox.paypal.com",
 ]
 resolve_s3 = true

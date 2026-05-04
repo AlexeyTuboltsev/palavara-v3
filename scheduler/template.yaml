@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Palavara Scheduler — calendar booking with PayPal payment
+  Palavara Scheduler — calendar booking with PayPal Orders v2 (REST + Webhooks v2)
   Lambda + API Gateway + DynamoDB (eu-central-1)
 
 Globals:
@@ -14,10 +14,10 @@ Globals:
         BOOKINGS_TABLE: !Ref BookingsTable
         PAYPAL_CLIENT_ID: !Ref PayPalClientId
         PAYPAL_CLIENT_SECRET: !Ref PayPalClientSecret
-        PAYPAL_MODE: !Ref PayPalMode          # sandbox | live
+        PAYPAL_API_BASE: !Ref PayPalApiBase
         PAYPAL_RETURN_URL: !Ref PayPalReturnUrl
         PAYPAL_CANCEL_URL: !Ref PayPalCancelUrl
-        PAYPAL_IPN_VERIFY_URL: !Ref PayPalIpnVerifyUrl
+        PAYPAL_WEBHOOK_ID: !Ref PayPalWebhookId
         PRICE_CENTS: "2000"                   # €20.00
         PRICE_CURRENCY: "EUR"
   Api:
@@ -29,30 +29,32 @@ Globals:
 Parameters:
   PayPalClientId:
     Type: String
-    Description: PayPal App Client ID (from developer.paypal.com)
+    Description: PayPal REST app Client ID (from developer.paypal.com)
   PayPalClientSecret:
     Type: String
     NoEcho: true
-    Description: PayPal App Client Secret
-  PayPalMode:
+    Description: PayPal REST app Client Secret
+  PayPalApiBase:
     Type: String
-    Default: sandbox
-    AllowedValues: [sandbox, live]
+    Default: https://api-m.sandbox.paypal.com
+    AllowedValues:
+      - https://api-m.sandbox.paypal.com
+      - https://api-m.paypal.com
+    Description: PayPal REST API base URL — sandbox or live
   PayPalReturnUrl:
     Type: String
-    Description: URL PayPal redirects to after successful payment (your confirmation page)
+    Description: URL PayPal redirects to after the buyer approves payment
     Default: https://REPLACE_WITH_YOUR_DOMAIN/scheduler/confirm.html
   PayPalCancelUrl:
     Type: String
-    Description: URL PayPal redirects to when payment is cancelled
+    Description: URL PayPal redirects to when the buyer cancels payment
     Default: https://REPLACE_WITH_YOUR_DOMAIN/scheduler/index.html
-  PayPalIpnVerifyUrl:
+  PayPalWebhookId:
     Type: String
-    Default: https://ipnpb.sandbox.paypal.com/cgi-bin/webscr
+    Default: ""
     Description: >
-      PayPal IPN verification endpoint.
-      sandbox: https://ipnpb.sandbox.paypal.com/cgi-bin/webscr
-      live:    https://ipnpb.paypal.com/cgi-bin/webscr
+      PayPal Webhook ID (configured in the PayPal app dashboard).
+      Leave empty to reject all webhooks until configured.
 
 Resources:
 
@@ -133,6 +135,23 @@ Resources:
             Path: /bookings/{id}
             Method: get
 
+  CaptureOrderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-capture-order
+      CodeUri: backend/
+      Handler: src/handlers/captureOrder.handler
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /bookings/{id}/capture
+            Method: post
+
   PayPalWebhookFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -154,6 +173,9 @@ Outputs:
   ApiBaseUrl:
     Description: API Gateway base URL — put this in frontend/config.js
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  WebhookUrl:
+    Description: Configure this URL in the PayPal app dashboard (Webhooks → Add)
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/webhooks/paypal"
   BookingsTableName:
     Description: DynamoDB table name
     Value: !Ref BookingsTable

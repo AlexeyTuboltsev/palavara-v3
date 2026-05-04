@@ -1,141 +1,95 @@
 'use strict';
 
 /**
- * POST /webhooks/paypal   (PayPal IPN receiver)
+ * POST /webhooks/paypal — PayPal Webhooks v2 receiver
  *
- * Flow:
- *  1. Receive raw IPN post body from PayPal.
- *  2. Re-post the same body with "cmd=_notify-validate" back to PayPal.
- *  3. PayPal replies "VERIFIED" or "INVALID".
- *  4. On VERIFIED, check payment_status = "Completed" and amount matches.
- *  5. Update booking status → "confirmed", store paypalOrderId & confirmedAt.
+ * Verifies the signature via PayPal's verify-webhook-signature endpoint, then
+ * confirms the booking when a PAYMENT.CAPTURE.COMPLETED event arrives.
  *
- * PayPal IPN docs:
- *   https://developer.paypal.com/api/nvp-soap/ipn/
+ * Configured in PayPal Dashboard → Webhooks. Subscribe to:
+ *   - PAYMENT.CAPTURE.COMPLETED  (primary signal)
+ *   - PAYMENT.CAPTURE.DENIED     (optional — for ops visibility)
  *
- * IMPORTANT: This endpoint must be publicly reachable by PayPal's servers.
- * The URL is passed as `notify_url` in the PayPal redirect (createBooking.js).
+ * The synchronous capture flow in /bookings/{id}/capture handles the happy
+ * path; this webhook is the backup for cases where the user closes the
+ * browser before the return URL fires, or where the capture call fails
+ * server-side but PayPal has already taken the money.
  */
 
-const { UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
+const { verifyWebhookSignature } = require('../utils/paypal');
 
-const TABLE            = process.env.BOOKINGS_TABLE;
-const IPN_VERIFY_URL   = process.env.PAYPAL_IPN_VERIFY_URL
-  || 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr';
-const PRICE_CENTS      = parseInt(process.env.PRICE_CENTS || '2000', 10);
-const PRICE_CURRENCY   = process.env.PRICE_CURRENCY || 'EUR';
-
-/**
- * Verify an IPN message by bouncing it back to PayPal.
- * @param {string} rawBody — the raw application/x-www-form-urlencoded body
- * @returns {Promise<boolean>}
- */
-async function verifyIpn(rawBody) {
-  // Use dynamic import for node-fetch (ESM) or fall back to https module
-  let fetchFn;
-  try {
-    const { default: fetch } = await import('node-fetch');
-    fetchFn = fetch;
-  } catch {
-    // node 18+ has global fetch
-    fetchFn = globalThis.fetch;
-  }
-
-  const verifyBody = 'cmd=_notify-validate&' + rawBody;
-
-  const response = await fetchFn(IPN_VERIFY_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'User-Agent': 'palavara-scheduler/1.0',
-    },
-    body: verifyBody,
-  });
-
-  const text = await response.text();
-  return text.trim() === 'VERIFIED';
-}
+const TABLE       = process.env.BOOKINGS_TABLE;
+const WEBHOOK_ID  = process.env.PAYPAL_WEBHOOK_ID;
 
 exports.handler = async (event) => {
-  // Always return 200 immediately — PayPal requires it.
-  // Processing happens async; errors are logged but don't affect the response.
-  const rawBody = event.body || '';
-
+  // PayPal expects a 200 within ~25s or it retries. We always return 200
+  // and log errors — duplicate retries are handled idempotently below.
   try {
-    const params = new URLSearchParams(rawBody);
+    const rawBody = event.body || '';
+    let payload;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      console.warn('webhook: invalid JSON body');
+      return { statusCode: 200, body: '' };
+    }
 
-    const paymentStatus  = params.get('payment_status');
-    const paymentGross   = params.get('mc_gross');
-    const paymentCurrency = params.get('mc_currency');
-    const txnId          = params.get('txn_id');
-    const bookingId      = params.get('custom'); // we set this in createBooking
+    // API Gateway lower-cases header keys for HTTP API but not REST API;
+    // normalise both to lowercase before passing to verifier.
+    const headers = {};
+    for (const [k, v] of Object.entries(event.headers || {})) {
+      headers[k.toLowerCase()] = v;
+    }
 
-    console.log('IPN received', { paymentStatus, txnId, bookingId });
-
-    // ── Step 1: Verify with PayPal ──────────────────────────────────────────
-    const verified = await verifyIpn(rawBody);
+    const verified = await verifyWebhookSignature(headers, payload, WEBHOOK_ID);
     if (!verified) {
-      console.warn('IPN verification failed — ignoring message');
-      return { statusCode: 200, body: '' };
-    }
-
-    // ── Step 2: Check payment status ─────────────────────────────────────────
-    if (paymentStatus !== 'Completed') {
-      console.log(`IPN: payment_status=${paymentStatus} — not completed, skipping`);
-      return { statusCode: 200, body: '' };
-    }
-
-    // ── Step 3: Validate amount & currency ───────────────────────────────────
-    const paidCents = Math.round(parseFloat(paymentGross) * 100);
-    if (paidCents !== PRICE_CENTS || paymentCurrency !== PRICE_CURRENCY) {
-      console.error('IPN amount/currency mismatch', {
-        expected: { cents: PRICE_CENTS, currency: PRICE_CURRENCY },
-        received: { cents: paidCents, currency: paymentCurrency },
+      console.warn('webhook: signature verification failed', {
+        eventType: payload.event_type,
+        id: payload.id,
       });
       return { statusCode: 200, body: '' };
     }
 
-    // ── Step 4: Fetch booking ─────────────────────────────────────────────────
+    if (payload.event_type !== 'PAYMENT.CAPTURE.COMPLETED') {
+      console.log('webhook: ignoring event type', payload.event_type);
+      return { statusCode: 200, body: '' };
+    }
+
+    // custom_id was set to bookingId when we created the order.
+    const bookingId = payload.resource?.custom_id;
+    const captureId = payload.resource?.id;
     if (!bookingId) {
-      console.warn('IPN: missing custom (bookingId) field');
+      console.warn('webhook: PAYMENT.CAPTURE.COMPLETED with no custom_id');
       return { statusCode: 200, body: '' };
     }
 
-    const existing = await ddb.send(new GetCommand({
-      TableName: TABLE,
-      Key: { PK: `BOOKING#${bookingId}` },
-    }));
-
-    if (!existing.Item) {
-      console.error('IPN: booking not found', bookingId);
-      return { statusCode: 200, body: '' };
+    try {
+      await ddb.send(new UpdateCommand({
+        TableName: TABLE,
+        Key: { PK: `BOOKING#${bookingId}` },
+        UpdateExpression: 'SET #s = :confirmed, paypalCaptureId = :cap, confirmedAt = :now',
+        ConditionExpression: 'attribute_exists(PK) AND #s = :pending',
+        ExpressionAttributeNames: { '#s': 'status' },
+        ExpressionAttributeValues: {
+          ':confirmed': 'confirmed',
+          ':pending':   'pending',
+          ':cap':       captureId || '',
+          ':now':       new Date().toISOString(),
+        },
+      }));
+      console.log('webhook: booking confirmed', { bookingId, captureId });
+    } catch (err) {
+      if (err.name === 'ConditionalCheckFailedException') {
+        // Already confirmed (sync capture beat us, or duplicate webhook).
+        console.log('webhook: booking already confirmed or missing', { bookingId });
+      } else {
+        throw err;
+      }
     }
-
-    if (existing.Item.status === 'confirmed') {
-      console.log('IPN: booking already confirmed (duplicate IPN?)', bookingId);
-      return { statusCode: 200, body: '' };
-    }
-
-    // ── Step 5: Confirm booking ───────────────────────────────────────────────
-    await ddb.send(new UpdateCommand({
-      TableName: TABLE,
-      Key: { PK: `BOOKING#${bookingId}` },
-      UpdateExpression: 'SET #s = :confirmed, paypalOrderId = :txn, confirmedAt = :now',
-      ConditionExpression: '#s = :pending',
-      ExpressionAttributeNames: { '#s': 'status' },
-      ExpressionAttributeValues: {
-        ':confirmed': 'confirmed',
-        ':pending':   'pending',
-        ':txn':       txnId || '',
-        ':now':       new Date().toISOString(),
-      },
-    }));
-
-    console.log('Booking confirmed', { bookingId, txnId });
   } catch (err) {
-    console.error('paypalWebhook error:', err);
-    // Still return 200 so PayPal doesn't retry indefinitely
+    console.error('webhook handler error:', err);
   }
 
   return { statusCode: 200, body: '' };
