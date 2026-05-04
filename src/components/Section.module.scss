@@ -138,15 +138,26 @@
   h1 {
     font-weight: 700;
     line-height: 1.5;
-    margin: 0 0 20px 0;
+    margin: 0;
     font-size: 17px;
     text-transform: uppercase;
     padding: 0 10px;
+
+  }
+
+  // Per-page opt-in styling for the page H1. Used on /wheel-throwing
+  // because that page leads with an .anchor-menu and the bare default
+  // H1 read as a single block run-on with the section content below.
+  // Other Section-using pages keep the default h1; opt them in by
+  // setting `className={styles.h1Highlighted}` on their h1 if they
+  // want this treatment.
+  .h1Highlighted {
     color: $color-blue;
+    margin-bottom: 20px;
 
     @media (max-width: $breakpoint-mobile) {
-      // Mobile h2's are black per the existing rule below; keep h1
-      // consistent with that on the same viewport.
+      // Mobile h2's are black per the existing rule below; keep this
+      // h1 variant consistent with that on the same viewport.
       color: $color-black;
     }
   }

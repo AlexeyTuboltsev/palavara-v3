@@ -16,7 +16,7 @@ export const WheelThrowing: FC<{
 </div>
 }>
 
-    <h1>Wheel Throwing Classes in Berlin</h1>
+    <h1 className={styles.h1Highlighted}>Wheel Throwing Classes in Berlin</h1>
 
     <div className={styles.mainText}>
       <h2 id="4-session-wheel-throwing-class">A 4-session Wheel-Throwing class</h2>
