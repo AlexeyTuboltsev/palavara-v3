@@ -1,0 +1,159 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Palavara Scheduler — calendar booking with PayPal payment
+  Lambda + API Gateway + DynamoDB (eu-central-1)
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Timeout: 15
+    MemorySize: 256
+    Environment:
+      Variables:
+        BOOKINGS_TABLE: !Ref BookingsTable
+        PAYPAL_CLIENT_ID: !Ref PayPalClientId
+        PAYPAL_CLIENT_SECRET: !Ref PayPalClientSecret
+        PAYPAL_MODE: !Ref PayPalMode          # sandbox | live
+        PAYPAL_RETURN_URL: !Ref PayPalReturnUrl
+        PAYPAL_CANCEL_URL: !Ref PayPalCancelUrl
+        PAYPAL_IPN_VERIFY_URL: !Ref PayPalIpnVerifyUrl
+        PRICE_CENTS: "2000"                   # €20.00
+        PRICE_CURRENCY: "EUR"
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: "'*'"
+
+Parameters:
+  PayPalClientId:
+    Type: String
+    Description: PayPal App Client ID (from developer.paypal.com)
+  PayPalClientSecret:
+    Type: String
+    NoEcho: true
+    Description: PayPal App Client Secret
+  PayPalMode:
+    Type: String
+    Default: sandbox
+    AllowedValues: [sandbox, live]
+  PayPalReturnUrl:
+    Type: String
+    Description: URL PayPal redirects to after successful payment (your confirmation page)
+    Default: https://REPLACE_WITH_YOUR_DOMAIN/scheduler/confirm.html
+  PayPalCancelUrl:
+    Type: String
+    Description: URL PayPal redirects to when payment is cancelled
+    Default: https://REPLACE_WITH_YOUR_DOMAIN/scheduler/index.html
+  PayPalIpnVerifyUrl:
+    Type: String
+    Default: https://ipnpb.sandbox.paypal.com/cgi-bin/webscr
+    Description: >
+      PayPal IPN verification endpoint.
+      sandbox: https://ipnpb.sandbox.paypal.com/cgi-bin/webscr
+      live:    https://ipnpb.paypal.com/cgi-bin/webscr
+
+Resources:
+
+  # ── DynamoDB ────────────────────────────────────────────────────────────────
+  BookingsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: palavara-bookings
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: date
+          AttributeType: S
+        - AttributeName: timeSlot
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: date-index
+          KeySchema:
+            - AttributeName: date
+              KeyType: HASH
+            - AttributeName: timeSlot
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # ── Lambda functions ─────────────────────────────────────────────────────────
+  GetAvailabilityFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-get-availability
+      CodeUri: backend/
+      Handler: src/handlers/getAvailability.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BookingsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /availability
+            Method: get
+
+  CreateBookingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-create-booking
+      CodeUri: backend/
+      Handler: src/handlers/createBooking.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /bookings
+            Method: post
+
+  GetBookingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-get-booking
+      CodeUri: backend/
+      Handler: src/handlers/getBooking.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BookingsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /bookings/{id}
+            Method: get
+
+  PayPalWebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-paypal-webhook
+      CodeUri: backend/
+      Handler: src/handlers/paypalWebhook.handler
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /webhooks/paypal
+            Method: post
+
+Outputs:
+  ApiBaseUrl:
+    Description: API Gateway base URL — put this in frontend/config.js
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  BookingsTableName:
+    Description: DynamoDB table name
+    Value: !Ref BookingsTable

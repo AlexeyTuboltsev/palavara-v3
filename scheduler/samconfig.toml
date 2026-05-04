@@ -1,0 +1,16 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "palavara-scheduler"
+region = "eu-central-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = [
+  "PayPalClientId=SANDBOX_CLIENT_ID_PLACEHOLDER",
+  "PayPalClientSecret=SANDBOX_CLIENT_SECRET_PLACEHOLDER",
+  "PayPalMode=sandbox",
+  "PayPalReturnUrl=https://REPLACE_WITH_YOUR_DOMAIN/scheduler/confirm.html",
+  "PayPalCancelUrl=https://REPLACE_WITH_YOUR_DOMAIN/scheduler/index.html",
+  "PayPalIpnVerifyUrl=https://ipnpb.sandbox.paypal.com/cgi-bin/webscr",
+]
+resolve_s3 = true
