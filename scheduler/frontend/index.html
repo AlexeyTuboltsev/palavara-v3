@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Book a Lesson — Palavara</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+    <header class="site-header">
+      <h1 class="logo">Palavara</h1>
+      <p class="tagline">Book a 1-hour language lesson</p>
+    </header>
+
+    <main class="booking-container">
+
+      <!-- ── Step 1: Pick a date ────────────────────────────────────────── -->
+      <section id="step-date" class="step active">
+        <h2>Select a date</h2>
+        <div class="date-picker-wrap">
+          <input
+            type="date"
+            id="datePicker"
+            class="date-input"
+            min=""
+            aria-label="Select booking date"
+          />
+          <button id="loadSlotsBtn" class="btn btn-primary">See available times →</button>
+        </div>
+        <p id="dateError" class="error-msg hidden"></p>
+      </section>
+
+      <!-- ── Step 2: Pick a time slot ──────────────────────────────────── -->
+      <section id="step-slots" class="step hidden">
+        <h2>Available slots for <span id="selectedDateLabel"></span></h2>
+        <div id="slotsGrid" class="slots-grid" role="group" aria-label="Available time slots">
+          <!-- populated by JS -->
+        </div>
+        <p id="slotsError" class="error-msg hidden"></p>
+        <button id="backToDateBtn" class="btn btn-ghost">← Change date</button>
+      </section>
+
+      <!-- ── Step 3: Fill in details ───────────────────────────────────── -->
+      <section id="step-form" class="step hidden">
+        <h2>Your details</h2>
+        <div class="booking-summary">
+          📅 <span id="summaryDate"></span> &nbsp;⏰ <span id="summarySlot"></span>
+          &nbsp;💶 €20.00
+        </div>
+        <form id="bookingForm" novalidate>
+          <div class="form-group">
+            <label for="studentName">Full name</label>
+            <input
+              type="text"
+              id="studentName"
+              name="studentName"
+              autocomplete="name"
+              placeholder="Jane Smith"
+              required
+              minlength="2"
+            />
+          </div>
+          <div class="form-group">
+            <label for="studentEmail">Email address</label>
+            <input
+              type="email"
+              id="studentEmail"
+              name="studentEmail"
+              autocomplete="email"
+              placeholder="jane@example.com"
+              required
+            />
+          </div>
+          <p id="formError" class="error-msg hidden"></p>
+          <div class="form-actions">
+            <button type="button" id="backToSlotsBtn" class="btn btn-ghost">← Change time</button>
+            <button type="submit" id="bookBtn" class="btn btn-paypal">
+              <span class="btn-icon">💳</span> Book &amp; Pay with PayPal — €20.00
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ── Spinner / loading state ───────────────────────────────────── -->
+      <div id="loadingOverlay" class="loading-overlay hidden" aria-live="polite">
+        <div class="spinner"></div>
+        <p id="loadingMsg">Loading…</p>
+      </div>
+
+    </main>
+
+    <footer class="site-footer">
+      <p>Lessons are €20 per session &bull; Secure payment via PayPal</p>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
