@@ -23,6 +23,9 @@ Globals:
         SES_FROM_ADDRESS: !Ref SesFromAddress
         SES_REPLY_TO: !Ref SesReplyTo
         OWNER_NOTIFY_ADDRESS: !Ref OwnerNotifyAddress
+        CANCEL_URL_BASE: !Ref CancelUrlBase
+        CANCEL_TOKEN_SECRET: !Ref CancelTokenSecret
+        ADMIN_SECRET: !Ref AdminSecret
   Api:
     Cors:
       AllowMethods: "'GET,POST,OPTIONS'"
@@ -74,6 +77,23 @@ Parameters:
     Description: >
       Where the studio-side "new booking" notification email lands. Reply-To
       on those emails is set to the booker so the owner can reply directly.
+  CancelUrlBase:
+    Type: String
+    Default: "https://book.palavara.com/cancel.html"
+    Description: Public URL of the static cancel page (where the cancel link points).
+  CancelTokenSecret:
+    Type: String
+    NoEcho: true
+    Description: >
+      HMAC secret used to sign cancellation tokens in the confirmation email.
+      Generate once with `openssl rand -hex 32`. Rotating invalidates all
+      outstanding cancellation links.
+  AdminSecret:
+    Type: String
+    NoEcho: true
+    Description: >
+      Shared secret required in the X-Admin-Secret header on /admin endpoints.
+      Generate with `openssl rand -hex 32`. Use only over HTTPS.
 
 Resources:
 
@@ -211,6 +231,52 @@ Resources:
           Type: Api
           Properties:
             Path: /webhooks/paypal
+            Method: post
+
+  CancelBookingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-cancel-booking
+      CodeUri: backend/
+      Handler: src/handlers/cancelBooking.handler
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /bookings/{id}/cancel
+            Method: post
+
+  AdminCancelBookingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-cancel-booking
+      CodeUri: backend/
+      Handler: src/handlers/adminCancelBooking.handler
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/bookings/{id}/cancel
             Method: post
 
 Outputs:
