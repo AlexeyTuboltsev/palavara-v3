@@ -20,6 +20,8 @@ Globals:
         PAYPAL_WEBHOOK_ID: !Ref PayPalWebhookId
         PRICE_CENTS: "9500"                   # €95.00 — wheel-throwing workshop
         PRICE_CURRENCY: "EUR"
+        SES_FROM_ADDRESS: !Ref SesFromAddress
+        SES_REPLY_TO: !Ref SesReplyTo
   Api:
     Cors:
       AllowMethods: "'GET,POST,OPTIONS'"
@@ -55,6 +57,16 @@ Parameters:
     Description: >
       PayPal Webhook ID (configured in the PayPal app dashboard).
       Leave empty to reject all webhooks until configured.
+  SesFromAddress:
+    Type: String
+    Default: "Palavara Studio <bookings@studio.palavara.com>"
+    Description: >
+      Verified SES sender for confirmation emails. The studio.palavara.com
+      domain (or this specific email) must be verified in SES eu-central-1.
+  SesReplyTo:
+    Type: String
+    Default: "palavarastudio@gmail.com"
+    Description: Reply-To address for confirmation emails.
 
 Resources:
 
@@ -158,6 +170,12 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
       Events:
         Api:
           Type: Api
@@ -175,6 +193,12 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
       Events:
         Api:
           Type: Api

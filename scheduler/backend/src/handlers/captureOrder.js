@@ -20,6 +20,7 @@ const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, notFound, serverError } = require('../utils/response');
 const { captureOrder } = require('../utils/paypal');
+const { sendBookingConfirmation } = require('../utils/email');
 
 const TABLE = process.env.BOOKINGS_TABLE;
 
@@ -77,6 +78,10 @@ exports.handler = async (event) => {
       },
       ReturnValues: 'ALL_NEW',
     }));
+
+    // We won the conditional flip — send the confirmation email. Failures
+    // here log only; we never roll back a booking because of email trouble.
+    await sendBookingConfirmation(updated.Attributes);
 
     return ok(stripBooking(updated.Attributes));
   } catch (err) {
