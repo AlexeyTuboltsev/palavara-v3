@@ -282,6 +282,16 @@ body {
 
 .confirm-email-note { font-size: 0.85rem; color: var(--color-muted); margin-top: 0.5rem; }
 
+.refund-notice {
+  font-size: 0.95rem;
+  margin: 1rem 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+.refund-notice.refund-eligible { background: #ecfdf5; color: #065f46; }
+.refund-notice.refund-late     { background: #fff7ed; color: #92400e; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .step { padding: 1.25rem; }
