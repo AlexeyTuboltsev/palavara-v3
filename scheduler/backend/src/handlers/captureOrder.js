@@ -20,6 +20,7 @@ const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, notFound, serverError } = require('../utils/response');
 const { captureOrder } = require('../utils/paypal');
+const { sendBookingConfirmation, sendOwnerNotification } = require('../utils/email');
 
 const TABLE = process.env.BOOKINGS_TABLE;
 
@@ -78,6 +79,14 @@ exports.handler = async (event) => {
       ReturnValues: 'ALL_NEW',
     }));
 
+    // We won the conditional flip — send both confirmation emails (student
+    // + owner). Failures log only; we never roll back a booking because of
+    // email trouble. Run in parallel since they're independent.
+    await Promise.all([
+      sendBookingConfirmation(updated.Attributes),
+      sendOwnerNotification(updated.Attributes),
+    ]);
+
     return ok(stripBooking(updated.Attributes));
   } catch (err) {
     console.error('captureOrder error:', err);
@@ -100,6 +109,7 @@ function stripBooking(item) {
     bookingId:    item.bookingId,
     date:         item.date,
     timeSlot:     item.timeSlot,
+    slotEnd:      item.slotEnd,
     status:       item.status,
     studentName:  item.studentName,
     amountCents:  item.amountCents,

@@ -18,8 +18,11 @@ Globals:
         PAYPAL_RETURN_URL: !Ref PayPalReturnUrl
         PAYPAL_CANCEL_URL: !Ref PayPalCancelUrl
         PAYPAL_WEBHOOK_ID: !Ref PayPalWebhookId
-        PRICE_CENTS: "2000"                   # €20.00
+        PRICE_CENTS: "9500"                   # €95.00 — wheel-throwing workshop
         PRICE_CURRENCY: "EUR"
+        SES_FROM_ADDRESS: !Ref SesFromAddress
+        SES_REPLY_TO: !Ref SesReplyTo
+        OWNER_NOTIFY_ADDRESS: !Ref OwnerNotifyAddress
   Api:
     Cors:
       AllowMethods: "'GET,POST,OPTIONS'"
@@ -55,6 +58,22 @@ Parameters:
     Description: >
       PayPal Webhook ID (configured in the PayPal app dashboard).
       Leave empty to reject all webhooks until configured.
+  SesFromAddress:
+    Type: String
+    Default: "Palavara Studio <bookings@studio.palavara.com>"
+    Description: >
+      Verified SES sender for confirmation emails. The studio.palavara.com
+      domain (or this specific email) must be verified in SES eu-central-1.
+  SesReplyTo:
+    Type: String
+    Default: "palavarastudio@gmail.com"
+    Description: Reply-To address for student confirmation emails.
+  OwnerNotifyAddress:
+    Type: String
+    Default: "palavarastudio@gmail.com"
+    Description: >
+      Where the studio-side "new booking" notification email lands. Reply-To
+      on those emails is set to the booker so the owner can reply directly.
 
 Resources:
 
@@ -87,6 +106,19 @@ Resources:
         PointInTimeRecoveryEnabled: true
 
   # ── Lambda functions ─────────────────────────────────────────────────────────
+  GetDatesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-get-dates
+      CodeUri: backend/
+      Handler: src/handlers/getDates.handler
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /dates
+            Method: get
+
   GetAvailabilityFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -145,6 +177,12 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
       Events:
         Api:
           Type: Api
@@ -162,6 +200,12 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
       Events:
         Api:
           Type: Api

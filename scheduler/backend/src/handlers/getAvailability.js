@@ -3,15 +3,17 @@
 /**
  * GET /availability?date=YYYY-MM-DD
  *
- * Returns the list of available 1-hour slots for the given date.
- * All 12 slots (10:00–21:00) minus any slots that already have a
- * booking in status "pending" or "confirmed".
+ * Returns the workshop slots configured for the given date that have not
+ * yet been booked. Each slot is returned as { start, end } with times in
+ * Europe/Berlin local time.
+ *
+ * Past dates and dates with no workshops yield an empty list (not an error).
  */
 
 const { QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, serverError } = require('../utils/response');
-const { ALL_SLOTS, isValidFutureDate } = require('../utils/slots');
+const { getSlotsForDate, isValidDateString } = require('../utils/slots');
 
 const TABLE = process.env.BOOKINGS_TABLE;
 
@@ -22,20 +24,24 @@ exports.handler = async (event) => {
     if (!date) {
       return badRequest('Missing required query parameter: date');
     }
-    if (!isValidFutureDate(date)) {
-      return badRequest('Invalid or past date. Use YYYY-MM-DD format.');
+    if (!isValidDateString(date)) {
+      return badRequest('Invalid date. Use YYYY-MM-DD format.');
     }
 
-    // Query the GSI date-index for all bookings on this date
+    const allSlots = getSlotsForDate(date);
+
+    if (allSlots.length === 0) {
+      // Past date, no workshops, or unknown date — return empty list cleanly.
+      return ok({ date, availableSlots: [], totalSlots: 0, bookedCount: 0 });
+    }
+
+    // The GSI's range key is timeSlot (the slot's start time).
     const result = await ddb.send(new QueryCommand({
       TableName: TABLE,
       IndexName: 'date-index',
       KeyConditionExpression: '#d = :date',
       FilterExpression: '#s IN (:pending, :confirmed)',
-      ExpressionAttributeNames: {
-        '#d': 'date',
-        '#s': 'status',
-      },
+      ExpressionAttributeNames: { '#d': 'date', '#s': 'status' },
       ExpressionAttributeValues: {
         ':date': date,
         ':pending': 'pending',
@@ -44,14 +50,14 @@ exports.handler = async (event) => {
       ProjectionExpression: 'timeSlot',
     }));
 
-    const bookedSlots = new Set((result.Items || []).map((item) => item.timeSlot));
-    const availableSlots = ALL_SLOTS.filter((slot) => !bookedSlots.has(slot));
+    const bookedStarts = new Set((result.Items || []).map((item) => item.timeSlot));
+    const availableSlots = allSlots.filter((s) => !bookedStarts.has(s.start));
 
     return ok({
       date,
       availableSlots,
-      totalSlots: ALL_SLOTS.length,
-      bookedCount: bookedSlots.size,
+      totalSlots: allSlots.length,
+      bookedCount: bookedStarts.size,
     });
   } catch (err) {
     console.error('getAvailability error:', err);
