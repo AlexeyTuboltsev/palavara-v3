@@ -149,6 +149,44 @@ async function captureOrder(orderId) {
 }
 
 /**
+ * Refund a captured payment, in full. Returns the refund id and status.
+ * Use for cancellations within the refund window.
+ *
+ * @param {object} args
+ * @param {string} args.captureId   The PayPal capture id (saved when capture succeeded)
+ * @param {number} args.amountCents Amount to refund in minor units
+ * @param {string} args.currency    ISO 4217
+ * @param {string} args.bookingId   Used as idempotency key + custom_id
+ * @returns {Promise<{status: string, refundId: string}>}
+ */
+async function refundCapture({ captureId, amountCents, currency, bookingId }) {
+  const token = await getAccessToken();
+  const value = (amountCents / 100).toFixed(2);
+
+  const res = await fetch(`${API_BASE}/v2/payments/captures/${encodeURIComponent(captureId)}/refund`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'PayPal-Request-Id': `refund-${bookingId}`,
+    },
+    body: JSON.stringify({
+      amount: { value, currency_code: currency },
+      note_to_payer: 'Workshop cancellation refund — Palavara Studio',
+    }),
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (res.status !== 200 && res.status !== 201) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`PayPal refundCapture failed (${res.status}): ${text}`);
+  }
+
+  const data = await res.json();
+  return { status: data.status, refundId: data.id };
+}
+
+/**
  * Verify a Webhooks v2 signature by calling PayPal's verification endpoint.
  * @param {object} headers      Lowercased request headers
  * @param {object} eventBody    Parsed JSON event payload
@@ -193,4 +231,4 @@ async function verifyWebhookSignature(headers, eventBody, webhookId) {
   return data.verification_status === 'SUCCESS';
 }
 
-module.exports = { getAccessToken, createOrder, captureOrder, verifyWebhookSignature };
+module.exports = { getAccessToken, createOrder, captureOrder, refundCapture, verifyWebhookSignature };

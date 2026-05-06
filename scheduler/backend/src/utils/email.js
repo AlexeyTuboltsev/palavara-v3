@@ -16,12 +16,14 @@
  */
 
 const { SESv2Client, SendEmailCommand } = require('@aws-sdk/client-sesv2');
+const { signCancelToken } = require('./cancelToken');
 
 const ses = new SESv2Client({ region: process.env.AWS_REGION || 'eu-central-1' });
 
 const FROM_ADDRESS         = process.env.SES_FROM_ADDRESS;
 const REPLY_TO             = process.env.SES_REPLY_TO;
 const OWNER_NOTIFY_ADDRESS = process.env.OWNER_NOTIFY_ADDRESS;
+const CANCEL_URL_BASE      = process.env.CANCEL_URL_BASE || 'https://book.palavara.com/cancel.html';
 
 const STUDIO_ADDRESS = 'Steegerstr. 1A, 13359 Berlin';
 const STUDIO_TZ      = 'Europe/Berlin';
@@ -82,7 +84,15 @@ function foldIcsLines(text) {
   }).join('\r\n');
 }
 
-function buildIcs(booking) {
+/**
+ * Build a VCALENDAR. method='REQUEST' for new bookings, 'CANCEL' to remove
+ * the previously-sent event from the recipient's calendar.
+ *
+ * For CANCEL we increment SEQUENCE to 1 — calendar clients use this to know
+ * the cancellation supersedes the original REQUEST (which was SEQUENCE:0,
+ * implicit on creation).
+ */
+function buildIcs(booking, { method = 'REQUEST' } = {}) {
   const summary  = `Wheel-throwing workshop — ${booking.studentName}`;
   const desc     = [
     `Booker: ${booking.studentName} <${booking.studentEmail}>`,
@@ -90,12 +100,13 @@ function buildIcs(booking) {
     `Booking ID: ${booking.bookingId}`,
   ].join('\\n');
 
+  const isCancel = method === 'CANCEL';
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//Palavara Studio//Scheduler//EN',
     'CALSCALE:GREGORIAN',
-    'METHOD:REQUEST',
+    `METHOD:${method}`,
     'BEGIN:VEVENT',
     `UID:${booking.bookingId}@studio.palavara.com`,
     `DTSTAMP:${icsUtcNow()}`,
@@ -105,7 +116,8 @@ function buildIcs(booking) {
     `LOCATION:${icsEscape(STUDIO_ADDRESS)}`,
     `DESCRIPTION:${icsEscape(desc)}`,
     `ORGANIZER;CN=Palavara Studio:MAILTO:${stripDisplayName(FROM_ADDRESS)}`,
-    'STATUS:CONFIRMED',
+    `STATUS:${isCancel ? 'CANCELLED' : 'CONFIRMED'}`,
+    `SEQUENCE:${isCancel ? '1' : '0'}`,
     'TRANSP:OPAQUE',
     'END:VEVENT',
     'END:VCALENDAR',
@@ -153,6 +165,18 @@ function stripDisplayName(addr) {
   return m ? m[1] : addr;
 }
 
+/**
+ * Build the cancellation URL the recipient clicks to start a self-service
+ * cancellation. Token is HMAC-bound to the booking id.
+ */
+function buildCancelUrl(booking) {
+  const token = signCancelToken(booking.bookingId);
+  const u = new URL(CANCEL_URL_BASE);
+  u.searchParams.set('bookingId', booking.bookingId);
+  u.searchParams.set('token', token);
+  return u.toString();
+}
+
 // ── Email senders ─────────────────────────────────────────────────────────
 
 /**
@@ -169,6 +193,7 @@ async function sendBookingConfirmation(booking) {
   const timeLine  = `${booking.timeSlot} – ${booking.slotEnd}`;
   const priceLine = formatPrice(booking.amountCents || 9500, 'EUR');
   const gcalUrl   = buildGoogleCalendarUrl(booking);
+  const cancelUrl = buildCancelUrl(booking);
   const ics       = buildIcs(booking);
 
   const subject = 'Your wheel-throwing workshop is confirmed — Palavara Studio';
@@ -191,8 +216,12 @@ async function sendBookingConfirmation(booking) {
     "  - Wear clothes you don't mind getting clay on. Aprons are provided.",
     '  - The workshop can be conducted in English or Russian — tell us on arrival.',
     '',
-    'If you need to cancel or reschedule, reply to this email or write to',
-    'palavarastudio@gmail.com as soon as possible.',
+    'Need to cancel? Use this link:',
+    `  ${cancelUrl}`,
+    "Cancellations more than 48 hours before the workshop receive a full refund;",
+    "later than that, no refund is possible.",
+    '',
+    'For anything else, reply to this email or write to palavarastudio@gmail.com.',
     '',
     'Looking forward to seeing you.',
     'Palavara Studio',
@@ -223,8 +252,17 @@ async function sendBookingConfirmation(booking) {
     <li>Wear clothes you don't mind getting clay on. Aprons are provided.</li>
     <li>The workshop can be conducted in English or Russian — tell us on arrival.</li>
   </ul>
-  <p>If you need to cancel or reschedule, reply to this email or write to
-    <a href="mailto:palavarastudio@gmail.com">palavarastudio@gmail.com</a> as soon as possible.</p>
+  <p style="margin-top: 24px;">
+    Need to cancel?
+    <a href="${escapeHtml(cancelUrl)}" style="color:#1a73e8;">Cancel this booking</a>.
+    <br/>
+    <span style="color:#6b7280; font-size: 13px;">
+      Cancellations more than 48 hours before the workshop receive a full refund.
+      Later than that, no refund is possible.
+    </span>
+  </p>
+  <p>For anything else, reply to this email or write to
+    <a href="mailto:palavarastudio@gmail.com">palavarastudio@gmail.com</a>.</p>
   <p>Looking forward to seeing you.<br/>Palavara Studio</p>
   <hr/>
   <p style="color:#6b7280; font-size: 12px;">Booking ID: ${escapeHtml(booking.bookingId)}</p>
@@ -258,6 +296,7 @@ async function sendOwnerNotification(booking) {
   const timeLine  = `${booking.timeSlot} – ${booking.slotEnd}`;
   const priceLine = formatPrice(booking.amountCents || 9500, 'EUR');
   const gcalUrl   = buildGoogleCalendarUrl(booking);
+  const cancelUrl = buildCancelUrl(booking);
   const ics       = buildIcs(booking);
 
   const subject = `New booking: ${booking.studentName} — ${dateLine}, ${timeLine}`;
@@ -273,6 +312,9 @@ async function sendOwnerNotification(booking) {
     '',
     `Add to Google Calendar: ${gcalUrl}`,
     'A calendar invite is also attached to this email.',
+    '',
+    `Cancel this booking (always full refund when you cancel):`,
+    `  ${cancelUrl}`,
     '',
     'Reply to this email to contact the booker directly.',
   ].join('\n');
@@ -292,6 +334,10 @@ async function sendOwnerNotification(booking) {
       Add to Google Calendar
     </a>
     <span style="color:#6b7280; font-size: 13px; margin-left: 8px;">(or open the attached calendar invite)</span>
+  </p>
+  <p style="margin-top: 16px;">
+    <a href="${escapeHtml(cancelUrl)}" style="color:#1a73e8;">Cancel this booking</a>
+    <span style="color:#6b7280; font-size: 13px;">(always full refund when you cancel)</span>
   </p>
   <p style="color:#6b7280; font-size: 13px;">Reply to this email to contact the booker directly.</p>
 </body></html>`;
@@ -315,7 +361,7 @@ async function sendOwnerNotification(booking) {
  * Build a multipart/mixed Raw MIME message and call SendEmail. Using Raw
  * (instead of Simple+Attachments) keeps us portable across SDK versions.
  */
-async function sendWithIcs({ to, subject, text, html, icsContent, icsFilename, replyTo, logTag, bookingId }) {
+async function sendWithIcs({ to, subject, text, html, icsContent, icsFilename, icsMethod = 'REQUEST', replyTo, logTag, bookingId }) {
   const boundary    = `b1_${Date.now()}_${Math.random().toString(36).slice(2)}`;
   const altBoundary = `b2_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
@@ -347,7 +393,7 @@ async function sendWithIcs({ to, subject, text, html, icsContent, icsFilename, r
     `--${altBoundary}--`,
     '',
     `--${boundary}`,
-    `Content-Type: text/calendar; method=REQUEST; charset=UTF-8; name="${icsFilename}"`,
+    `Content-Type: text/calendar; method=${icsMethod}; charset=UTF-8; name="${icsFilename}"`,
     `Content-Disposition: attachment; filename="${icsFilename}"`,
     'Content-Transfer-Encoding: 8bit',
     '',
@@ -377,4 +423,157 @@ function encodeMimeHeader(s) {
   return `=?UTF-8?B?${Buffer.from(s, 'utf8').toString('base64')}?=`;
 }
 
-module.exports = { sendBookingConfirmation, sendOwnerNotification };
+// ── Cancellation emails ───────────────────────────────────────────────────
+
+/**
+ * Notify the student that their booking has been cancelled. Includes a
+ * cancellation .ics so calendar apps remove the event.
+ *
+ * @param {object} booking — the cancelled booking row (post-update). Must
+ *   include refundedAmountCents (0 if not eligible) and cancelledBy.
+ */
+async function sendCancellationConfirmation(booking) {
+  if (!FROM_ADDRESS) {
+    console.warn('SES_FROM_ADDRESS not configured — skipping student cancel email');
+    return false;
+  }
+
+  const dateLine  = formatDate(booking.date);
+  const timeLine  = `${booking.timeSlot} – ${booking.slotEnd}`;
+  const refunded  = (booking.refundedAmountCents || 0) > 0;
+  const refundLine = refunded
+    ? `${formatPrice(booking.refundedAmountCents)} has been refunded to your PayPal account.`
+    : 'No refund per the >48h policy. The slot has been released for other bookings.';
+
+  const ics = buildIcs(booking, { method: 'CANCEL' });
+
+  const subject = 'Workshop cancelled — Palavara Studio';
+
+  const cancelledByStudio = booking.cancelledBy === 'studio';
+  const lead = cancelledByStudio
+    ? 'Your wheel-throwing workshop has been cancelled by the studio.'
+    : 'Your wheel-throwing workshop has been cancelled.';
+
+  const text = [
+    `Hi ${booking.studentName},`,
+    '',
+    lead,
+    '',
+    `  Date: ${dateLine}`,
+    `  Time: ${timeLine}`,
+    '',
+    refundLine,
+    '',
+    cancelledByStudio
+      ? 'We apologise for the inconvenience. Reply to this email if you\'d like to rebook.'
+      : 'You can book another workshop at https://book.palavara.com/ whenever you like.',
+    '',
+    'A calendar update is attached so the event is removed from your calendar.',
+    '',
+    'Palavara Studio',
+    '',
+    '---',
+    `Booking ID: ${booking.bookingId}`,
+  ].join('\n');
+
+  const html = `<!DOCTYPE html>
+<html><body style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #111; line-height: 1.55;">
+  <p>Hi ${escapeHtml(booking.studentName)},</p>
+  <p>${escapeHtml(lead)}</p>
+  <table cellpadding="4" style="border-collapse: collapse; margin: 12px 0;">
+    <tr><td style="color:#6b7280">Date</td><td><strong>${escapeHtml(dateLine)}</strong></td></tr>
+    <tr><td style="color:#6b7280">Time</td><td><strong>${escapeHtml(timeLine)}</strong></td></tr>
+  </table>
+  <p>${escapeHtml(refundLine)}</p>
+  ${cancelledByStudio
+    ? '<p>We apologise for the inconvenience. Reply to this email if you\'d like to rebook.</p>'
+    : '<p>You can book another workshop at <a href="https://book.palavara.com/">book.palavara.com</a> whenever you like.</p>'}
+  <p style="color:#6b7280; font-size: 13px;">A calendar update is attached so the event is removed from your calendar.</p>
+  <p>Palavara Studio</p>
+  <hr/>
+  <p style="color:#6b7280; font-size: 12px;">Booking ID: ${escapeHtml(booking.bookingId)}</p>
+</body></html>`;
+
+  return sendWithIcs({
+    to:        booking.studentEmail,
+    subject,
+    text,
+    html,
+    icsContent: ics,
+    icsFilename: 'workshop-cancelled.ics',
+    icsMethod: 'CANCEL',
+    replyTo:   REPLY_TO,
+    logTag:    'student-cancel',
+    bookingId: booking.bookingId,
+  });
+}
+
+/**
+ * Notify the studio owner about a cancellation. Subject distinguishes
+ * student- vs studio-initiated.
+ */
+async function sendCancellationNotification(booking) {
+  if (!FROM_ADDRESS || !OWNER_NOTIFY_ADDRESS) {
+    console.warn('SES sender or OWNER_NOTIFY_ADDRESS not configured — skipping owner cancel email');
+    return false;
+  }
+
+  const dateLine  = formatDate(booking.date);
+  const timeLine  = `${booking.timeSlot} – ${booking.slotEnd}`;
+  const refunded  = (booking.refundedAmountCents || 0) > 0;
+  const refundLine = refunded
+    ? `Refund: ${formatPrice(booking.refundedAmountCents)} processed (PayPal refund id ${booking.paypalRefundId || '?'})`
+    : 'Refund: none (cancellation within 48h of workshop)';
+
+  const ics = buildIcs(booking, { method: 'CANCEL' });
+
+  const cancelledBy = booking.cancelledBy === 'studio' ? 'studio' : 'student';
+  const subject = `Booking cancelled (${cancelledBy}): ${booking.studentName} — ${dateLine}, ${timeLine}`;
+
+  const text = [
+    `A booking has been cancelled by the ${cancelledBy}.`,
+    '',
+    `  Booker:     ${booking.studentName} <${booking.studentEmail}>`,
+    `  Date:       ${dateLine}`,
+    `  Time:       ${timeLine}`,
+    `  Booking ID: ${booking.bookingId}`,
+    '',
+    refundLine,
+    '',
+    'The slot is now available for other bookings.',
+    'A calendar update is attached so the event is removed from your calendar.',
+  ].join('\n');
+
+  const html = `<!DOCTYPE html>
+<html><body style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #111; line-height: 1.55;">
+  <p>A booking has been cancelled by the <strong>${escapeHtml(cancelledBy)}</strong>.</p>
+  <table cellpadding="4" style="border-collapse: collapse; margin: 12px 0;">
+    <tr><td style="color:#6b7280">Booker</td><td>${escapeHtml(booking.studentName)} &lt;<a href="mailto:${escapeHtml(booking.studentEmail)}">${escapeHtml(booking.studentEmail)}</a>&gt;</td></tr>
+    <tr><td style="color:#6b7280">Date</td><td><strong>${escapeHtml(dateLine)}</strong></td></tr>
+    <tr><td style="color:#6b7280">Time</td><td><strong>${escapeHtml(timeLine)}</strong></td></tr>
+    <tr><td style="color:#6b7280">Booking ID</td><td><code>${escapeHtml(booking.bookingId)}</code></td></tr>
+  </table>
+  <p>${escapeHtml(refundLine)}</p>
+  <p style="color:#6b7280; font-size: 13px;">The slot is now available for other bookings. A calendar update is attached.</p>
+</body></html>`;
+
+  return sendWithIcs({
+    to:        OWNER_NOTIFY_ADDRESS,
+    subject,
+    text,
+    html,
+    icsContent: ics,
+    icsFilename: `cancel-${booking.bookingId.slice(0, 8)}.ics`,
+    icsMethod: 'CANCEL',
+    replyTo:   booking.studentEmail,
+    logTag:    'owner-cancel',
+    bookingId: booking.bookingId,
+  });
+}
+
+module.exports = {
+  sendBookingConfirmation,
+  sendOwnerNotification,
+  sendCancellationConfirmation,
+  sendCancellationNotification,
+};
