@@ -19,7 +19,7 @@
 const { UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { verifyWebhookSignature } = require('../utils/paypal');
-const { sendBookingConfirmation } = require('../utils/email');
+const { sendBookingConfirmation, sendOwnerNotification } = require('../utils/email');
 
 const TABLE       = process.env.BOOKINGS_TABLE;
 const WEBHOOK_ID  = process.env.PAYPAL_WEBHOOK_ID;
@@ -82,10 +82,13 @@ exports.handler = async (event) => {
         ReturnValues: 'ALL_NEW',
       }));
       console.log('webhook: booking confirmed', { bookingId, captureId });
-      // We won the conditional flip — send the confirmation email. The sync
-      // capture path didn't, so this is the only place email gets sent for
-      // bookings that browser-close after PayPal approval.
-      await sendBookingConfirmation(updated.Attributes);
+      // We won the conditional flip — send both confirmation emails. The
+      // sync capture path didn't, so this is the only place emails get
+      // sent for bookings that browser-close after PayPal approval.
+      await Promise.all([
+        sendBookingConfirmation(updated.Attributes),
+        sendOwnerNotification(updated.Attributes),
+      ]);
     } catch (err) {
       if (err.name === 'ConditionalCheckFailedException') {
         // Already confirmed (sync capture beat us, or duplicate webhook).

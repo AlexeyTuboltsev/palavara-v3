@@ -22,6 +22,7 @@ Globals:
         PRICE_CURRENCY: "EUR"
         SES_FROM_ADDRESS: !Ref SesFromAddress
         SES_REPLY_TO: !Ref SesReplyTo
+        OWNER_NOTIFY_ADDRESS: !Ref OwnerNotifyAddress
   Api:
     Cors:
       AllowMethods: "'GET,POST,OPTIONS'"
@@ -66,7 +67,13 @@ Parameters:
   SesReplyTo:
     Type: String
     Default: "palavarastudio@gmail.com"
-    Description: Reply-To address for confirmation emails.
+    Description: Reply-To address for student confirmation emails.
+  OwnerNotifyAddress:
+    Type: String
+    Default: "palavarastudio@gmail.com"
+    Description: >
+      Where the studio-side "new booking" notification email lands. Reply-To
+      on those emails is set to the booker so the owner can reply directly.
 
 Resources:
 
