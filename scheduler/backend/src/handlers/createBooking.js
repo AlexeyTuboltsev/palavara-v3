@@ -3,31 +3,32 @@
 /**
  * POST /bookings
  *
- * Body (JSON): { date, timeSlot, studentName, studentEmail }
+ * Body (JSON): { date, start, studentName, studentEmail }
  *
- * 1. Validates input.
+ * 1. Validates input and that the slot exists for the chosen date.
  * 2. Confirms the slot is still free (best-effort — see TOCTOU note below).
  * 3. Creates a PayPal Order (Orders v2 REST, intent CAPTURE).
- * 4. Writes a `pending` booking to DynamoDB carrying the order id.
+ * 4. Writes a `pending` booking to DynamoDB carrying the order id and the
+ *    slot's start + end times.
  * 5. Returns { bookingId, approveUrl } — frontend redirects user to approveUrl.
  *
- * Note on race conditions: two concurrent requests for the same date+timeSlot
- * can both pass the availability query and both insert. For an MVP studio with
- * <5 bookings/day this is acceptable; switching to a SLOT#date#time PK is the
- * fix when concurrency matters.
+ * Note on race conditions: two concurrent requests for the same date+start
+ * can both pass the availability query and both insert. For an MVP studio
+ * with <5 bookings/day this is acceptable; switching to a SLOT#date#start PK
+ * is the fix when concurrency matters.
  */
 
 const { PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, serverError } = require('../utils/response');
-const { ALL_SLOTS, isValidFutureDate } = require('../utils/slots');
+const { findSlot, isValidDateString } = require('../utils/slots');
 const { createOrder } = require('../utils/paypal');
 const { v4: uuidv4 } = require('uuid');
 
 const TABLE             = process.env.BOOKINGS_TABLE;
 const PAYPAL_RETURN_URL = process.env.PAYPAL_RETURN_URL;
 const PAYPAL_CANCEL_URL = process.env.PAYPAL_CANCEL_URL;
-const PRICE_CENTS       = parseInt(process.env.PRICE_CENTS || '2000', 10);
+const PRICE_CENTS       = parseInt(process.env.PRICE_CENTS || '9500', 10);
 const PRICE_CURRENCY    = process.env.PRICE_CURRENCY || 'EUR';
 
 exports.handler = async (event) => {
@@ -39,18 +40,21 @@ exports.handler = async (event) => {
       return badRequest('Invalid JSON body');
     }
 
-    const { date, timeSlot, studentName, studentEmail } = body;
+    const { date, start, studentName, studentEmail } = body;
 
     // ── Validate inputs ──────────────────────────────────────────────────────
-    if (!date || !timeSlot || !studentName || !studentEmail) {
-      return badRequest('Missing required fields: date, timeSlot, studentName, studentEmail');
+    if (!date || !start || !studentName || !studentEmail) {
+      return badRequest('Missing required fields: date, start, studentName, studentEmail');
     }
-    if (!isValidFutureDate(date)) {
-      return badRequest('Invalid or past date');
+    if (!isValidDateString(date)) {
+      return badRequest('Invalid date. Use YYYY-MM-DD format.');
     }
-    if (!ALL_SLOTS.includes(timeSlot)) {
-      return badRequest(`Invalid timeSlot. Must be one of: ${ALL_SLOTS.join(', ')}`);
+
+    const slot = findSlot(date, start);
+    if (!slot) {
+      return badRequest('No workshop slot at that date and start time.');
     }
+
     if (!studentEmail.includes('@')) {
       return badRequest('Invalid email address');
     }
@@ -67,7 +71,7 @@ exports.handler = async (event) => {
       ExpressionAttributeNames: { '#d': 'date', '#t': 'timeSlot', '#s': 'status' },
       ExpressionAttributeValues: {
         ':date': date,
-        ':slot': timeSlot,
+        ':slot': start,
         ':pending': 'pending',
         ':confirmed': 'confirmed',
       },
@@ -98,7 +102,8 @@ exports.handler = async (event) => {
       PK:            `BOOKING#${bookingId}`,
       bookingId,
       date,
-      timeSlot,
+      timeSlot:      slot.start,
+      slotEnd:       slot.end,
       status:        'pending',
       studentName:   studentName.trim(),
       studentEmail:  studentEmail.trim().toLowerCase(),

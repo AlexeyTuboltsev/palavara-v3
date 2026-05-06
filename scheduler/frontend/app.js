@@ -2,9 +2,10 @@
  * Palavara Scheduler — main booking page script (app.js)
  *
  * Flow:
- *  1. User picks a date → fetch available slots from API
- *  2. User picks a slot → show booking form
- *  3. User fills name + email → POST /bookings → redirect to PayPal
+ *  1. On load, fetch the list of dates that have workshops → populate dropdown
+ *  2. User picks a date → fetch available {start, end} slots from API
+ *  3. User picks a slot → show booking form
+ *  4. User fills name + email → POST /bookings → redirect to PayPal
  */
 
 'use strict';
@@ -34,7 +35,8 @@ const loadingMsg  = document.getElementById('loadingMsg');
 
 // ── State ──────────────────────────────────────────────────────────────────
 let selectedDate = '';
-let selectedSlot = '';
+let selectedStart = '';
+let selectedEnd   = '';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function showStep(step) {
@@ -65,25 +67,47 @@ function hideError(el) {
   el.textContent = '';
 }
 
-/** Format YYYY-MM-DD as a human-readable string, e.g. "Tuesday, 20 May 2025" */
+/** Format YYYY-MM-DD as a human-readable string, e.g. "Tuesday, 7 May 2026" */
 function formatDate(isoDate) {
   const d = new Date(isoDate + 'T12:00:00Z');
   return d.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-/** Format HH:MM as "10:00 – 11:00" */
+/** Format a slot {start, end} as "14:00 – 16:00" */
 function formatSlotRange(slot) {
-  const [h, m] = slot.split(':').map(Number);
-  const end = `${String(h + 1).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-  return `${slot} – ${end}`;
+  return `${slot.start} – ${slot.end}`;
 }
 
-// ── Set min date on the picker (today) ────────────────────────────────────
-(function setMinDate() {
-  const today = new Date().toISOString().split('T')[0];
-  datePicker.min = today;
-  datePicker.value = today;
-})();
+// ── On load: fetch the list of dates and populate the dropdown ────────────
+async function loadDates() {
+  try {
+    const res = await fetch(`${API_BASE}/dates`);
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const data = await res.json();
+    const dates = data.dates || [];
+
+    if (dates.length === 0) {
+      datePicker.innerHTML = '<option value="">No upcoming workshops</option>';
+      datePicker.disabled = true;
+      loadSlotsBtn.disabled = true;
+      return;
+    }
+
+    datePicker.innerHTML = '<option value="">Choose a date…</option>'
+      + dates.map((d) => `<option value="${d}">${formatDate(d)}</option>`).join('');
+    datePicker.disabled = false;
+    // Enable the "See available times" button only when a real date is picked.
+    loadSlotsBtn.disabled = true;
+    datePicker.addEventListener('change', () => {
+      loadSlotsBtn.disabled = !datePicker.value;
+    });
+  } catch (err) {
+    datePicker.innerHTML = '<option value="">Unable to load dates</option>';
+    datePicker.disabled = true;
+    showError(dateError, 'Could not load workshop dates. Please refresh the page.');
+  }
+}
+loadDates();
 
 // ── Step 1 → Step 2: load slots ────────────────────────────────────────────
 loadSlotsBtn.addEventListener('click', async () => {
@@ -115,11 +139,6 @@ loadSlotsBtn.addEventListener('click', async () => {
   }
 });
 
-// Allow pressing Enter in the date field
-datePicker.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') loadSlotsBtn.click();
-});
-
 // ── Render slot buttons ────────────────────────────────────────────────────
 function renderSlots(availableSlots) {
   slotsGrid.innerHTML = '';
@@ -129,12 +148,13 @@ function renderSlots(availableSlots) {
     return;
   }
 
-  availableSlots.forEach(slot => {
+  availableSlots.forEach((slot) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'slot-btn';
     btn.textContent = formatSlotRange(slot);
-    btn.dataset.slot = slot;
+    btn.dataset.start = slot.start;
+    btn.dataset.end   = slot.end;
     btn.addEventListener('click', () => selectSlot(slot, btn));
     slotsGrid.appendChild(btn);
   });
@@ -144,7 +164,8 @@ function selectSlot(slot, btn) {
   // Deselect any previously selected slot
   slotsGrid.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
-  selectedSlot = slot;
+  selectedStart = slot.start;
+  selectedEnd   = slot.end;
 
   // Update summary and move to form step
   summaryDate.textContent = formatDate(selectedDate);
@@ -155,12 +176,14 @@ function selectSlot(slot, btn) {
 
 // ── Back buttons ───────────────────────────────────────────────────────────
 backToDateBtn.addEventListener('click', () => {
-  selectedSlot = '';
+  selectedStart = '';
+  selectedEnd   = '';
   showStep(stepDate);
 });
 
 backToSlotsBtn.addEventListener('click', () => {
-  selectedSlot = '';
+  selectedStart = '';
+  selectedEnd   = '';
   showStep(stepSlots);
 });
 
@@ -183,7 +206,7 @@ bookingForm.addEventListener('submit', async (e) => {
     document.getElementById('studentEmail').focus();
     return;
   }
-  if (!selectedDate || !selectedSlot) {
+  if (!selectedDate || !selectedStart) {
     showError(formError, 'Missing date or time slot. Please go back and select again.');
     return;
   }
@@ -195,7 +218,7 @@ bookingForm.addEventListener('submit', async (e) => {
     const res = await fetch(`${API_BASE}/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: selectedDate, timeSlot: selectedSlot, studentName, studentEmail }),
+      body: JSON.stringify({ date: selectedDate, start: selectedStart, studentName, studentEmail }),
     });
 
     const data = await res.json().catch(() => ({}));

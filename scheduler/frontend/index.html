@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Book a Lesson — Palavara</title>
+  <title>Book a Wheel-Throwing Workshop — Palavara</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="page-wrapper">
     <header class="site-header">
       <h1 class="logo">Palavara</h1>
-      <p class="tagline">Book a 1-hour language lesson</p>
+      <p class="tagline">Book a wheel-throwing workshop</p>
     </header>
 
     <main class="booking-container">
@@ -20,14 +20,10 @@
       <section id="step-date" class="step active">
         <h2>Select a date</h2>
         <div class="date-picker-wrap">
-          <input
-            type="date"
-            id="datePicker"
-            class="date-input"
-            min=""
-            aria-label="Select booking date"
-          />
-          <button id="loadSlotsBtn" class="btn btn-primary">See available times →</button>
+          <select id="datePicker" class="date-input" aria-label="Select workshop date">
+            <option value="">Loading dates…</option>
+          </select>
+          <button id="loadSlotsBtn" class="btn btn-primary" disabled>See available times →</button>
         </div>
         <p id="dateError" class="error-msg hidden"></p>
       </section>
@@ -46,8 +42,8 @@
       <section id="step-form" class="step hidden">
         <h2>Your details</h2>
         <div class="booking-summary">
-          📅 <span id="summaryDate"></span> &nbsp;⏰ <span id="summarySlot"></span>
-          &nbsp;💶 €20.00
+          <span id="summaryDate"></span> &nbsp;·&nbsp; <span id="summarySlot"></span>
+          &nbsp;·&nbsp; €95.00
         </div>
         <form id="bookingForm" novalidate>
           <div class="form-group">
@@ -77,7 +73,7 @@
           <div class="form-actions">
             <button type="button" id="backToSlotsBtn" class="btn btn-ghost">← Change time</button>
             <button type="submit" id="bookBtn" class="btn btn-paypal">
-              <span class="btn-icon">💳</span> Book &amp; Pay with PayPal — €20.00
+              Book &amp; Pay with PayPal — €95.00
             </button>
           </div>
         </form>
@@ -92,7 +88,7 @@
     </main>
 
     <footer class="site-footer">
-      <p>Lessons are €20 per session &bull; Secure payment via PayPal</p>
+      <p>Wheel-throwing workshops are €95 for 2 hours &bull; Secure payment via PayPal</p>
     </footer>
   </div>
 

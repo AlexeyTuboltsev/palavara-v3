@@ -38,17 +38,15 @@ function formatDate(isoDate) {
   return d.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-function formatSlotRange(slot) {
-  const [h, m] = slot.split(':').map(Number);
-  const end = `${String(h + 1).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-  return `${slot} – ${end}`;
+function formatSlotRange(start, end) {
+  return `${start} – ${end}`;
 }
 
 function renderConfirmedDetails(booking) {
   confirmDetails.innerHTML = `
-    📅 ${formatDate(booking.date)}
-    &nbsp;&nbsp;⏰ ${formatSlotRange(booking.timeSlot)}
-    &nbsp;&nbsp;💶 €${(booking.amountCents / 100).toFixed(2)}
+    ${formatDate(booking.date)}
+    &nbsp;·&nbsp; ${formatSlotRange(booking.timeSlot, booking.slotEnd)}
+    &nbsp;·&nbsp; €${(booking.amountCents / 100).toFixed(2)}
     <br/><small style="color:#6b7280">Booking ID: ${booking.bookingId}</small>
   `;
 }

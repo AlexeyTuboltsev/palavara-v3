@@ -25,7 +25,7 @@ exports.handler = async (event) => {
       TableName: TABLE,
       Key: { PK: `BOOKING#${id}` },
       ProjectionExpression:
-        'bookingId, #d, timeSlot, #s, studentName, amountCents, createdAt, confirmedAt',
+        'bookingId, #d, timeSlot, slotEnd, #s, studentName, amountCents, createdAt, confirmedAt',
       ExpressionAttributeNames: {
         '#d': 'date',
         '#s': 'status',

@@ -18,7 +18,7 @@ Globals:
         PAYPAL_RETURN_URL: !Ref PayPalReturnUrl
         PAYPAL_CANCEL_URL: !Ref PayPalCancelUrl
         PAYPAL_WEBHOOK_ID: !Ref PayPalWebhookId
-        PRICE_CENTS: "2000"                   # €20.00
+        PRICE_CENTS: "9500"                   # €95.00 — wheel-throwing workshop
         PRICE_CURRENCY: "EUR"
   Api:
     Cors:
@@ -87,6 +87,19 @@ Resources:
         PointInTimeRecoveryEnabled: true
 
   # ── Lambda functions ─────────────────────────────────────────────────────────
+  GetDatesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-get-dates
+      CodeUri: backend/
+      Handler: src/handlers/getDates.handler
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /dates
+            Method: get
+
   GetAvailabilityFunction:
     Type: AWS::Serverless::Function
     Properties:

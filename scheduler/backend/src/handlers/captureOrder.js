@@ -100,6 +100,7 @@ function stripBooking(item) {
     bookingId:    item.bookingId,
     date:         item.date,
     timeSlot:     item.timeSlot,
+    slotEnd:      item.slotEnd,
     status:       item.status,
     studentName:  item.studentName,
     amountCents:  item.amountCents,
