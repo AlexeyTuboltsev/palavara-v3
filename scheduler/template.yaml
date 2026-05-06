@@ -279,6 +279,29 @@ Resources:
             Path: /admin/bookings/{id}/cancel
             Method: post
 
+  AdminCreateBookingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-create-booking
+      CodeUri: backend/
+      Handler: src/handlers/adminCreateBooking.handler
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: '*'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/bookings
+            Method: post
+
 Outputs:
   ApiBaseUrl:
     Description: API Gateway base URL — put this in frontend/config.js

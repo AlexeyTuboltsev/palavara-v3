@@ -48,14 +48,17 @@ function isRefundEligible(booking, nowMs = Date.now()) {
  * @returns {Promise<object>}        The updated booking attributes.
  */
 async function processCancellation({ booking, alwaysRefund, cancelledBy, reason }) {
-  const refund = alwaysRefund;
   let refundedAmountCents = 0;
   let paypalRefundId = '';
 
-  if (refund) {
-    if (!booking.paypalCaptureId) {
-      throw new Error(`Booking ${booking.bookingId} has no paypalCaptureId — cannot refund`);
-    }
+  // Only refund through PayPal if the caller asked AND the booking was paid
+  // via PayPal in the first place AND it has an actual capture id. Manual /
+  // comp / held bookings have no capture; the owner reverses any out-of-band
+  // payment themselves.
+  const paymentMethod = booking.paymentMethod || 'paypal';
+  const refundable = alwaysRefund && paymentMethod === 'paypal' && booking.paypalCaptureId;
+
+  if (refundable) {
     const r = await refundCapture({
       captureId:   booking.paypalCaptureId,
       amountCents: booking.amountCents,
