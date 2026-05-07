@@ -35,17 +35,18 @@ export function setupResizeObserver(element: HTMLElement, dispatch: Dispatch) {
 }
 
 function getResizeDimensions(element: ResizeObserverEntry): TResizeEventPayload {
-  const {
-    borderBoxSize,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    contentBoxSize,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    devicePixelContentBoxSize,
-  } = element
-
+  // borderBoxSize is universally supported in modern browsers, but Sentry
+  // shows it occasionally undefined (Edge with extensions, polyfills, etc).
+  // contentRect is the original-spec property, always present.
+  if (element.borderBoxSize?.[0]) {
+    return {
+      height: element.borderBoxSize[0].blockSize,
+      width: element.borderBoxSize[0].inlineSize,
+    }
+  }
   return {
-    height: borderBoxSize[0].blockSize,
-    width: borderBoxSize[0].inlineSize
+    height: element.contentRect.height,
+    width: element.contentRect.width,
   }
 }
 
