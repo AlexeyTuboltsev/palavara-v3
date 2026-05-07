@@ -18,6 +18,7 @@ const {
   sendCancellationConfirmation,
   sendCancellationNotification,
 } = require('./email');
+const { deleteBookingEvent } = require('./googleCalendar');
 
 const TABLE          = process.env.BOOKINGS_TABLE;
 const PRICE_CURRENCY = process.env.PRICE_CURRENCY || 'EUR';
@@ -114,11 +115,14 @@ async function processCancellation({ booking, alwaysRefund, cancelledBy, reason 
     throw err;
   }
 
-  // Best-effort emails. Failures log only; cancellation itself is the
-  // source of truth in DynamoDB.
+  // Best-effort side-effects. Failures log only; cancellation itself is
+  // the source of truth in DynamoDB.
   await Promise.all([
     sendCancellationConfirmation(updated),
     sendCancellationNotification(updated),
+    deleteBookingEvent(updated).catch((e) => {
+      console.error('googleCalendar delete failed', { bookingId: updated.bookingId, error: e?.message || e });
+    }),
   ]);
 
   return { booking: updated, alreadyCancelled: false };

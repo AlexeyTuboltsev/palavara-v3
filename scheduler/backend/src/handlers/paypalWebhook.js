@@ -20,6 +20,7 @@ const { UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { verifyWebhookSignature } = require('../utils/paypal');
 const { sendBookingConfirmation, sendOwnerNotification } = require('../utils/email');
+const { insertBookingEvent } = require('../utils/googleCalendar');
 
 const TABLE       = process.env.BOOKINGS_TABLE;
 const WEBHOOK_ID  = process.env.PAYPAL_WEBHOOK_ID;
@@ -82,12 +83,16 @@ exports.handler = async (event) => {
         ReturnValues: 'ALL_NEW',
       }));
       console.log('webhook: booking confirmed', { bookingId, captureId });
-      // We won the conditional flip — send both confirmation emails. The
-      // sync capture path didn't, so this is the only place emails get
-      // sent for bookings that browser-close after PayPal approval.
+      // We won the conditional flip — fire side-effects in parallel.
+      // The sync capture path didn't fire emails / calendar insert, so
+      // this is the only place they happen for bookings where the user
+      // closed the browser before the return URL fired.
       await Promise.all([
         sendBookingConfirmation(updated.Attributes),
         sendOwnerNotification(updated.Attributes),
+        insertBookingEvent(updated.Attributes).catch((e) => {
+          console.error('googleCalendar insert failed', { bookingId, error: e?.message || e });
+        }),
       ]);
     } catch (err) {
       if (err.name === 'ConditionalCheckFailedException') {

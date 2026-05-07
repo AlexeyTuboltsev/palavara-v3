@@ -29,6 +29,7 @@ const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, serverError } = require('../utils/response');
 const { findSlot, isValidDateString } = require('../utils/slots');
 const { sendBookingConfirmation, sendOwnerNotification } = require('../utils/email');
+const { insertBookingEvent } = require('../utils/googleCalendar');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
@@ -162,6 +163,9 @@ exports.handler = async (event) => {
     await Promise.all([
       wantsStudentEmail ? sendBookingConfirmation(item) : Promise.resolve(false),
       sendOwnerNotification(item),
+      insertBookingEvent(item).catch((e) => {
+        console.error('googleCalendar insert failed', { bookingId: item.bookingId, error: e?.message || e });
+      }),
     ]);
 
     return ok(stripBooking(item));

@@ -21,6 +21,7 @@ const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, notFound, serverError } = require('../utils/response');
 const { captureOrder } = require('../utils/paypal');
 const { sendBookingConfirmation, sendOwnerNotification } = require('../utils/email');
+const { insertBookingEvent } = require('../utils/googleCalendar');
 
 const TABLE = process.env.BOOKINGS_TABLE;
 
@@ -79,12 +80,16 @@ exports.handler = async (event) => {
       ReturnValues: 'ALL_NEW',
     }));
 
-    // We won the conditional flip — send both confirmation emails (student
-    // + owner). Failures log only; we never roll back a booking because of
-    // email trouble. Run in parallel since they're independent.
+    // We won the conditional flip — fire all post-confirm side-effects in
+    // parallel: student email, owner email, and Google Calendar insert.
+    // None of these can fail the booking; errors are logged but the
+    // DynamoDB row stays the source of truth.
     await Promise.all([
       sendBookingConfirmation(updated.Attributes),
       sendOwnerNotification(updated.Attributes),
+      insertBookingEvent(updated.Attributes).catch((e) => {
+        console.error('googleCalendar insert failed', { bookingId: id, error: e?.message || e });
+      }),
     ]);
 
     return ok(stripBooking(updated.Attributes));
