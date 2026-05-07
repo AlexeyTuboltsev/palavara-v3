@@ -29,7 +29,7 @@ Globals:
   Api:
     Cors:
       AllowMethods: "'GET,POST,OPTIONS'"
-      AllowHeaders: "'Content-Type'"
+      AllowHeaders: "'Content-Type,X-Admin-Secret'"
       AllowOrigin: "'*'"
 
 Parameters:
@@ -301,6 +301,23 @@ Resources:
           Properties:
             Path: /admin/bookings
             Method: post
+
+  AdminListBookingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-list-bookings
+      CodeUri: backend/
+      Handler: src/handlers/adminListBookings.handler
+      Timeout: 15
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BookingsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/bookings
+            Method: get
 
 Outputs:
   ApiBaseUrl:
