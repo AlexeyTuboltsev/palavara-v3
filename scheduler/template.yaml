@@ -27,6 +27,11 @@ Globals:
         CANCEL_URL_BASE: !Ref CancelUrlBase
         CANCEL_TOKEN_SECRET: !Ref CancelTokenSecret
         ADMIN_SECRET: !Ref AdminSecret
+        GOOGLE_CLIENT_ID: !Ref GoogleClientId
+        GOOGLE_CLIENT_SECRET: !Ref GoogleClientSecret
+        GOOGLE_CALENDAR_ID: !Ref GoogleCalendarId
+        GOOGLE_OAUTH_REDIRECT_URI: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/admin/google/oauth/callback"
+        GOOGLE_REFRESH_TOKEN_PARAM_NAME: !Ref GoogleRefreshTokenParamName
   Api:
     Cors:
       AllowMethods: "'GET,POST,DELETE,OPTIONS'"
@@ -95,6 +100,31 @@ Parameters:
     Description: >
       Shared secret required in the X-Admin-Secret header on /admin endpoints.
       Generate with `openssl rand -hex 32`. Use only over HTTPS.
+  GoogleClientId:
+    Type: String
+    Default: ""
+    Description: >
+      Google OAuth 2.0 Client ID (Web application) for the Calendar API.
+      Leave empty to disable Google Calendar sync.
+  GoogleClientSecret:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: Google OAuth 2.0 Client Secret matching GoogleClientId.
+  GoogleCalendarId:
+    Type: String
+    Default: "primary"
+    Description: >
+      Calendar ID to write events to. "primary" = the OAuth'd user's
+      default calendar; or pass a specific calendar id like
+      "abcdef@group.calendar.google.com".
+  GoogleRefreshTokenParamName:
+    Type: String
+    Default: "/palavara/google-refresh-token"
+    Description: >
+      SSM Parameter Store name (SecureString) where the refresh token
+      lives. Created automatically by the OAuth callback handler on
+      first successful consent.
 
 Resources:
 
@@ -238,6 +268,10 @@ Resources:
                 - ses:SendEmail
                 - ses:SendRawEmail
               Resource: '*'
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
       Events:
         Api:
           Type: Api
@@ -261,6 +295,10 @@ Resources:
                 - ses:SendEmail
                 - ses:SendRawEmail
               Resource: '*'
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
       Events:
         Api:
           Type: Api
@@ -284,6 +322,10 @@ Resources:
                 - ses:SendEmail
                 - ses:SendRawEmail
               Resource: '*'
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
       Events:
         Api:
           Type: Api
@@ -307,6 +349,10 @@ Resources:
                 - ses:SendEmail
                 - ses:SendRawEmail
               Resource: '*'
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
       Events:
         Api:
           Type: Api
@@ -332,12 +378,51 @@ Resources:
                 - ses:SendEmail
                 - ses:SendRawEmail
               Resource: '*'
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
       Events:
         Api:
           Type: Api
           Properties:
             Path: /admin/bookings
             Method: post
+
+  GoogleOauthStartFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-google-oauth-start
+      CodeUri: backend/
+      Handler: src/handlers/adminGoogleOauthStart.handler
+      Timeout: 10
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/google/oauth/start
+            Method: get
+
+  GoogleOauthCallbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-google-oauth-callback
+      CodeUri: backend/
+      Handler: src/handlers/adminGoogleOauthCallback.handler
+      Timeout: 30
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:PutParameter
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/google/oauth/callback
+            Method: get
 
   AdminListSlotsFunction:
     Type: AWS::Serverless::Function
