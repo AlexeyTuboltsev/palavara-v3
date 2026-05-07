@@ -50,7 +50,7 @@ exports.handler = async (event) => {
       return badRequest('Invalid date. Use YYYY-MM-DD format.');
     }
 
-    const slot = findSlot(date, start);
+    const slot = await findSlot(date, start);
     if (!slot) {
       return badRequest('No workshop slot at that date and start time.');
     }

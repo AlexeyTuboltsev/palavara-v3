@@ -13,7 +13,7 @@ const { getAvailableDates } = require('../utils/slots');
 
 exports.handler = async () => {
   try {
-    return ok({ dates: getAvailableDates() });
+    return ok({ dates: await getAvailableDates() });
   } catch (err) {
     console.error('getDates error:', err);
     return serverError();

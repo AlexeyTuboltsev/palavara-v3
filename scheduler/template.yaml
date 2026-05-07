@@ -12,6 +12,7 @@ Globals:
     Environment:
       Variables:
         BOOKINGS_TABLE: !Ref BookingsTable
+        SLOTS_TABLE: !Ref SlotsTable
         PAYPAL_CLIENT_ID: !Ref PayPalClientId
         PAYPAL_CLIENT_SECRET: !Ref PayPalClientSecret
         PAYPAL_API_BASE: !Ref PayPalApiBase
@@ -28,7 +29,7 @@ Globals:
         ADMIN_SECRET: !Ref AdminSecret
   Api:
     Cors:
-      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowMethods: "'GET,POST,DELETE,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Admin-Secret'"
       AllowOrigin: "'*'"
 
@@ -125,6 +126,33 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  SlotsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: palavara-slots
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: date
+          AttributeType: S
+        - AttributeName: start
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: date-index
+          KeySchema:
+            - AttributeName: date
+              KeyType: HASH
+            - AttributeName: start
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
   # ── Lambda functions ─────────────────────────────────────────────────────────
   GetDatesFunction:
     Type: AWS::Serverless::Function
@@ -132,6 +160,9 @@ Resources:
       FunctionName: palavara-get-dates
       CodeUri: backend/
       Handler: src/handlers/getDates.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SlotsTable
       Events:
         Api:
           Type: Api
@@ -148,6 +179,8 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref BookingsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref SlotsTable
       Events:
         Api:
           Type: Api
@@ -164,6 +197,8 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref SlotsTable
       Events:
         Api:
           Type: Api
@@ -289,6 +324,8 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref SlotsTable
         - Statement:
             - Effect: Allow
               Action:
@@ -301,6 +338,59 @@ Resources:
           Properties:
             Path: /admin/bookings
             Method: post
+
+  AdminListSlotsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-list-slots
+      CodeUri: backend/
+      Handler: src/handlers/adminListSlots.handler
+      Timeout: 15
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SlotsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/slots
+            Method: get
+
+  AdminCreateSlotsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-create-slots
+      CodeUri: backend/
+      Handler: src/handlers/adminCreateSlots.handler
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SlotsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/slots
+            Method: post
+
+  AdminCancelSlotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-cancel-slot
+      CodeUri: backend/
+      Handler: src/handlers/adminCancelSlot.handler
+      Timeout: 15
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SlotsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref BookingsTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/slots/{id}
+            Method: delete
 
   AdminListBookingsFunction:
     Type: AWS::Serverless::Function
