@@ -30,7 +30,7 @@ Globals:
         GOOGLE_CLIENT_ID: !Ref GoogleClientId
         GOOGLE_CLIENT_SECRET: !Ref GoogleClientSecret
         GOOGLE_CALENDAR_ID: !Ref GoogleCalendarId
-        GOOGLE_OAUTH_REDIRECT_URI: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/admin/google/oauth/callback"
+        GOOGLE_OAUTH_REDIRECT_URI: !Ref GoogleOAuthRedirectUri
         GOOGLE_REFRESH_TOKEN_PARAM_NAME: !Ref GoogleRefreshTokenParamName
   Api:
     Cors:
@@ -125,6 +125,15 @@ Parameters:
       SSM Parameter Store name (SecureString) where the refresh token
       lives. Created automatically by the OAuth callback handler on
       first successful consent.
+  GoogleOAuthRedirectUri:
+    Type: String
+    Default: "https://74c5ex58qa.execute-api.eu-central-1.amazonaws.com/Prod/admin/google/oauth/callback"
+    Description: >
+      OAuth redirect URI registered in the Google Cloud OAuth client.
+      Hardcoded by default to the existing API Gateway invoke URL —
+      avoids a circular dependency between Lambdas (which need the URL
+      as an env var) and the API (which depends on the Lambdas).
+      Update if the API Gateway is ever recreated with a new id.
 
 Resources:
 
