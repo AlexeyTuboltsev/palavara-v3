@@ -52,6 +52,24 @@ function formatPrice(cents, currency = 'EUR') {
   return `${symbol}${(cents / 100).toFixed(2)}`;
 }
 
+/**
+ * Render a "price + how it was paid" line for the .ics description and email
+ * bodies. Branches on paymentMethod so admin-created bookings don't claim
+ * "paid via PayPal" when payment was actually a bank transfer or comp.
+ */
+function priceLineText(booking) {
+  const cents  = booking.amountCents ?? 0;
+  const method = booking.paymentMethod || 'paypal';
+  const note   = booking.paymentNote;
+  if (method === 'none' || cents === 0) {
+    return note ? `Comp / no charge (${note})` : 'Comp / no charge';
+  }
+  const price = formatPrice(cents);
+  if (method === 'paypal') return `Price: ${price} (paid via PayPal)`;
+  if (method === 'manual') return `Price: ${price} (paid${note ? `: ${note}` : ' offline'})`;
+  return `Price: ${price}`;
+}
+
 // ── ICS / Google Calendar builders ────────────────────────────────────────
 
 /** Escape RFC 5545 TEXT values: commas, semicolons, backslashes, newlines. */
@@ -93,12 +111,21 @@ function foldIcsLines(text) {
  * implicit on creation).
  */
 function buildIcs(booking, { method = 'REQUEST' } = {}) {
-  const summary  = `Wheel-throwing workshop — ${booking.studentName}`;
-  const desc     = [
-    `Booker: ${booking.studentName} <${booking.studentEmail}>`,
-    `Price: ${formatPrice(booking.amountCents || 9500)} (paid via PayPal)`,
-    `Booking ID: ${booking.bookingId}`,
-  ].join('\\n');
+  const isHeld = booking.bookingType === 'held';
+  const summary = isHeld
+    ? `Slot held — ${booking.paymentNote || 'studio reservation'}`
+    : `Wheel-throwing workshop — ${booking.studentName}`;
+  const descLines = isHeld
+    ? [
+        booking.paymentNote ? `Note: ${booking.paymentNote}` : 'Held by studio',
+        `Booking ID: ${booking.bookingId}`,
+      ]
+    : [
+        `Booker: ${booking.studentName} <${booking.studentEmail}>`,
+        priceLineText(booking),
+        `Booking ID: ${booking.bookingId}`,
+      ];
+  const desc = descLines.join('\\n');
 
   const isCancel = method === 'CANCEL';
   const lines = [
@@ -188,13 +215,18 @@ async function sendBookingConfirmation(booking) {
     console.warn('SES_FROM_ADDRESS not configured — skipping student email');
     return false;
   }
+  // Held slots have no student to email; skip silently.
+  if (booking.bookingType === 'held') return false;
+  // Admin endpoint may explicitly suppress the student email even for student bookings.
+  if (!booking.studentEmail) return false;
 
-  const dateLine  = formatDate(booking.date);
-  const timeLine  = `${booking.timeSlot} – ${booking.slotEnd}`;
-  const priceLine = formatPrice(booking.amountCents || 9500, 'EUR');
-  const gcalUrl   = buildGoogleCalendarUrl(booking);
-  const cancelUrl = buildCancelUrl(booking);
-  const ics       = buildIcs(booking);
+  const dateLine    = formatDate(booking.date);
+  const timeLine    = `${booking.timeSlot} – ${booking.slotEnd}`;
+  const priceLine   = priceLineText(booking);
+  const showPrice   = (booking.amountCents ?? 0) > 0;
+  const gcalUrl     = buildGoogleCalendarUrl(booking);
+  const cancelUrl   = buildCancelUrl(booking);
+  const ics         = buildIcs(booking);
 
   const subject = 'Your wheel-throwing workshop is confirmed — Palavara Studio';
 
@@ -205,7 +237,7 @@ async function sendBookingConfirmation(booking) {
     '',
     `  Date:     ${dateLine}`,
     `  Time:     ${timeLine}`,
-    `  Price:    ${priceLine} (paid)`,
+    showPrice ? `  ${priceLine}` : null,
     `  Location: ${STUDIO_ADDRESS}`,
     '',
     `Add to Google Calendar: ${gcalUrl}`,
@@ -228,7 +260,7 @@ async function sendBookingConfirmation(booking) {
     '',
     '---',
     `Booking ID: ${booking.bookingId}`,
-  ].join('\n');
+  ].filter((l) => l !== null).join('\n');
 
   const html = `<!DOCTYPE html>
 <html><body style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #111; line-height: 1.55;">
@@ -237,7 +269,7 @@ async function sendBookingConfirmation(booking) {
   <table cellpadding="4" style="border-collapse: collapse; margin: 12px 0;">
     <tr><td style="color:#6b7280">Date</td><td><strong>${escapeHtml(dateLine)}</strong></td></tr>
     <tr><td style="color:#6b7280">Time</td><td><strong>${escapeHtml(timeLine)}</strong></td></tr>
-    <tr><td style="color:#6b7280">Price</td><td><strong>${escapeHtml(priceLine)}</strong> (paid)</td></tr>
+    ${showPrice ? `<tr><td style="color:#6b7280">Payment</td><td>${escapeHtml(priceLine)}</td></tr>` : ''}
     <tr><td style="color:#6b7280">Location</td><td>${escapeHtml(STUDIO_ADDRESS)}</td></tr>
   </table>
   <p style="margin: 16px 0;">
@@ -292,41 +324,55 @@ async function sendOwnerNotification(booking) {
     return false;
   }
 
+  const isHeld    = booking.bookingType === 'held';
   const dateLine  = formatDate(booking.date);
   const timeLine  = `${booking.timeSlot} – ${booking.slotEnd}`;
-  const priceLine = formatPrice(booking.amountCents || 9500, 'EUR');
+  const priceLine = priceLineText(booking);
+  const showPrice = (booking.amountCents ?? 0) > 0;
   const gcalUrl   = buildGoogleCalendarUrl(booking);
-  const cancelUrl = buildCancelUrl(booking);
+  // Cancel link only makes sense for student bookings — held slots are
+  // managed via the admin endpoint, not via a cancel URL.
+  const cancelUrl = isHeld ? null : buildCancelUrl(booking);
   const ics       = buildIcs(booking);
 
-  const subject = `New booking: ${booking.studentName} — ${dateLine}, ${timeLine}`;
+  const subject = isHeld
+    ? `Slot held: ${dateLine}, ${timeLine}${booking.paymentNote ? ` (${booking.paymentNote})` : ''}`
+    : `New booking: ${booking.studentName} — ${dateLine}, ${timeLine}`;
 
   const text = [
-    'A new wheel-throwing workshop booking has been confirmed.',
+    isHeld
+      ? `A slot has been held in the schedule${booking.paymentNote ? ` — ${booking.paymentNote}` : ''}.`
+      : 'A new wheel-throwing workshop booking has been confirmed.',
     '',
-    `  Booker:     ${booking.studentName} <${booking.studentEmail}>`,
+    !isHeld ? `  Booker:     ${booking.studentName} <${booking.studentEmail}>` : null,
     `  Date:       ${dateLine}`,
     `  Time:       ${timeLine}`,
-    `  Price:      ${priceLine} (paid via PayPal)`,
+    showPrice ? `  ${priceLine}` : null,
+    booking.paymentNote ? `  Note:       ${booking.paymentNote}` : null,
     `  Booking ID: ${booking.bookingId}`,
     '',
     `Add to Google Calendar: ${gcalUrl}`,
     'A calendar invite is also attached to this email.',
     '',
-    `Cancel this booking (always full refund when you cancel):`,
-    `  ${cancelUrl}`,
-    '',
-    'Reply to this email to contact the booker directly.',
-  ].join('\n');
+    cancelUrl ? `Cancel this booking (always full refund when you cancel):` : null,
+    cancelUrl ? `  ${cancelUrl}` : null,
+    cancelUrl ? '' : null,
+    !isHeld ? 'Reply to this email to contact the booker directly.' : null,
+  ].filter((l) => l !== null).join('\n');
+
+  const lead = isHeld
+    ? `A slot has been held in the schedule${booking.paymentNote ? ` — ${escapeHtml(booking.paymentNote)}` : ''}.`
+    : 'A new wheel-throwing workshop booking has been confirmed.';
 
   const html = `<!DOCTYPE html>
 <html><body style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #111; line-height: 1.55;">
-  <p>A new wheel-throwing workshop booking has been confirmed.</p>
+  <p>${lead}</p>
   <table cellpadding="4" style="border-collapse: collapse; margin: 12px 0;">
-    <tr><td style="color:#6b7280">Booker</td><td><strong>${escapeHtml(booking.studentName)}</strong> &lt;<a href="mailto:${escapeHtml(booking.studentEmail)}">${escapeHtml(booking.studentEmail)}</a>&gt;</td></tr>
+    ${isHeld ? '' : `<tr><td style="color:#6b7280">Booker</td><td><strong>${escapeHtml(booking.studentName)}</strong> &lt;<a href="mailto:${escapeHtml(booking.studentEmail)}">${escapeHtml(booking.studentEmail)}</a>&gt;</td></tr>`}
     <tr><td style="color:#6b7280">Date</td><td><strong>${escapeHtml(dateLine)}</strong></td></tr>
     <tr><td style="color:#6b7280">Time</td><td><strong>${escapeHtml(timeLine)}</strong></td></tr>
-    <tr><td style="color:#6b7280">Price</td><td><strong>${escapeHtml(priceLine)}</strong> (paid via PayPal)</td></tr>
+    ${showPrice ? `<tr><td style="color:#6b7280">Payment</td><td>${escapeHtml(priceLine)}</td></tr>` : ''}
+    ${booking.paymentNote ? `<tr><td style="color:#6b7280">Note</td><td>${escapeHtml(booking.paymentNote)}</td></tr>` : ''}
     <tr><td style="color:#6b7280">Booking ID</td><td><code>${escapeHtml(booking.bookingId)}</code></td></tr>
   </table>
   <p style="margin: 16px 0;">
@@ -335,11 +381,11 @@ async function sendOwnerNotification(booking) {
     </a>
     <span style="color:#6b7280; font-size: 13px; margin-left: 8px;">(or open the attached calendar invite)</span>
   </p>
-  <p style="margin-top: 16px;">
+  ${cancelUrl ? `<p style="margin-top: 16px;">
     <a href="${escapeHtml(cancelUrl)}" style="color:#1a73e8;">Cancel this booking</a>
     <span style="color:#6b7280; font-size: 13px;">(always full refund when you cancel)</span>
-  </p>
-  <p style="color:#6b7280; font-size: 13px;">Reply to this email to contact the booker directly.</p>
+  </p>` : ''}
+  ${isHeld ? '' : '<p style="color:#6b7280; font-size: 13px;">Reply to this email to contact the booker directly.</p>'}
 </body></html>`;
 
   return sendWithIcs({
@@ -349,8 +395,8 @@ async function sendOwnerNotification(booking) {
     html,
     icsContent: ics,
     icsFilename: `booking-${booking.bookingId.slice(0, 8)}.ics`,
-    replyTo:   booking.studentEmail,
-    logTag:    'owner',
+    replyTo:   booking.studentEmail || undefined,
+    logTag:    isHeld ? 'owner-hold' : 'owner',
     bookingId: booking.bookingId,
   });
 }

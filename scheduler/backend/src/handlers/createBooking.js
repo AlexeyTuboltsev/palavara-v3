@@ -105,6 +105,8 @@ exports.handler = async (event) => {
       timeSlot:      slot.start,
       slotEnd:       slot.end,
       status:        'pending',
+      bookingType:   'student',
+      paymentMethod: 'paypal',
       studentName:   studentName.trim(),
       studentEmail:  studentEmail.trim().toLowerCase(),
       paypalOrderId: orderId,
