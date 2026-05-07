@@ -7,7 +7,7 @@ import {TRoute} from "../router";
 import {trackLanguageChange, trackPageView} from "../services/analytics";
 
 export function* analyticsSaga(initialRoute: TRoute) {
-  // initial page_view already fired by gtag('config') in index.html
+  // initial page_view auto-fired by Umami's script tag in index.html
   let lastRoute: TRoute = initialRoute;
   while (true) {
     const action: PayloadAction<any> = yield take([setAppState.type, actions.changeLanguage.type]);
