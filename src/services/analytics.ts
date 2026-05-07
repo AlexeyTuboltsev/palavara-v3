@@ -2,8 +2,12 @@ import {ERoute, routeDefs, TRoute} from "../router";
 
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void;
-    dataLayer?: any[];
+    umami?: {
+      track: (
+        eventOrFn?: string | ((props: Record<string, any>) => Record<string, any>),
+        data?: Record<string, any>,
+      ) => void;
+    };
   }
 }
 
@@ -27,25 +31,17 @@ const routeTitles: Record<ERoute, string> = {
   [ERoute.NOT_FOUND]: '404 Not Found',
 };
 
-function gtag(...args: any[]) {
-  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-    window.gtag(...args);
-  }
-}
-
 export function trackEvent(name: string, params: Record<string, any> = {}) {
-  gtag('event', name, params);
+  if (typeof window === 'undefined') return;
+  window.umami?.track(name, params);
 }
 
 export function trackPageView(route: TRoute) {
+  if (typeof window === 'undefined') return;
   const def = routeDefs.find(r => r.routeName === route.routeName);
   const path = def?.routePattern ?? window.location.pathname;
   const title = routeTitles[route.routeName] ?? route.routeName;
-  gtag('event', 'page_view', {
-    page_path: path,
-    page_title: title,
-    page_location: window.location.origin + path,
-  });
+  window.umami?.track(props => ({...props, url: path, title}));
 }
 
 export function trackLanguageChange(language: string) {

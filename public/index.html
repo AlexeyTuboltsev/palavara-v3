@@ -2,28 +2,7 @@
 <html lang="en">
 
 <head>
-  <!-- Google tag (gtag.js) — injected 4 s after window.load so it never
-       competes with the hero image paint. Events queued into dataLayer
-       are flushed when the real gtag.js arrives.
-       Note: requestIdleCallback was tried first but fires during the
-       LCP wait window (browser is idle waiting for the image), so gtag
-       was still parsed before LCP committed. A plain timeout is more
-       predictable on Slow-4G-style traces. -->
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-WEFKKD2KC8');
-    function loadGtag() {
-      var s = document.createElement('script');
-      s.async = true;
-      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-WEFKKD2KC8';
-      document.head.appendChild(s);
-    }
-    window.addEventListener('load', function() {
-      setTimeout(loadGtag, 4000);
-    });
-  </script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="dda456ec-ea26-4ea9-ab99-2a17f0f9cf20"></script>
   <meta charset="utf-8" />
 
   <!-- be.palavara.com is only used for <img>/<picture> hero loads,
