@@ -2,7 +2,28 @@
 <html lang="en">
 
 <head>
-  <script defer src="https://cloud.umami.is/script.js" data-website-id="dda456ec-ea26-4ea9-ab99-2a17f0f9cf20" data-domains="studio.palavara.com"></script>
+  <!-- Analytics (Umami) — injected 4 s after window.load so its DNS +
+       TLS handshake to cloud.umami.is doesn't compete with the hero
+       image paint. Even small (~2 KB) third-party scripts hurt LCP if
+       their connection lands inside the LCP wait window. <script defer>
+       on its own is NOT enough — defer fires during parsing, well
+       before LCP commits. requestIdleCallback was tried first but
+       fires during the LCP wait window (browser is idle waiting for
+       the image), so the script was still parsed before LCP committed.
+       A plain timeout is more predictable on Slow-4G-style traces.
+       PRESERVE THIS PATTERN when swapping the analytics provider. -->
+  <script>
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://cloud.umami.is/script.js';
+        s.setAttribute('data-website-id', 'dda456ec-ea26-4ea9-ab99-2a17f0f9cf20');
+        s.setAttribute('data-domains', 'studio.palavara.com');
+        document.head.appendChild(s);
+      }, 4000);
+    });
+  </script>
   <meta charset="utf-8" />
 
   <!-- be.palavara.com is only used for <img>/<picture> hero loads,
