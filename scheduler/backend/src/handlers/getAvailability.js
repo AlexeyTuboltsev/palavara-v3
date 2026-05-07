@@ -28,7 +28,7 @@ exports.handler = async (event) => {
       return badRequest('Invalid date. Use YYYY-MM-DD format.');
     }
 
-    const allSlots = getSlotsForDate(date);
+    const allSlots = await getSlotsForDate(date);
 
     if (allSlots.length === 0) {
       // Past date, no workshops, or unknown date — return empty list cleanly.

@@ -73,7 +73,7 @@ exports.handler = async (event) => {
       return badRequest('bookingType must be "student" or "held"');
     }
 
-    const slot = findSlot(date, start);
+    const slot = await findSlot(date, start);
     if (!slot) return badRequest('No workshop slot at that date and start time.');
 
     if (bookingType === 'student') {
