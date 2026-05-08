@@ -40,10 +40,16 @@ const SOURCE_DIR = path.join(__dirname, '..', 'public', 'img');
 
 const HOME_BASES = Array.from({ length: 7 }, (_, i) => `home-${i + 1}`);
 const SECTION_BASES = [
-  '01-01', // familySaturday
+  '01-01', // familySaturday hero
+  '01-02', // familySaturday carousel
+  '01-03', // familySaturday carousel
+  '01-04', // familySaturday carousel
+  '01-05', // familySaturday carousel
+  '01-06', // familySaturday carousel
   '02-01', // kidsClass
   '04-01', // wheelThrowing
   '05-01', // about
+  '05-02', // about hero (current)
   '06-01', // firingService
   '07-01', // membership
   '08-01', // openStudio
