@@ -31,11 +31,41 @@ const { renderTemplate } = require('./render');
 const REPLY_TO             = process.env.SES_REPLY_TO;
 const OWNER_NOTIFY_ADDRESS = process.env.OWNER_NOTIFY_ADDRESS;
 
+// PNG (not SVG) is the only format Gmail / Outlook / Apple Mail
+// universally render in <img> tags — using the studio site's existing
+// 192-px favicon keeps the email branded without a separate asset.
+const LOGO_URL  = 'https://studio.palavara.com/favicon/favicon-192x192.png';
+const STUDIO_URL = 'https://studio.palavara.com/';
+
 /** Lesson type label snapshotted on the booking row (e.g. "Single lesson",
  *  "Group lesson"). Falls back to "Workshop" for legacy bookings that pre-date
  *  the lesson-types catalog. */
 function lessonLabelOf(booking) {
   return booking.lessonTypeLabel || 'Workshop';
+}
+
+/** Pre-rendered "Phone" row blocks for owner emails. Empty strings when the
+ *  booking has no phone, so the templates can splice them unconditionally. */
+function phoneBlocks(booking) {
+  const phone = (booking.studentPhone || '').trim();
+  if (!phone) return { text: '', html: '' };
+  return {
+    text: `\n  Phone:      ${phone}`,
+    html: `<tr><td style="color:#6b7280">Phone</td><td>${escapeHtml(phone)}</td></tr>`,
+  };
+}
+
+/** Pre-rendered "Comment" block. Multi-line, so it sits below the table
+ *  rather than inside it. Empty strings when there's no comment. */
+function commentBlocks(booking) {
+  const comment = (booking.comment || '').trim();
+  if (!comment) return { text: '', html: '' };
+  return {
+    text: `\n\nComment:\n  ${comment.replace(/\n/g, '\n  ')}`,
+    html:
+      '<p style="margin: 16px 0 4px; color:#6b7280; font-size: 13px;">Comment</p>' +
+      `<p style="margin: 0; white-space: pre-wrap;">${escapeHtml(comment)}</p>`,
+  };
 }
 
 // ── Booking confirmations ─────────────────────────────────────────────────
@@ -59,9 +89,10 @@ async function sendBookingConfirmation(booking) {
     dateLine,
     timeLine,
     studioAddress:     STUDIO_ADDRESS,
-    gcalUrl:           buildGoogleCalendarUrl(booking),
     cancelUrl:         buildCancelUrl(booking),
     bookingId:         booking.bookingId,
+    logoUrl:           LOGO_URL,
+    studioUrl:         STUDIO_URL,
     lessonLabel,
     lessonLabelLower:  lessonLabel.toLowerCase(),
     priceLineIndented: showPrice ? `\n  ${priceLine}` : '',
@@ -102,7 +133,8 @@ async function sendOwnerNotification(booking) {
     dateLine,
     timeLine,
     bookingId:           booking.bookingId,
-    gcalUrl:             buildGoogleCalendarUrl(booking),
+    logoUrl:             LOGO_URL,
+    studioUrl:           STUDIO_URL,
     paymentNoteIndented: note ? `\n  Note:       ${note}` : '',
     paymentNoteRowHtml:  note
       ? `<tr><td style="color:#6b7280">Note</td><td>${escapeHtml(note)}</td></tr>`
@@ -122,6 +154,8 @@ async function sendOwnerNotification(booking) {
   } else {
     templateName = 'booking-owner-student';
     const lessonLabel = lessonLabelOf(booking);
+    const phone   = phoneBlocks(booking);
+    const cmt     = commentBlocks(booking);
     ctx = {
       ...sharedCtx,
       studentName:       booking.studentName,
@@ -133,6 +167,10 @@ async function sendOwnerNotification(booking) {
       priceRowHtml:      showPrice
         ? `<tr><td style="color:#6b7280">Payment</td><td>${escapeHtml(priceLine)}</td></tr>`
         : '',
+      phoneBlockText:    phone.text,
+      phoneRowHtml:      phone.html,
+      commentBlockText:  cmt.text,
+      commentBlockHtml:  cmt.html,
     };
   }
 
@@ -183,6 +221,8 @@ async function sendCancellationConfirmation(booking) {
     dateLine,
     timeLine,
     bookingId:   booking.bookingId,
+    logoUrl:     LOGO_URL,
+    studioUrl:   STUDIO_URL,
     lead,
     refundLine,
     closing,
@@ -227,6 +267,8 @@ async function sendCancellationNotification(booking) {
     dateLine,
     timeLine,
     bookingId:    booking.bookingId,
+    logoUrl:      LOGO_URL,
+    studioUrl:    STUDIO_URL,
     refundLine,
   };
 

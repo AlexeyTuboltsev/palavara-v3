@@ -6,13 +6,7 @@ Your {{lessonLabelLower}} is confirmed.
   Time:     {{timeLine}}{{priceLineIndented}}
   Location: {{studioAddress}}
 
-Add to Google Calendar: {{gcalUrl}}
-A calendar invite is also attached to this email.
-
-A few practical things:
-  - Please arrive a few minutes early so we can start on time.
-  - Wear clothes you don't mind getting clay on. Aprons are provided.
-  - The workshop can be conducted in English or Russian — tell us on arrival.
+A calendar invite is attached to this email.
 
 Need to cancel? Use this link:
   {{cancelUrl}}

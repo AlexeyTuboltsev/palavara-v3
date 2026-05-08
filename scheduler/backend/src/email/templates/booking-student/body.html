@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html><body style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #111; line-height: 1.55;">
+  <p style="margin: 0 0 16px;">
+    <a href="{{studioUrl}}" style="text-decoration:none;">
+      <img src="{{logoUrl}}" alt="Palavara" width="60" height="60" style="display:block;border:0;" />
+    </a>
+  </p>
   <p>Hi {{studentName}},</p>
   <p>Your {{lessonLabelLower}} is confirmed.</p>
   <table cellpadding="4" style="border-collapse: collapse; margin: 12px 0;">
@@ -8,18 +13,7 @@
     {{{priceRowHtml}}}
     <tr><td style="color:#6b7280">Location</td><td>{{studioAddress}}</td></tr>
   </table>
-  <p style="margin: 16px 0;">
-    <a href="{{gcalUrl}}" style="display:inline-block;background:#1a73e8;color:#fff;text-decoration:none;padding:8px 16px;border-radius:4px;">
-      Add to Google Calendar
-    </a>
-    <span style="color:#6b7280; font-size: 13px; margin-left: 8px;">(or open the attached calendar invite)</span>
-  </p>
-  <p>A few practical things:</p>
-  <ul>
-    <li>Please arrive a few minutes early so we can start on time.</li>
-    <li>Wear clothes you don't mind getting clay on. Aprons are provided.</li>
-    <li>The workshop can be conducted in English or Russian — tell us on arrival.</li>
-  </ul>
+  <p style="color:#6b7280; font-size: 13px;">A calendar invite is attached to this email.</p>
   <p style="margin-top: 24px;">
     Need to cancel?
     <a href="{{cancelUrl}}" style="color:#1a73e8;">Cancel this booking</a>.
