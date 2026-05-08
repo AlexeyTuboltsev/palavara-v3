@@ -3,17 +3,16 @@
  *
  * Desktop:
  *   1. Calendar with slots rendered inside each day cell.
- *   2. Click a slot → form (step 3).
+ *   2. Click a slot → form (step 2).
  *
  * Mobile (≤ 600 px):
  *   1. Vertical list of dates that have workshops.
- *   2. Tap a date → step 2 with that date's slots.
- *   3. Tap a slot → form (step 3).
+ *   2. Tap a date → drawer expands inline with that date's slots.
+ *   3. Tap a slot → form (step 2).
  *
- * Each step has a close × (top-right) and a Cancel (bottom-right).
- * Steps 2 and 3 also have Back (bottom-left). Cancel and × call
- * history.back() if the user came from another page, otherwise navigate
- * to the studio home.
+ * All visible strings come from i18next (locales/<lng>/translation.json).
+ * The page is wired so this file is loaded BEFORE i18next.init() resolves —
+ * we expose `boot()` which i18n.js calls once translations are ready.
  */
 
 'use strict';
@@ -21,6 +20,8 @@
 // ── Config ─────────────────────────────────────────────────────────────────
 const API_BASE = window.SCHEDULER_CONFIG?.API_BASE_URL || '';
 const STUDIO_URL = 'https://studio.palavara.com/';
+
+const t = (...args) => window.i18next ? window.i18next.t(...args) : args[0];
 
 // ── DOM refs ───────────────────────────────────────────────────────────────
 const stepDate    = document.getElementById('step-date');
@@ -34,6 +35,7 @@ const summaryDate = document.getElementById('summaryDate');
 const summarySlot = document.getElementById('summarySlot');
 const bookingForm = document.getElementById('bookingForm');
 const bookBtn     = document.getElementById('bookBtn');
+const bookBtnLabel = document.getElementById('bookBtnLabel');
 const dateError   = document.getElementById('dateError');
 const formError   = document.getElementById('formError');
 const headerTitle = document.getElementById('headerTitle');
@@ -43,12 +45,12 @@ const loadingMsg  = document.getElementById('loadingMsg');
 const STEPS = [stepDate, stepForm];
 
 // ── State ──────────────────────────────────────────────────────────────────
-let availableDates = [];               // array of YYYY-MM-DD strings, sorted
+let availableDates = [];
 let availableDateSet = new Set();
-let slotsByDate = {};                  // { 'YYYY-MM-DD': [{start,end}, ...] }
-let lessonTypes = [];                  // [{id, label, pricePerPersonCents, minPersons, maxPersons}, ...]
+let slotsByDate = {};
+let lessonTypes = [];
 let calendarYear  = 0;
-let calendarMonth = 0;                 // 0-indexed
+let calendarMonth = 0;
 let selectedDate = '';
 let selectedStart = '';
 let selectedEnd   = '';
@@ -63,8 +65,8 @@ function showStep(step) {
   step.classList.add('active');
 }
 
-function showLoading(msg = 'Loading…') {
-  loadingMsg.textContent = msg;
+function showLoading(msg) {
+  loadingMsg.textContent = msg || t('common.loading');
   loadingOverlay.classList.remove('hidden');
 }
 function hideLoading() { loadingOverlay.classList.add('hidden'); }
@@ -72,31 +74,33 @@ function hideLoading() { loadingOverlay.classList.add('hidden'); }
 function showError(el, msg) { el.textContent = msg; el.classList.remove('hidden'); }
 function hideError(el)      { el.classList.add('hidden'); el.textContent = ''; }
 
+function uiLocale() {
+  return (window.i18next && window.i18next.resolvedLanguage) || 'en';
+}
+
 function formatDateLong(isoDate) {
-  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString('en-GB', {
+  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString(uiLocale(), {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 }
 function formatWeekday(isoDate) {
-  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'long' });
+  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString(uiLocale(), { weekday: 'long' });
 }
 function formatDateShort(isoDate) {
-  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString('en-GB', {
+  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString(uiLocale(), {
     year: 'numeric', month: 'long', day: 'numeric',
   });
 }
 function formatSlotRange(slot) { return `${slot.start} – ${slot.end}`; }
 function pad2(n) { return n < 10 ? '0' + n : '' + n; }
 function dateToIso(year, month, day) { return `${year}-${pad2(month + 1)}-${pad2(day)}`; }
+function formatEuro(cents) { return `€${(cents / 100).toFixed(2)}`; }
 
 function isDesktop() { return window.matchMedia('(min-width: 601px)').matches; }
 
 // ── On load: fetch the whole calendar in one request ─────────────────────
-// The /dates endpoint now returns { dates: [...], calendar: [{date, slots}, ...] }
-// — slots already filtered for what's still available — so one round-trip
-// covers both desktop (renders slots in cells) and mobile (drawers).
 async function loadDatesAndSlots() {
-  showLoading('Loading dates…');
+  showLoading();
   try {
     const res = await fetch(`${API_BASE}/dates`);
     if (!res.ok) throw new Error(`Server error ${res.status}`);
@@ -111,14 +115,13 @@ async function loadDatesAndSlots() {
       return;
     }
 
-    // Start the calendar on the month of the first available date.
     const first = new Date(availableDates[0] + 'T12:00:00Z');
     calendarYear  = first.getUTCFullYear();
     calendarMonth = first.getUTCMonth();
     renderCalendar();
     renderDateList();
   } catch (err) {
-    showError(dateError, 'Could not load workshop dates. Please refresh the page.');
+    showError(dateError, t('datePicker.errorLoading'));
     renderEmpty();
   } finally {
     hideLoading();
@@ -130,22 +133,26 @@ function renderEmpty() {
   calMonthLabel.textContent = '—';
   calPrev.disabled = true;
   calNext.disabled = true;
-  dateList.innerHTML = '<li class="date-list-empty">No upcoming workshops.</li>';
+  const li = document.createElement('li');
+  li.className = 'date-list-empty';
+  li.textContent = t('datePicker.noDates');
+  dateList.innerHTML = '';
+  dateList.appendChild(li);
 }
 
 function renderCalendar() {
   const year = calendarYear;
   const month = calendarMonth;
   calMonthLabel.textContent = new Date(Date.UTC(year, month, 1))
-    .toLocaleDateString('en-GB', { year: 'numeric', month: 'long' });
+    .toLocaleDateString(uiLocale(), { year: 'numeric', month: 'long' });
 
   const firstWeekday = (new Date(Date.UTC(year, month, 1)).getUTCDay() + 6) % 7; // Mon=0
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   const daysInPrev  = new Date(Date.UTC(year, month, 0)).getUTCDate();
 
   const todayIso = (() => {
-    const t = new Date();
-    return dateToIso(t.getFullYear(), t.getMonth(), t.getDate());
+    const d = new Date();
+    return dateToIso(d.getFullYear(), d.getMonth(), d.getDate());
   })();
 
   const cells = [];
@@ -171,7 +178,6 @@ function renderCalendar() {
       slots: outside ? [] : (slotsByDate[iso] || []),
     });
   }
-  // Trim trailing all-outside row (5-week months don't get a 6th row of next-month numbers).
   while (cells.length > 35 && cells.slice(-7).every((c) => c.outside)) cells.length -= 7;
 
   calendarGrid.innerHTML = '';
@@ -203,7 +209,6 @@ function renderCalendar() {
     calendarGrid.appendChild(cell);
   }
 
-  // Disable nav arrows when there's nothing of interest in that direction.
   const earliest = availableDates[0];
   const latest   = availableDates[availableDates.length - 1];
   const monthStart = `${year}-${pad2(month + 1)}`;
@@ -220,15 +225,24 @@ function renderDateList() {
     head.type = 'button';
     head.className = 'date-list-item';
     head.dataset.iso = iso;
-    head.innerHTML =
-      `<span class="weekday">${formatWeekday(iso)}</span>` +
-      `<span class="date">${formatDateShort(iso)}</span>` +
-      `<span class="chevron" aria-hidden="true">▾</span>`;
+
+    const wkd = document.createElement('span');
+    wkd.className = 'weekday';
+    wkd.textContent = formatWeekday(iso);
+    const dt = document.createElement('span');
+    dt.className = 'date';
+    dt.textContent = formatDateShort(iso);
+    const ch = document.createElement('span');
+    ch.className = 'chevron';
+    ch.setAttribute('aria-hidden', 'true');
+    ch.textContent = '▾';
+    head.appendChild(wkd);
+    head.appendChild(dt);
+    head.appendChild(ch);
     head.setAttribute('aria-expanded', 'false');
 
     const drawer = document.createElement('div');
     drawer.className = 'date-drawer';
-    // Drawer is populated lazily on first open.
 
     head.addEventListener('click', () => toggleDrawer(head, drawer, iso));
 
@@ -244,7 +258,7 @@ function renderDrawerSlots(drawer, iso) {
   if (slots.length === 0) {
     const msg = document.createElement('p');
     msg.className = 'no-slots-msg';
-    msg.textContent = 'No slots available for this date.';
+    msg.textContent = t('datePicker.noSlotsForDate');
     drawer.appendChild(msg);
     return;
   }
@@ -263,13 +277,12 @@ function renderDrawerSlots(drawer, iso) {
 
 function toggleDrawer(head, drawer, iso) {
   const isOpen = drawer.classList.contains('open');
-  // Close any other open drawer first.
   dateList.querySelectorAll('.date-drawer.open').forEach((d) => d.classList.remove('open'));
   dateList.querySelectorAll('.date-list-item.expanded').forEach((b) => {
     b.classList.remove('expanded');
     b.setAttribute('aria-expanded', 'false');
   });
-  if (isOpen) return;  // user just closed this one — leave it closed
+  if (isOpen) return;
 
   renderDrawerSlots(drawer, iso);
   drawer.classList.add('open');
@@ -297,7 +310,6 @@ function onSlotPicked(iso, slot) {
   const slotRange = formatSlotRange(slot);
   summaryDate.textContent = dateLong;
   summarySlot.textContent = slotRange;
-  // Mobile shows the title in the page header (next to the logo).
   headerTitle.textContent = `${dateLong} · ${slotRange}`;
   showStep(stepForm);
   updateBookBtnEnabled();
@@ -310,7 +322,6 @@ const emailInp      = document.getElementById('studentEmail');
 const lessonTypeSel = document.getElementById('lessonType');
 const personsGroup  = document.getElementById('personsGroup');
 const numPersonsInp = document.getElementById('numPersons');
-const bookPriceEl   = document.getElementById('bookPrice');
 const phoneInp      = document.getElementById('studentPhone');
 const commentInp    = document.getElementById('comment');
 
@@ -319,7 +330,7 @@ async function loadLessonTypes() {
     const r = await fetch(`${API_BASE}/lesson-types`);
     if (!r.ok) return;
     const d = await r.json();
-    lessonTypes = (d.lessonTypes || []).filter((t) => t && t.id && t.pricePerPersonCents > 0);
+    lessonTypes = (d.lessonTypes || []).filter((lt) => lt && lt.id && lt.pricePerPersonCents > 0);
   } catch {
     lessonTypes = [];
   }
@@ -332,25 +343,25 @@ function populateLessonTypes() {
   if (lessonTypes.length === 0) {
     const opt = document.createElement('option');
     opt.value = '';
-    opt.textContent = 'No lesson types available';
+    opt.textContent = t('form.lessonType.noTypes');
     lessonTypeSel.appendChild(opt);
     lessonTypeSel.disabled = true;
     return;
   }
   lessonTypeSel.disabled = false;
-  for (const t of lessonTypes) {
+  for (const lt of lessonTypes) {
     const opt = document.createElement('option');
-    opt.value = t.id;
-    const price = formatEuro(t.pricePerPersonCents);
-    opt.textContent = t.maxPersons > t.minPersons
-      ? `${t.label} — ${price} / person`
-      : `${t.label} — ${price}`;
+    opt.value = lt.id;
+    const price = formatEuro(lt.pricePerPersonCents);
+    opt.textContent = lt.maxPersons > lt.minPersons
+      ? t('form.lessonType.optionPerPerson', { label: lt.label, price })
+      : t('form.lessonType.optionFlat', { label: lt.label, price });
     lessonTypeSel.appendChild(opt);
   }
 }
 
 function selectedLessonType() {
-  return lessonTypes.find((t) => t.id === lessonTypeSel.value) || null;
+  return lessonTypes.find((lt) => lt.id === lessonTypeSel.value) || null;
 }
 
 function clampPersons(n, type) {
@@ -361,9 +372,9 @@ function clampPersons(n, type) {
 }
 
 function priceCents() {
-  const t = selectedLessonType();
-  if (!t) return 0;
-  return t.pricePerPersonCents * clampPersons(parseInt(numPersonsInp.value, 10), t);
+  const lt = selectedLessonType();
+  if (!lt) return 0;
+  return lt.pricePerPersonCents * clampPersons(parseInt(numPersonsInp.value, 10), lt);
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -373,38 +384,42 @@ function isFormValid() {
   if (n.length < 2 || n.length > 99) return false;
   if (!EMAIL_RE.test(e))             return false;
   if (commentInp.value.length > 500) return false;
-  const t = selectedLessonType();
-  if (!t)                            return false;
-  const p = clampPersons(parseInt(numPersonsInp.value, 10), t);
-  if (p < t.minPersons || p > t.maxPersons) return false;
+  const lt = selectedLessonType();
+  if (!lt)                           return false;
+  const p = clampPersons(parseInt(numPersonsInp.value, 10), lt);
+  if (p < lt.minPersons || p > lt.maxPersons) return false;
   return true;
 }
 function updateBookBtnEnabled() {
   bookBtn.disabled = !isFormValid();
 }
 
+function refreshSubmitLabel() {
+  bookBtnLabel.textContent = t('form.submitWithPrice', { price: formatEuro(priceCents()) });
+}
+
 function updateLessonUi() {
-  const t = selectedLessonType();
-  if (t && t.maxPersons > t.minPersons) {
+  const lt = selectedLessonType();
+  if (lt && lt.maxPersons > lt.minPersons) {
     personsGroup.classList.remove('hidden');
-    numPersonsInp.min = String(t.minPersons);
-    numPersonsInp.max = String(t.maxPersons);
+    numPersonsInp.min = String(lt.minPersons);
+    numPersonsInp.max = String(lt.maxPersons);
     const current = parseInt(numPersonsInp.value, 10);
-    numPersonsInp.value = String(clampPersons(current, t));
+    numPersonsInp.value = String(clampPersons(current, lt));
   } else {
     personsGroup.classList.add('hidden');
   }
-  bookPriceEl.textContent = formatEuro(priceCents());
+  refreshSubmitLabel();
   updateBookBtnEnabled();
 }
 
 lessonTypeSel.addEventListener('change', updateLessonUi);
 numPersonsInp.addEventListener('input', () => {
-  const t = selectedLessonType();
-  if (!t) return;
-  const clamped = clampPersons(parseInt(numPersonsInp.value, 10), t);
+  const lt = selectedLessonType();
+  if (!lt) return;
+  const clamped = clampPersons(parseInt(numPersonsInp.value, 10), lt);
   if (String(clamped) !== numPersonsInp.value) numPersonsInp.value = String(clamped);
-  bookPriceEl.textContent = formatEuro(priceCents());
+  refreshSubmitLabel();
   updateBookBtnEnabled();
 });
 
@@ -412,15 +427,13 @@ numPersonsInp.addEventListener('input', () => {
   el.addEventListener('input', updateBookBtnEnabled);
 });
 
-function formatEuro(cents) { return `€${(cents / 100).toFixed(2)}`; }
-
 // ── Step 2: submit ────────────────────────────────────────────────────────
 bookingForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   hideError(formError);
 
-  const studentName  = document.getElementById('studentName').value.trim();
-  const studentEmail = document.getElementById('studentEmail').value.trim();
+  const studentName  = nameInp.value.trim();
+  const studentEmail = emailInp.value.trim();
   const studentPhone = phoneInp.value.trim();
   const comment      = commentInp.value.trim();
   const lessonType   = lessonTypeSel.value;
@@ -428,29 +441,27 @@ bookingForm.addEventListener('submit', async (e) => {
   const numPersons   = clampPersons(parseInt(numPersonsInp.value, 10), lessonTypeObj);
 
   if (studentName.length < 2 || studentName.length > 99) {
-    showError(formError, 'Please enter your full name (2 to 99 characters).');
-    document.getElementById('studentName').focus();
+    showError(formError, t('form.errors.nameLength'));
+    nameInp.focus();
     return;
   }
-  // Practical email regex — local@host.tld, allowing the common chars.
-  // Not RFC-perfect but good enough for the obvious-typo cases.
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentEmail)) {
-    showError(formError, 'Please enter a valid email address.');
-    document.getElementById('studentEmail').focus();
+  if (!EMAIL_RE.test(studentEmail)) {
+    showError(formError, t('form.errors.emailFormat'));
+    emailInp.focus();
     return;
   }
   if (comment.length > 500) {
-    showError(formError, 'Comment must be 500 characters or fewer.');
+    showError(formError, t('form.errors.commentLength'));
     commentInp.focus();
     return;
   }
   if (!selectedDate || !selectedStart) {
-    showError(formError, 'Missing date or time slot. Please go back and select again.');
+    showError(formError, t('form.errors.missingSlot'));
     return;
   }
 
   bookBtn.disabled = true;
-  showLoading('Creating your booking…');
+  showLoading(t('form.submitting'));
 
   try {
     const res = await fetch(`${API_BASE}/bookings`, {
@@ -465,17 +476,16 @@ bookingForm.addEventListener('submit', async (e) => {
         lessonType,
         numPersons,
         comment: comment || undefined,
-        // amountCents is computed server-side from lessonType + numPersons.
       }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
-    if (!data.approveUrl) throw new Error('No payment URL returned. Please try again.');
+    if (!data.approveUrl) throw new Error(t('form.errors.noPaymentUrl'));
     window.location.href = data.approveUrl;
   } catch (err) {
     hideLoading();
     bookBtn.disabled = false;
-    showError(formError, err.message || 'Failed to create booking. Please try again.');
+    showError(formError, err.message || t('form.errors.generic'));
   }
 });
 
@@ -485,7 +495,6 @@ function backFromStep(step) {
     headerTitle.textContent = '';
     showStep(stepDate);
   }
-  // step 1 has no Back button; this branch can't be reached for stepDate.
 }
 
 function exitToPrevious() {
@@ -504,5 +513,10 @@ document.addEventListener('click', (e) => {
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────
-// Both fetches in parallel — neither depends on the other.
-Promise.all([loadDatesAndSlots(), loadLessonTypes()]);
+// Called by i18n.js once translations are ready, so the first render of
+// the dropdown / submit label / error messages already shows localized
+// strings instead of the static English source.
+window.boot = function boot() {
+  refreshSubmitLabel();
+  Promise.all([loadDatesAndSlots(), loadLessonTypes()]);
+};

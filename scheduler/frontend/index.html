@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Book a class — Palavara Studio</title>
+  <title data-i18n="page.title">Book a class — Palavara Studio</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -24,24 +24,33 @@
           <!-- Desktop: month calendar with slots inside each day -->
           <div class="calendar-view">
             <div class="calendar-header">
-              <button type="button" class="cal-nav" id="calPrev" aria-label="Previous month">←</button>
+              <button type="button" class="cal-nav" id="calPrev"
+                      data-i18n="[aria-label]datePicker.calendarPrev"
+                      aria-label="Previous month">←</button>
               <span class="cal-month-label" id="calMonthLabel"></span>
-              <button type="button" class="cal-nav" id="calNext" aria-label="Next month">→</button>
+              <button type="button" class="cal-nav" id="calNext"
+                      data-i18n="[aria-label]datePicker.calendarNext"
+                      aria-label="Next month">→</button>
             </div>
             <div class="calendar-weekdays" aria-hidden="true">
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              <span data-i18n="datePicker.weekdays.mon">Mon</span><span data-i18n="datePicker.weekdays.tue">Tue</span><span data-i18n="datePicker.weekdays.wed">Wed</span><span data-i18n="datePicker.weekdays.thu">Thu</span><span data-i18n="datePicker.weekdays.fri">Fri</span><span data-i18n="datePicker.weekdays.sat">Sat</span><span data-i18n="datePicker.weekdays.sun">Sun</span>
             </div>
-            <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Workshop dates"></div>
+            <div class="calendar-grid" id="calendarGrid" role="grid"
+                 data-i18n="[aria-label]datePicker.ariaWorkshopDates"
+                 aria-label="Workshop dates"></div>
           </div>
 
           <!-- Mobile: scrollable list of dates with drawer-style slot reveal -->
-          <ul class="date-list" id="dateList" aria-label="Workshop dates"></ul>
+          <ul class="date-list" id="dateList"
+              data-i18n="[aria-label]datePicker.ariaWorkshopDates"
+              aria-label="Workshop dates"></ul>
 
           <p id="dateError" class="error-msg hidden"></p>
         </div>
 
         <div class="step-actions">
-          <button type="button" class="btn btn-ghost" data-action="cancel">Cancel</button>
+          <button type="button" class="btn btn-ghost" data-action="cancel"
+                  data-i18n="common.cancel">Cancel</button>
         </div>
       </section>
 
@@ -54,12 +63,13 @@
           <form id="bookingForm" novalidate>
             <div class="form-row">
               <div class="form-group">
-                <label for="studentName">Name</label>
+                <label for="studentName" data-i18n="form.name.label">Name</label>
                 <input
                   type="text"
                   id="studentName"
                   name="studentName"
                   autocomplete="name"
+                  data-i18n="[placeholder]form.name.placeholder"
                   placeholder="Jane Smith"
                   required
                   minlength="2"
@@ -67,36 +77,41 @@
                 />
               </div>
               <div class="form-group">
-                <label for="studentEmail">Email</label>
+                <label for="studentEmail" data-i18n="form.email.label">Email</label>
                 <input
                   type="email"
                   id="studentEmail"
                   name="studentEmail"
                   autocomplete="email"
+                  data-i18n="[placeholder]form.email.placeholder"
                   placeholder="jane@example.com"
                   required
                 />
               </div>
             </div>
             <div class="form-group">
-              <label for="studentPhone">Phone <span class="optional">(optional)</span></label>
+              <label for="studentPhone">
+                <span data-i18n="form.phone.label">Phone</span>
+                <span class="optional" data-i18n="common.optional">(optional)</span>
+              </label>
               <input
                 type="tel"
                 id="studentPhone"
                 name="studentPhone"
                 autocomplete="tel"
+                data-i18n="[placeholder]form.phone.placeholder"
                 placeholder="+49 …"
               />
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label for="lessonType">Lesson type</label>
+                <label for="lessonType" data-i18n="form.lessonType.label">Lesson type</label>
                 <select id="lessonType" name="lessonType" required>
-                  <option value="">Loading…</option>
+                  <option value="" data-i18n="form.lessonType.loading">Loading…</option>
                 </select>
               </div>
               <div class="form-group hidden" id="personsGroup">
-                <label for="numPersons">For how many people</label>
+                <label for="numPersons" data-i18n="form.numPersons.label">For how many people</label>
                 <input
                   type="number"
                   id="numPersons"
@@ -106,12 +121,16 @@
               </div>
             </div>
             <div class="form-group">
-              <label for="comment">Comment <span class="optional">(optional)</span></label>
+              <label for="comment">
+                <span data-i18n="form.comment.label">Comment</span>
+                <span class="optional" data-i18n="common.optional">(optional)</span>
+              </label>
               <textarea
                 id="comment"
                 name="comment"
                 rows="3"
                 maxlength="500"
+                data-i18n="[placeholder]form.comment.placeholder"
                 placeholder="Anything we should know?"
               ></textarea>
             </div>
@@ -120,24 +139,31 @@
         </div>
 
         <div class="step-actions">
-          <button type="button" class="btn btn-ghost" data-action="back">Back</button>
+          <button type="button" class="btn btn-ghost" data-action="back"
+                  data-i18n="common.back">Back</button>
           <button type="submit" form="bookingForm" id="bookBtn" class="btn btn-paypal" disabled>
-            Pay with PayPal — <span id="bookPrice">€95.00</span>
+            <!-- bookBtn label is fully dynamic — set by app.js via i18next.t('form.submitWithPrice', {price}) -->
+            <span id="bookBtnLabel">Pay with PayPal — <span id="bookPrice">€95.00</span></span>
           </button>
-          <button type="button" class="btn btn-ghost" data-action="cancel">Cancel</button>
+          <button type="button" class="btn btn-ghost" data-action="cancel"
+                  data-i18n="common.cancel">Cancel</button>
         </div>
       </section>
 
       <!-- ── Spinner / loading state ───────────────────────────────────── -->
       <div id="loadingOverlay" class="loading-overlay hidden" aria-live="polite">
         <div class="spinner"></div>
-        <p id="loadingMsg">Loading…</p>
+        <p id="loadingMsg" data-i18n="common.loading">Loading…</p>
       </div>
 
     </main>
   </div>
 
+  <script src="vendor/i18next.min.js"></script>
+  <script src="vendor/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="vendor/i18nextHttpBackend.min.js"></script>
   <script src="config.js"></script>
   <script src="app.js"></script>
+  <script src="i18n.js"></script>
 </body>
 </html>

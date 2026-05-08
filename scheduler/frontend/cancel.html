@@ -4,79 +4,94 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Cancel Booking — Palavara</title>
+  <title data-i18n="page.cancelTitle">Cancel booking — Palavara Studio</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="page-wrapper">
     <header class="site-header">
-      <h1 class="logo">Palavara</h1>
+      <a href="https://studio.palavara.com/" class="logo-link" aria-label="Palavara Studio">
+        <img src="logo.svg" alt="Palavara" class="logo" />
+      </a>
     </header>
 
     <main class="booking-container">
 
       <!-- Loading -->
       <section id="step-loading" class="step active">
-        <div class="loading-overlay static" aria-live="polite">
-          <div class="spinner"></div>
-          <p>Loading your booking…</p>
+        <div class="step-body">
+          <div class="loading-overlay static" aria-live="polite">
+            <div class="spinner"></div>
+            <p data-i18n="cancel.loadingBooking">Loading your booking…</p>
+          </div>
         </div>
       </section>
 
       <!-- Confirm step (we have the booking, ask the user before doing anything) -->
       <section id="step-confirm" class="step hidden">
-        <div class="confirm-card">
-          <h2>Cancel this booking?</h2>
-          <div id="bookingDetails" class="booking-summary large">
-            <!-- populated by JS -->
+        <div class="step-body">
+          <div class="confirm-card">
+            <h2 data-i18n="cancel.promptTitle">Cancel this booking?</h2>
+            <div id="bookingDetails" class="confirm-details">
+              <!-- populated by JS -->
+            </div>
+            <p id="refundNotice" class="refund-notice"></p>
           </div>
-          <p id="refundNotice" class="refund-notice"></p>
-          <div class="form-actions">
-            <a href="index.html" class="btn btn-ghost">← Keep booking</a>
-            <button type="button" id="confirmCancelBtn" class="btn btn-primary">
-              Yes, cancel my booking
-            </button>
-          </div>
+        </div>
+        <div class="step-actions">
+          <a href="index.html" class="btn btn-ghost"
+             data-i18n="cancel.keepBooking">Keep booking</a>
+          <button type="button" id="confirmCancelBtn" class="btn btn-paypal"
+                  data-i18n="cancel.confirmCancel">Yes, cancel my booking</button>
         </div>
       </section>
 
       <!-- Cancelling -->
       <section id="step-cancelling" class="step hidden">
-        <div class="loading-overlay static" aria-live="polite">
-          <div class="spinner"></div>
-          <p>Cancelling…</p>
+        <div class="step-body">
+          <div class="loading-overlay static" aria-live="polite">
+            <div class="spinner"></div>
+            <p data-i18n="cancel.cancelling">Cancelling…</p>
+          </div>
         </div>
       </section>
 
       <!-- Cancelled -->
       <section id="step-cancelled" class="step hidden">
-        <div class="confirm-card">
-          <div class="confirm-icon">✓</div>
-          <h2>Booking cancelled</h2>
-          <p id="cancelledMessage" class="confirm-message"></p>
-          <p class="confirm-email-note">A confirmation has been sent to your email.</p>
-          <a href="index.html" class="btn btn-ghost">Book another workshop</a>
+        <div class="step-body">
+          <div class="confirm-card">
+            <h2 data-i18n="cancel.cancelledTitle">Booking cancelled</h2>
+            <p id="cancelledMessage" class="confirm-message"></p>
+            <p class="confirm-email-note" data-i18n="cancel.emailNote">A confirmation has been sent to your email.</p>
+            <a href="index.html" class="btn btn-ghost confirm-cta"
+               data-i18n="cancel.bookAnother">Book another lesson</a>
+          </div>
         </div>
       </section>
 
       <!-- Error -->
       <section id="step-error" class="step hidden">
-        <div class="confirm-card error">
-          <div class="confirm-icon">!</div>
-          <h2>Something went wrong</h2>
-          <p id="errorMsg">We couldn't process this cancellation.</p>
-          <a href="index.html" class="btn btn-ghost">← Back to bookings</a>
+        <div class="step-body">
+          <div class="confirm-card error">
+            <div class="confirm-icon">!</div>
+            <h2 data-i18n="errorCard.title">Something went wrong</h2>
+            <p id="errorMsg">We couldn't process this cancellation.</p>
+          </div>
+        </div>
+        <div class="step-actions">
+          <a href="index.html" class="btn btn-ghost"
+             data-i18n="cancel.back">Back to bookings</a>
         </div>
       </section>
 
     </main>
-
-    <footer class="site-footer">
-      <p>Questions? Contact us at <a href="mailto:palavarastudio@gmail.com">palavarastudio@gmail.com</a></p>
-    </footer>
   </div>
 
+  <script src="vendor/i18next.min.js"></script>
+  <script src="vendor/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="vendor/i18nextHttpBackend.min.js"></script>
   <script src="config.js"></script>
   <script src="cancel.js"></script>
+  <script src="i18n.js"></script>
 </body>
 </html>

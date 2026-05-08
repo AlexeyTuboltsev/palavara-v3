@@ -4,21 +4,28 @@
  * Flow (PayPal Orders v2):
  *  1. Read ?bookingId=... from the URL (we appended it to the return URL
  *     when creating the order; PayPal also adds ?token=ORDERID&PayerID=...).
- *  2. Call POST /bookings/{id}/capture — this captures the payment server-side
+ *  2. Call POST /bookings/{id}/capture — captures the payment server-side
  *     and flips the booking to 'confirmed' synchronously.
  *  3. If capture succeeds, render the confirmed details.
- *  4. If capture fails (e.g. webhook beat us, network glitch), fall back to
- *     polling GET /bookings/{id} for a few seconds.
+ *  4. If capture fails (webhook beat us, network glitch), poll
+ *     GET /bookings/{id} for a few seconds.
+ *
+ * All visible strings come from i18next (locales/<lng>/translation.json).
+ * The init runs from `window.boot()`, called by i18n.js once translations
+ * are ready.
  */
 
 'use strict';
 
 const API_BASE = window.SCHEDULER_CONFIG?.API_BASE_URL || '';
 
+const t = (...args) => window.i18next ? window.i18next.t(...args) : args[0];
+
 const stepVerifying = document.getElementById('step-verifying');
 const stepConfirmed = document.getElementById('step-confirmed');
 const stepPending   = document.getElementById('step-pending');
 const stepError     = document.getElementById('step-error');
+const confirmMessage  = document.getElementById('confirmMessage');
 const confirmDetails  = document.getElementById('confirmDetails');
 const pendingBookingId = document.getElementById('pendingBookingId');
 const errorMsg      = document.getElementById('errorMsg');
@@ -33,9 +40,14 @@ function showStep(step) {
   step.classList.add('active');
 }
 
+function uiLocale() {
+  return (window.i18next && window.i18next.resolvedLanguage) || 'en';
+}
+
 function formatDate(isoDate) {
-  const d = new Date(isoDate + 'T12:00:00Z');
-  return d.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString(uiLocale(), {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
 }
 
 function formatSlotRange(start, end) {
@@ -44,23 +56,23 @@ function formatSlotRange(start, end) {
 
 function renderConfirmedDetails(booking) {
   const price = `€${((booking.amountCents || 0) / 100).toFixed(2)}`;
-  // Lesson label snapshotted on the booking row. Falls back to "Workshop"
-  // for legacy bookings that pre-date the lesson-types catalog.
   const baseLabel = booking.lessonTypeLabel || 'Workshop';
   const detailsLabel = booking.numPersons && booking.numPersons > 1
-    ? `${baseLabel} · ${booking.numPersons} people`
+    ? `${baseLabel} · ${t('confirm.personsSuffix', { count: booking.numPersons })}`
     : baseLabel;
-  confirmDetails.innerHTML = `
-    <div class="confirm-row"><span class="label">Lesson type</span><span class="value">${detailsLabel}</span></div>
-    <div class="confirm-row"><span class="label">Date</span><span class="value">${formatDate(booking.date)}</span></div>
-    <div class="confirm-row"><span class="label">Time</span><span class="value">${formatSlotRange(booking.timeSlot, booking.slotEnd)}</span></div>
-    <div class="confirm-row"><span class="label">Paid</span><span class="value">${price}</span></div>
-    <div class="confirm-row"><span class="label">Booking ID</span><span class="value"><code>${booking.bookingId}</code></span></div>
-  `;
 
-  // Inject the lesson label into the confirmation message paragraph too.
-  const headerLabel = document.getElementById('confirmLessonLabel');
-  if (headerLabel) headerLabel.textContent = baseLabel.toLowerCase();
+  const rows = [
+    { label: t('confirm.details.lessonType'), value: detailsLabel },
+    { label: t('confirm.details.date'),       value: formatDate(booking.date) },
+    { label: t('confirm.details.time'),       value: formatSlotRange(booking.timeSlot, booking.slotEnd) },
+    { label: t('confirm.details.paid'),       value: price },
+    { label: t('confirm.details.bookingId'),  value: `<code>${booking.bookingId}</code>` },
+  ];
+  confirmDetails.innerHTML = rows.map((r) =>
+    `<div class="confirm-row"><span class="label">${r.label}</span><span class="value">${r.value}</span></div>`
+  ).join('');
+
+  confirmMessage.textContent = t('confirm.messageWithLabel', { lessonLabel: baseLabel.toLowerCase() });
 }
 
 async function captureBooking(bookingId) {
@@ -102,8 +114,7 @@ async function init() {
   const bookingId = params.get('bookingId');
 
   // Preview mode: ?preview=confirmed | pending | error — skips the API
-  // call and renders the corresponding state with mock data. Useful for
-  // designing the page without making a real booking.
+  // call and renders the corresponding state with mock data.
   const preview = params.get('preview');
   if (preview) {
     if (preview === 'confirmed') {
@@ -129,13 +140,12 @@ async function init() {
 
   if (!bookingId) {
     showStep(stepError);
-    errorMsg.textContent = 'No booking ID found in the URL. Did you come from a PayPal payment?';
+    errorMsg.textContent = t('confirm.errors.noBookingId');
     return;
   }
 
   showStep(stepVerifying);
 
-  // Try the synchronous capture first.
   try {
     const booking = await captureBooking(bookingId);
     if (booking.status === 'confirmed') {
@@ -144,12 +154,9 @@ async function init() {
       return;
     }
   } catch (err) {
-    // Capture might fail because the webhook already confirmed it, the
-    // network blipped, etc. Fall through to polling.
     console.warn('capture call failed, falling back to polling:', err);
   }
 
-  // Fall-back: poll until the webhook flips the booking to confirmed.
   try {
     const booking = await pollUntilConfirmed(bookingId);
     if (booking) {
@@ -161,9 +168,10 @@ async function init() {
     }
   } catch (err) {
     showStep(stepError);
-    errorMsg.textContent = err.message || 'Unable to verify your booking. Please contact support.';
+    errorMsg.textContent = err.message || t('confirm.errors.verifyFailed');
   }
 }
 
 refreshBtn.addEventListener('click', init);
-init();
+
+window.boot = init;
