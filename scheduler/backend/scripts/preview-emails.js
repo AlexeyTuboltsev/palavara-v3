@@ -32,6 +32,25 @@ const LOGO_URL  = '../logo.svg';
 const STUDIO_URL = 'https://studio.palavara.com/';
 const STUDIO_ADDRESS = 'Steegerstr. 1A, 13359 Berlin';
 
+// Mirrors the constants in src/email/index.js so previews render the
+// real footer block. Update both in lockstep.
+const IMPRESSUM_TEXT =
+  '\n--\nPalavara Studio · Varvara Polyakova\n' +
+  'Steegerstr. 1A, 13359 Berlin · palavarastudio@gmail.com\n' +
+  'Impressum: https://studio.palavara.com/impressum · ' +
+  'AGB: https://studio.palavara.com/agb · ' +
+  'Datenschutz: https://studio.palavara.com/datenschutzerklaerung';
+
+const IMPRESSUM_HTML =
+  '<p style="color:#6b7280; font-size: 11px; line-height: 1.6; margin-top: 16px;">'
+  + 'Palavara Studio · Varvara Polyakova<br/>'
+  + 'Steegerstr. 1A, 13359 Berlin · '
+  + '<a href="mailto:palavarastudio@gmail.com" style="color:#6b7280;">palavarastudio@gmail.com</a><br/>'
+  + '<a href="https://studio.palavara.com/impressum" style="color:#6b7280;">Impressum</a> · '
+  + '<a href="https://studio.palavara.com/agb" style="color:#6b7280;">AGB</a> · '
+  + '<a href="https://studio.palavara.com/datenschutzerklaerung" style="color:#6b7280;">Datenschutzerklärung</a>'
+  + '</p>';
+
 // ── Variants ───────────────────────────────────────────────────────────
 const variants = [
   {
@@ -174,7 +193,8 @@ const variants = [
 const indexLinks = [];
 
 for (const v of variants) {
-  const r = renderTemplate(v.template, v.ctx);
+  const ctx = { ...v.ctx, impressumText: IMPRESSUM_TEXT, impressumHtml: IMPRESSUM_HTML };
+  const r = renderTemplate(v.template, ctx);
   const wrapped =
     `<!DOCTYPE html>
 <html lang="en">
