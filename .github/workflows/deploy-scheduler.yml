@@ -1,0 +1,62 @@
+name: Deploy Scheduler Stack
+
+# Deploys the booking-scheduler SAM stack (Lambdas, API Gateway, DynamoDB
+# tables) defined in scheduler/template.yaml. This is the backend for
+# book.palavara.com — the static frontend is deployed separately.
+#
+# Manual trigger only: pick a moment when no live booking is in flight,
+# since the deploy briefly bounces the API.
+#
+# CloudFormation reuses any parameter values supplied on previous deploys,
+# so PayPal credentials, Google OAuth client, AdminSecret, etc. don't need
+# to be re-passed every run. If a parameter ever needs to change, update
+# it once via the AWS console (or a one-off `sam deploy --parameter-overrides`)
+# and subsequent CI runs continue to inherit it.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # SAM CLI needs Python; the Node.js Lambdas need a Node toolchain at
+      # build time so npm install runs against the correct major version.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup SAM CLI
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: SAM build
+        working-directory: scheduler
+        run: sam build
+
+      - name: SAM deploy
+        working-directory: scheduler
+        # --no-fail-on-empty-changeset keeps a re-run idempotent — if main
+        # is already deployed, the workflow exits 0 instead of red.
+        run: |
+          sam deploy \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset
