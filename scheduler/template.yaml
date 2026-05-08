@@ -192,6 +192,20 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  LessonTypesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: palavara-lesson-types
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
   # ── Lambda functions ─────────────────────────────────────────────────────────
   GetDatesFunction:
     Type: AWS::Serverless::Function
@@ -202,11 +216,32 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref SlotsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref BookingsTable
       Events:
         Api:
           Type: Api
           Properties:
             Path: /dates
+            Method: get
+
+  GetLessonTypesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-get-lesson-types
+      CodeUri: backend/
+      Handler: src/handlers/getLessonTypes.handler
+      Environment:
+        Variables:
+          LESSON_TYPES_TABLE: !Ref LessonTypesTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref LessonTypesTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /lesson-types
             Method: get
 
   GetAvailabilityFunction:
@@ -233,11 +268,16 @@ Resources:
       FunctionName: palavara-create-booking
       CodeUri: backend/
       Handler: src/handlers/createBooking.handler
+      Environment:
+        Variables:
+          LESSON_TYPES_TABLE: !Ref LessonTypesTable
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingsTable
         - DynamoDBReadPolicy:
             TableName: !Ref SlotsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref LessonTypesTable
       Events:
         Api:
           Type: Api
@@ -502,6 +542,83 @@ Resources:
           Properties:
             Path: /admin/bookings
             Method: get
+
+  # ── Admin: lesson-type catalog ───────────────────────────────────────────
+  AdminListLessonTypesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-list-lesson-types
+      CodeUri: backend/
+      Handler: src/handlers/adminListLessonTypes.handler
+      Environment:
+        Variables:
+          LESSON_TYPES_TABLE: !Ref LessonTypesTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref LessonTypesTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/lesson-types
+            Method: get
+
+  AdminCreateLessonTypeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-create-lesson-type
+      CodeUri: backend/
+      Handler: src/handlers/adminCreateLessonType.handler
+      Environment:
+        Variables:
+          LESSON_TYPES_TABLE: !Ref LessonTypesTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LessonTypesTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/lesson-types
+            Method: post
+
+  AdminUpdateLessonTypeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-update-lesson-type
+      CodeUri: backend/
+      Handler: src/handlers/adminUpdateLessonType.handler
+      Environment:
+        Variables:
+          LESSON_TYPES_TABLE: !Ref LessonTypesTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LessonTypesTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/lesson-types/{id}
+            Method: put
+
+  AdminDeleteLessonTypeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-admin-delete-lesson-type
+      CodeUri: backend/
+      Handler: src/handlers/adminDeleteLessonType.handler
+      Environment:
+        Variables:
+          LESSON_TYPES_TABLE: !Ref LessonTypesTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LessonTypesTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /admin/lesson-types/{id}
+            Method: delete
 
 Outputs:
   ApiBaseUrl:

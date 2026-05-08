@@ -10,73 +10,122 @@
 <body>
   <div class="page-wrapper">
     <header class="site-header">
-      <h1 class="logo">Palavara</h1>
-      <p class="tagline">Book a wheel-throwing workshop</p>
+      <a href="https://studio.palavara.com/" class="logo-link" aria-label="Palavara Studio">
+        <img src="logo.svg" alt="Palavara" class="logo" />
+      </a>
+      <p class="header-title" id="headerTitle"></p>
     </header>
 
     <main class="booking-container">
 
       <!-- ── Step 1: Pick a date ────────────────────────────────────────── -->
-      <section id="step-date" class="step active">
-        <h2>Select a date</h2>
-        <div class="date-picker-wrap">
-          <select id="datePicker" class="date-input" aria-label="Select workshop date">
-            <option value="">Loading dates…</option>
-          </select>
-          <button id="loadSlotsBtn" class="btn btn-primary" disabled>See available times →</button>
+      <section id="step-date" class="step active" data-step="1">
+        <div class="step-body">
+          <!-- Desktop: month calendar with slots inside each day -->
+          <div class="calendar-view">
+            <div class="calendar-header">
+              <button type="button" class="cal-nav" id="calPrev" aria-label="Previous month">←</button>
+              <span class="cal-month-label" id="calMonthLabel"></span>
+              <button type="button" class="cal-nav" id="calNext" aria-label="Next month">→</button>
+            </div>
+            <div class="calendar-weekdays" aria-hidden="true">
+              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Workshop dates"></div>
+          </div>
+
+          <!-- Mobile: scrollable list of dates with drawer-style slot reveal -->
+          <ul class="date-list" id="dateList" aria-label="Workshop dates"></ul>
+
+          <p id="dateError" class="error-msg hidden"></p>
         </div>
-        <p id="dateError" class="error-msg hidden"></p>
+
+        <div class="step-actions">
+          <button type="button" class="btn btn-ghost" data-action="cancel">Cancel</button>
+        </div>
       </section>
 
-      <!-- ── Step 2: Pick a time slot ──────────────────────────────────── -->
-      <section id="step-slots" class="step hidden">
-        <h2>Available slots for <span id="selectedDateLabel"></span></h2>
-        <div id="slotsGrid" class="slots-grid" role="group" aria-label="Available time slots">
-          <!-- populated by JS -->
+      <!-- ── Step 2: Fill in details ───────────────────────────────────── -->
+      <section id="step-form" class="step hidden" data-step="2">
+        <div class="step-body">
+          <p class="step-context">
+            <span id="summaryDate"></span> &middot; <span id="summarySlot"></span>
+          </p>
+          <form id="bookingForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="studentName">Name</label>
+                <input
+                  type="text"
+                  id="studentName"
+                  name="studentName"
+                  autocomplete="name"
+                  placeholder="Jane Smith"
+                  required
+                  minlength="2"
+                  maxlength="99"
+                />
+              </div>
+              <div class="form-group">
+                <label for="studentEmail">Email</label>
+                <input
+                  type="email"
+                  id="studentEmail"
+                  name="studentEmail"
+                  autocomplete="email"
+                  placeholder="jane@example.com"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="studentPhone">Phone <span class="optional">(optional)</span></label>
+              <input
+                type="tel"
+                id="studentPhone"
+                name="studentPhone"
+                autocomplete="tel"
+                placeholder="+49 …"
+              />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="lessonType">Lesson type</label>
+                <select id="lessonType" name="lessonType" required>
+                  <option value="">Loading…</option>
+                </select>
+              </div>
+              <div class="form-group hidden" id="personsGroup">
+                <label for="numPersons">For how many people</label>
+                <input
+                  type="number"
+                  id="numPersons"
+                  name="numPersons"
+                  step="1"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="comment">Comment <span class="optional">(optional)</span></label>
+              <textarea
+                id="comment"
+                name="comment"
+                rows="3"
+                maxlength="500"
+                placeholder="Anything we should know?"
+              ></textarea>
+            </div>
+            <p id="formError" class="error-msg hidden"></p>
+          </form>
         </div>
-        <p id="slotsError" class="error-msg hidden"></p>
-        <button id="backToDateBtn" class="btn btn-ghost">← Change date</button>
-      </section>
 
-      <!-- ── Step 3: Fill in details ───────────────────────────────────── -->
-      <section id="step-form" class="step hidden">
-        <h2>Your details</h2>
-        <div class="booking-summary">
-          <span id="summaryDate"></span> &nbsp;·&nbsp; <span id="summarySlot"></span>
-          &nbsp;·&nbsp; €95.00
+        <div class="step-actions">
+          <button type="button" class="btn btn-ghost" data-action="back">Back</button>
+          <button type="submit" form="bookingForm" id="bookBtn" class="btn btn-paypal" disabled>
+            Pay with PayPal — <span id="bookPrice">€95.00</span>
+          </button>
+          <button type="button" class="btn btn-ghost" data-action="cancel">Cancel</button>
         </div>
-        <form id="bookingForm" novalidate>
-          <div class="form-group">
-            <label for="studentName">Full name</label>
-            <input
-              type="text"
-              id="studentName"
-              name="studentName"
-              autocomplete="name"
-              placeholder="Jane Smith"
-              required
-              minlength="2"
-            />
-          </div>
-          <div class="form-group">
-            <label for="studentEmail">Email address</label>
-            <input
-              type="email"
-              id="studentEmail"
-              name="studentEmail"
-              autocomplete="email"
-              placeholder="jane@example.com"
-              required
-            />
-          </div>
-          <p id="formError" class="error-msg hidden"></p>
-          <div class="form-actions">
-            <button type="button" id="backToSlotsBtn" class="btn btn-ghost">← Change time</button>
-            <button type="submit" id="bookBtn" class="btn btn-paypal">
-              Book &amp; Pay with PayPal — €95.00
-            </button>
-          </div>
-        </form>
       </section>
 
       <!-- ── Spinner / loading state ───────────────────────────────────── -->
@@ -86,10 +135,6 @@
       </div>
 
     </main>
-
-    <footer class="site-footer">
-      <p>Wheel-throwing workshops are €95 for 2 hours &bull; Secure payment via PayPal</p>
-    </footer>
   </div>
 
   <script src="config.js"></script>

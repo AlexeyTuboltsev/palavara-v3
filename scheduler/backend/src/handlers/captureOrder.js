@@ -111,14 +111,17 @@ exports.handler = async (event) => {
 
 function stripBooking(item) {
   return {
-    bookingId:    item.bookingId,
-    date:         item.date,
-    timeSlot:     item.timeSlot,
-    slotEnd:      item.slotEnd,
-    status:       item.status,
-    studentName:  item.studentName,
-    amountCents:  item.amountCents,
-    createdAt:    item.createdAt,
-    confirmedAt:  item.confirmedAt,
+    bookingId:        item.bookingId,
+    date:             item.date,
+    timeSlot:         item.timeSlot,
+    slotEnd:          item.slotEnd,
+    status:           item.status,
+    studentName:      item.studentName,
+    amountCents:      item.amountCents,
+    lessonTypeId:     item.lessonTypeId,
+    lessonTypeLabel:  item.lessonTypeLabel,
+    numPersons:       item.numPersons,
+    createdAt:        item.createdAt,
+    confirmedAt:      item.confirmedAt,
   };
 }

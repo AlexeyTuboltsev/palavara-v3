@@ -10,63 +10,64 @@
 <body>
   <div class="page-wrapper">
     <header class="site-header">
-      <h1 class="logo">Palavara</h1>
+      <a href="https://studio.palavara.com/" class="logo-link" aria-label="Palavara Studio">
+        <img src="logo.svg" alt="Palavara" class="logo" />
+      </a>
     </header>
 
     <main class="booking-container">
 
       <!-- Polling / loading state -->
       <section id="step-verifying" class="step active">
-        <div class="loading-overlay static" aria-live="polite">
-          <div class="spinner"></div>
-          <p>Verifying your payment…</p>
+        <div class="step-body">
+          <div class="loading-overlay static" aria-live="polite">
+            <div class="spinner"></div>
+            <p>Verifying your payment…</p>
+          </div>
         </div>
       </section>
 
       <!-- Confirmed -->
       <section id="step-confirmed" class="step hidden">
-        <div class="confirm-card">
-          <div class="confirm-icon">✅</div>
-          <h2>You're booked!</h2>
-          <p class="confirm-message">Your wheel-throwing workshop is confirmed. See you there!</p>
-          <div id="confirmDetails" class="booking-summary large">
-            <!-- populated by JS -->
+        <div class="step-body">
+          <div class="confirm-card">
+            <h2>You're booked</h2>
+            <p class="confirm-message">Your wheel-throwing workshop is confirmed. See you there.</p>
+            <div id="confirmDetails" class="confirm-details">
+              <!-- populated by JS -->
+            </div>
+            <p class="confirm-email-note">A confirmation email is on its way to your inbox.</p>
+            <a href="index.html" class="btn btn-ghost confirm-cta">Book another lesson</a>
           </div>
-          <p class="confirm-email-note">A confirmation will be sent to your email address.</p>
-          <a href="index.html" class="btn btn-ghost">← Book another lesson</a>
         </div>
       </section>
 
       <!-- Not yet confirmed (payment still processing) -->
       <section id="step-pending" class="step hidden">
-        <div class="confirm-card warning">
-          <div class="confirm-icon">⏳</div>
-          <h2>Payment pending</h2>
-          <p>
-            We've received your booking request but payment hasn't been confirmed yet.
-            This usually takes a few seconds — please refresh in a moment.
-          </p>
-          <p class="booking-id-label">Booking ID: <code id="pendingBookingId"></code></p>
-          <button id="refreshBtn" class="btn btn-primary">Refresh status</button>
-          <a href="index.html" class="btn btn-ghost">← Back to calendar</a>
+        <div class="step-body">
+          <div class="confirm-card">
+            <h2>Payment pending</h2>
+            <p class="booking-id-label">Booking ID: <code id="pendingBookingId"></code></p>
+            <button type="button" id="refreshBtn" class="btn btn-ghost confirm-cta">Refresh status</button>
+          </div>
         </div>
       </section>
 
       <!-- Error -->
       <section id="step-error" class="step hidden">
-        <div class="confirm-card error">
-          <div class="confirm-icon">❌</div>
-          <h2>Something went wrong</h2>
-          <p id="errorMsg">Unable to look up your booking.</p>
-          <a href="index.html" class="btn btn-ghost">← Back to calendar</a>
+        <div class="step-body">
+          <div class="confirm-card error">
+            <div class="confirm-icon">!</div>
+            <h2>Something went wrong</h2>
+            <p id="errorMsg">Unable to look up your booking.</p>
+          </div>
+        </div>
+        <div class="step-actions">
+          <a href="index.html" class="btn btn-ghost">Back to calendar</a>
         </div>
       </section>
 
     </main>
-
-    <footer class="site-footer">
-      <p>Questions? Contact us at <a href="mailto:hello@palavara.com">hello@palavara.com</a></p>
-    </footer>
   </div>
 
   <script src="config.js"></script>
