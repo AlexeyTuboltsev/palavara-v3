@@ -203,24 +203,6 @@
     margin-top: 2px;
   }
 
-  // Legal-page links on /contact. Visually mimic an h1 (bold, uppercase,
-  // 17px) but the elements are <a> inside a <nav> for correct semantics —
-  // they used to be <h1>s, which broke the per-page single-h1 rule.
-  .legalLinks {
-    display: block;
-    margin-top: 20px;
-  }
-
-  .impressum {
-    display: block;
-    font-weight: 700;
-    font-size: 17px;
-    line-height: 1.5;
-    text-transform: uppercase;
-    padding: 0 10px;
-    margin-top: 20px;
-  }
-
   p, li, .small {
     line-height: 1.5;
     margin: 0;

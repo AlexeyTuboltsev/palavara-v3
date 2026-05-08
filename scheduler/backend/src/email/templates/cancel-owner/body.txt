@@ -9,3 +9,4 @@ A booking has been cancelled by the {{cancelledBy}}.
 
 The slot is now available for other bookings.
 A calendar update is attached so the event is removed from your calendar.
+{{impressumText}}
