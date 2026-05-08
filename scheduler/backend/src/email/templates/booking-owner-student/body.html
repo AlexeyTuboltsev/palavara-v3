@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html><body style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #111; line-height: 1.55;">
+  <p style="margin: 0 0 16px;">
+    <a href="{{studioUrl}}" style="text-decoration:none;">
+      <img src="{{logoUrl}}" alt="Palavara" width="60" height="60" style="display:block;border:0;" />
+    </a>
+  </p>
   <p>A new {{lessonLabelLower}} booking has been confirmed.</p>
   <table cellpadding="4" style="border-collapse: collapse; margin: 12px 0;">
     <tr><td style="color:#6b7280">Booker</td><td><strong>{{studentName}}</strong> &lt;<a href="mailto:{{studentEmail}}">{{studentEmail}}</a>&gt;</td></tr>
+    {{{phoneRowHtml}}}
     <tr><td style="color:#6b7280">Date</td><td><strong>{{dateLine}}</strong></td></tr>
     <tr><td style="color:#6b7280">Time</td><td><strong>{{timeLine}}</strong></td></tr>
     {{{priceRowHtml}}}
     {{{paymentNoteRowHtml}}}
     <tr><td style="color:#6b7280">Booking ID</td><td><code>{{bookingId}}</code></td></tr>
   </table>
-  <p style="margin: 16px 0;">
-    <a href="{{gcalUrl}}" style="display:inline-block;background:#1a73e8;color:#fff;text-decoration:none;padding:8px 16px;border-radius:4px;">
-      Add to Google Calendar
-    </a>
-    <span style="color:#6b7280; font-size: 13px; margin-left: 8px;">(or open the attached calendar invite)</span>
-  </p>
+  {{{commentBlockHtml}}}
+  <p style="color:#6b7280; font-size: 13px; margin-top: 16px;">A calendar invite is attached to this email.</p>
   <p style="margin-top: 16px;">
     <a href="{{cancelUrl}}" style="color:#1a73e8;">Cancel this booking</a>
     <span style="color:#6b7280; font-size: 13px;">(always full refund when you cancel)</span>

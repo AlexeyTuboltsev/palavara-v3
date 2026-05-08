@@ -1,12 +1,11 @@
 A new {{lessonLabelLower}} booking has been confirmed.
 
-  Booker:     {{studentName}} <{{studentEmail}}>
+  Booker:     {{studentName}} <{{studentEmail}}>{{phoneBlockText}}
   Date:       {{dateLine}}
   Time:       {{timeLine}}{{priceLineIndented}}{{paymentNoteIndented}}
-  Booking ID: {{bookingId}}
+  Booking ID: {{bookingId}}{{commentBlockText}}
 
-Add to Google Calendar: {{gcalUrl}}
-A calendar invite is also attached to this email.
+A calendar invite is attached to this email.
 
 Cancel this booking (always full refund when you cancel):
   {{cancelUrl}}
