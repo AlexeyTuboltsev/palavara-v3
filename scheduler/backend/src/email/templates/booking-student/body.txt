@@ -6,8 +6,6 @@ Your {{lessonLabelLower}} is confirmed.
   Time:     {{timeLine}}{{priceLineIndented}}
   Location: {{studioAddress}}
 
-A calendar invite is attached to this email.
-
 Need to cancel? Use this link:
   {{cancelUrl}}
 Cancellations more than 48 hours before the workshop receive a full refund;
