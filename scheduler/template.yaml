@@ -34,7 +34,7 @@ Globals:
         GOOGLE_REFRESH_TOKEN_PARAM_NAME: !Ref GoogleRefreshTokenParamName
   Api:
     Cors:
-      AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+      AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Admin-Secret'"
       AllowOrigin: "'*'"
 
