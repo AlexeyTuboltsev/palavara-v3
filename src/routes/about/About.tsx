@@ -49,6 +49,8 @@ const Content: FC<{
           manifest={manifest}
           imageLoaded={(state as any).imageLoaded}
           alt={routeImageAlts[state.route.routeName]}
+          eager
+          isLcp
         />
         <div className={styles.colorBlock} />
       </div>

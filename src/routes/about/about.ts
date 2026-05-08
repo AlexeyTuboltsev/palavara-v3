@@ -5,23 +5,17 @@ import {sectionMenu} from "../common/sectionMenu";
 import {fork, put} from "redux-saga/effects";
 import {setAppState} from "../../store";
 import {actionListenerLoop, imageChanger, screenResize, toggleMobileMenu, toggleSubmenu} from "../../sagas/uiSaga";
-import {actions} from "../../actions";
 import {TResizeEventPayload} from "../../services/resizeObserver";
 import {EScreenSize, screenSize} from "../common/screenSize";
 import {createImageState} from "../common/imageState";
 
 export function* about(screenDimensions: TResizeEventPayload): Generator<any, void, any> {
+  // 05-01 is a class shot with the wrong subject for an "About Varya"
+  // page; the alt text expects portraits and 05-02..05-10 are those.
+  // Starting at 05-02 means the preload (set in public/index.html for
+  // /about-me) hits the actual hero, not a frame the saga used to skip.
   const urls = [
-    "05-01.jpg",
     "05-02.jpg",
-    "05-03.jpg",
-    "05-04.jpg",
-    "05-05.jpg",
-    "05-06.jpg",
-    "05-07.jpg",
-    "05-08.jpg",
-    "05-09.jpg",
-    "05-10.jpg",
   ]
 
   const displayType = screenSize(screenDimensions)
@@ -45,6 +39,4 @@ export function* about(screenDimensions: TResizeEventPayload): Generator<any, vo
     ...imageChanger(urls),
     ...toggleMobileMenu
   })
-
-  yield put(actions.nextImage())
 }
