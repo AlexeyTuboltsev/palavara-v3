@@ -105,6 +105,30 @@ body {
   .header-title { display: none; }
 }
 
+/* Legal footer (Impressum / AGB / Datenschutz) — points at studio.palavara.com.
+   Mirrors the studio-site SiteFooter styling. § 5 TMG: legal links must be
+   reachable from every page that collects PII or triggers payment. */
+.site-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 1px 16px;
+  font-size: 7px;
+  flex-shrink: 0;
+}
+.site-footer a {
+  color: rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+}
+.site-footer a:hover { color: rgba(0, 0, 0, 0.8); }
+@media (max-width: 600px) {
+  .site-footer {
+    justify-content: space-between;
+    gap: 0;
+    font-size: 8px;
+  }
+}
+
 .booking-container {
   flex: 1;
   min-height: 0;             /* allow flex child to shrink below content size */
@@ -176,6 +200,20 @@ body {
 @media (max-width: 600px) {
   .step-close { display: none; }
 }
+
+/* Inline consent line above the PayPal button — § 305 BGB requires the
+   customer have a chance to take note of the AGB before contract conclusion. */
+.consent-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+  line-height: 1.5;
+}
+.consent-note a {
+  color: inherit;
+  text-decoration: underline;
+}
+.consent-note a:hover { color: rgba(0, 0, 0, 0.85); }
 
 .step-actions {
   display: flex;

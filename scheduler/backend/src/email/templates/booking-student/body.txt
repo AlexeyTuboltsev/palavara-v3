@@ -20,3 +20,4 @@ Palavara Studio
 
 ---
 Booking ID: {{bookingId}}
+{{impressumText}}

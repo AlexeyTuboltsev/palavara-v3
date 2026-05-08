@@ -4,6 +4,7 @@ import {EAppState, TReadyAppState} from "../types";
 import {TStore} from "../store";
 import {ERoute} from "../router";
 import { StartScreen } from './StartScreen';
+import { SiteFooter } from './SiteFooter';
 import { useRouteHead } from '../hooks/useRouteHead';
 // Home is the entry point for almost every visit — keep it in the main
 // bundle so the initial render doesn't need a second round-trip.
@@ -86,6 +87,7 @@ export const AppReady: FC<TReadyAppState> = (state) => {
   return (
     <Suspense fallback={null}>
       <AppRouteView state={state} />
+      <SiteFooter />
     </Suspense>
   );
 }

@@ -205,19 +205,38 @@ Visual tests run with `REACT_APP_VISUAL_TEST_MODE=true` environment variable, wh
 
 Implementation in `src/config.ts` and `src/components/Images.tsx`.
 
-### Updating baselines after a small UI change
+### Pixel-diff threshold
 
-`yarn test:visual:update` calls Playwright with `--update-snapshots` and no argument — which in Playwright 1.58+ only regenerates **missing** baselines, not changed ones. A visible change that falls under the `maxDiffPixels: 6100` threshold in `e2e/visual-regression.spec.ts` will pass the test, so `:update` won't touch the snapshot, and the baseline ends up stale.
+`maxDiffPixels: 5` in `e2e/visual-regression.spec.ts`. Strict on purpose — CI is byte-deterministic (Linux chromium, animations off, fonts pre-loaded, images stubbed with gray placeholders), so identical code should produce ~0 diff pixels between runs. The 5-pixel budget only absorbs incidental anti-aliased edge noise; **anything visible (a moved element, a new footer, a font change) will fail the test**. That is the desired behaviour — an intentional UI change should require an explicit baseline refresh, not slip through silently.
 
-To force-regenerate a snapshot that the test is "tolerating":
+Do **not** raise this number to make a test pass. If it's failing, either (a) the change is unintentional and needs investigating, or (b) the change is intentional and the baselines need refreshing — see below.
+
+### Refreshing baselines after an intentional UI change
+
+`yarn test:visual:update` runs Playwright with `--update-snapshots`, which in Playwright 1.58+ **only regenerates missing baselines, not changed ones**. So for a baseline that already exists but no longer matches the current code, `:update` is a no-op. The baseline files have to be deleted first.
+
+Standard workflow:
 
 ```bash
-# Delete the specific baselines first, then run update
-rm e2e/visual-regression.spec.ts-snapshots/home-chromium-*.png
+# 1. Delete the baselines that need to change (or all of them, if the
+#    change is site-wide like a global footer / typography tweak).
+rm e2e/visual-regression.spec.ts-snapshots/*.png
+# … or scoped: rm e2e/visual-regression.spec.ts-snapshots/home-chromium-*.png
+
+# 2. Regenerate. Playwright auto-starts the dev server via webServer
+#    config and writes fresh PNGs for every (route × viewport) combo.
 yarn test:visual:update
+
+# 3. Verify a clean second run before committing — confirms the
+#    new baselines are stable, not just freshly written.
+yarn test:visual
+
+# 4. Commit the spec (if changed) + the regenerated PNGs.
+git add e2e/visual-regression.spec.ts e2e/visual-regression.spec.ts-snapshots/
+git commit
 ```
 
-The regenerated snapshots will be written as if they were missing.
+A full refresh of all 48 snapshots takes ~90 seconds locally. Always do step 3 before pushing — a baseline that fails its own clean run means the page is non-deterministic (animations not fully disabled, fonts still loading, async content) and needs fixing in code, not in the threshold.
 
 ### Test Coverage
 

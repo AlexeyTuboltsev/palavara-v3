@@ -11,3 +11,4 @@ Cancel this booking (always full refund when you cancel):
   {{cancelUrl}}
 
 Reply to this email to contact the booker directly.
+{{impressumText}}

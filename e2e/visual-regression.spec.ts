@@ -63,9 +63,12 @@ for (const route of routes) {
     await expect(page).toHaveScreenshot(`${route.name}.png`, {
       fullPage: true,
       animations: 'disabled',
-      // Allow small differences due to font rendering and anti-aliasing
-      // Images are replaced with gray placeholders in test mode to avoid randomization issues
-      maxDiffPixels: 6100,
+      // Strict budget: only absorb a handful of anti-aliased edge pixels.
+      // Anything larger (a moved element, an added footer, a shifted image)
+      // should fail the test. After an intentional UI change, refresh the
+      // baselines via `rm <snapshots>/*.png && yarn test:visual:update` —
+      // see CLAUDE.md for the gotcha around stale "tolerated" baselines.
+      maxDiffPixels: 5,
     });
   });
 }

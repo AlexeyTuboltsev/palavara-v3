@@ -37,6 +37,26 @@ const OWNER_NOTIFY_ADDRESS = process.env.OWNER_NOTIFY_ADDRESS;
 const LOGO_URL  = 'https://studio.palavara.com/logo.png';
 const STUDIO_URL = 'https://studio.palavara.com/';
 
+// § 5/§ 6 TMG: commercial email must reference an Impressum. Static block
+// appended below the booking-id line in every template. Update both halves
+// in lockstep — text version is what plain-text mail clients render.
+const IMPRESSUM_TEXT =
+  '\n--\nPalavara Studio · Varvara Polyakova\n' +
+  'Steegerstr. 1A, 13359 Berlin · palavarastudio@gmail.com\n' +
+  'Impressum: https://studio.palavara.com/impressum · ' +
+  'AGB: https://studio.palavara.com/agb · ' +
+  'Datenschutz: https://studio.palavara.com/datenschutzerklaerung';
+
+const IMPRESSUM_HTML =
+  '<p style="color:#6b7280; font-size: 11px; line-height: 1.6; margin-top: 16px;">'
+  + 'Palavara Studio · Varvara Polyakova<br/>'
+  + 'Steegerstr. 1A, 13359 Berlin · '
+  + '<a href="mailto:palavarastudio@gmail.com" style="color:#6b7280;">palavarastudio@gmail.com</a><br/>'
+  + '<a href="https://studio.palavara.com/impressum" style="color:#6b7280;">Impressum</a> · '
+  + '<a href="https://studio.palavara.com/agb" style="color:#6b7280;">AGB</a> · '
+  + '<a href="https://studio.palavara.com/datenschutzerklaerung" style="color:#6b7280;">Datenschutzerklärung</a>'
+  + '</p>';
+
 /** Lesson type label snapshotted on the booking row (e.g. "Single lesson",
  *  "Group lesson"). Falls back to "Workshop" for legacy bookings that pre-date
  *  the lesson-types catalog. */
@@ -99,6 +119,8 @@ async function sendBookingConfirmation(booking) {
     priceRowHtml:      showPrice
       ? `<tr><td style="color:#6b7280">Payment</td><td>${escapeHtml(priceLine)}</td></tr>`
       : '',
+    impressumText:     IMPRESSUM_TEXT,
+    impressumHtml:     IMPRESSUM_HTML,
   };
 
   const { subject, text, html } = renderTemplate('booking-student', ctx);
@@ -139,6 +161,8 @@ async function sendOwnerNotification(booking) {
     paymentNoteRowHtml:  note
       ? `<tr><td style="color:#6b7280">Note</td><td>${escapeHtml(note)}</td></tr>`
       : '',
+    impressumText:       IMPRESSUM_TEXT,
+    impressumHtml:       IMPRESSUM_HTML,
   };
 
   let templateName;
@@ -227,6 +251,8 @@ async function sendCancellationConfirmation(booking) {
     refundLine,
     closing,
     closingHtml,
+    impressumText: IMPRESSUM_TEXT,
+    impressumHtml: IMPRESSUM_HTML,
   };
 
   const { subject, text, html } = renderTemplate('cancel-student', ctx);
@@ -270,6 +296,8 @@ async function sendCancellationNotification(booking) {
     logoUrl:      LOGO_URL,
     studioUrl:    STUDIO_URL,
     refundLine,
+    impressumText: IMPRESSUM_TEXT,
+    impressumHtml: IMPRESSUM_HTML,
   };
 
   const { subject, text, html } = renderTemplate('cancel-owner', ctx);

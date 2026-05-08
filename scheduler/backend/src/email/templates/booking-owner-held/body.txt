@@ -5,3 +5,4 @@ A slot has been held in the schedule{{paymentNoteDashed}}.
   Booking ID: {{bookingId}}
 
 A calendar invite is attached to this email.
+{{impressumText}}
