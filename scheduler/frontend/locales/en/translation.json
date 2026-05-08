@@ -1,0 +1,131 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "back": "Back",
+    "close": "Close",
+    "loading": "Loading…",
+    "optional": "(optional)"
+  },
+
+  "page": {
+    "title": "Book a class — Palavara Studio",
+    "confirmTitle": "Booking confirmed — Palavara Studio",
+    "cancelTitle": "Cancel booking — Palavara Studio"
+  },
+
+  "datePicker": {
+    "calendarPrev": "Previous month",
+    "calendarNext": "Next month",
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "ariaWorkshopDates": "Workshop dates",
+    "noDates": "No upcoming workshops.",
+    "noSlotsForDate": "No slots available for this date.",
+    "errorLoading": "Could not load workshop dates. Please refresh the page.",
+    "errorAvailability": "Failed to load availability. Please try again."
+  },
+
+  "form": {
+    "name": {
+      "label": "Name",
+      "placeholder": "Jane Smith"
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "jane@example.com"
+    },
+    "phone": {
+      "label": "Phone",
+      "placeholder": "+49 …"
+    },
+    "lessonType": {
+      "label": "Lesson type",
+      "loading": "Loading…",
+      "noTypes": "No lesson types available",
+      "optionFlat": "{{label}} — {{price}}",
+      "optionPerPerson": "{{label}} — {{price}} / person"
+    },
+    "numPersons": {
+      "label": "For how many people"
+    },
+    "comment": {
+      "label": "Comment",
+      "placeholder": "Anything we should know?"
+    },
+    "submitWithPrice": "Pay with PayPal — {{price}}",
+    "submitting": "Creating your booking…",
+    "errors": {
+      "nameLength": "Please enter your full name (2 to 99 characters).",
+      "emailFormat": "Please enter a valid email address.",
+      "commentLength": "Comment must be 500 characters or fewer.",
+      "missingSlot": "Missing date or time slot. Please go back and select again.",
+      "noPaymentUrl": "No payment URL returned. Please try again.",
+      "generic": "Failed to create booking. Please try again."
+    }
+  },
+
+  "confirm": {
+    "verifying": "Verifying your payment…",
+    "title": "You're booked",
+    "messageWithLabel": "Your {{lessonLabel}} is confirmed. See you there.",
+    "emailNote": "A confirmation email is on its way to your inbox.",
+    "bookAnother": "Book another lesson",
+    "details": {
+      "lessonType": "Lesson type",
+      "date": "Date",
+      "time": "Time",
+      "paid": "Paid",
+      "bookingId": "Booking ID"
+    },
+    "personsSuffix_one": "{{count}} person",
+    "personsSuffix_other": "{{count}} people",
+    "errors": {
+      "noBookingId": "No booking ID found in the URL. Did you come from a PayPal payment?",
+      "lookupFailed": "Unable to look up your booking.",
+      "verifyFailed": "Unable to verify your booking. Please contact support."
+    }
+  },
+
+  "pending": {
+    "title": "Payment pending",
+    "bookingIdLabel": "Booking ID:",
+    "refresh": "Refresh status"
+  },
+
+  "errorCard": {
+    "title": "Something went wrong",
+    "backToCalendar": "Back to calendar"
+  },
+
+  "cancel": {
+    "loadingBooking": "Loading your booking…",
+    "promptTitle": "Cancel this booking?",
+    "keepBooking": "Keep booking",
+    "confirmCancel": "Yes, cancel my booking",
+    "cancelling": "Cancelling…",
+    "refundEligible": "This is more than 48 hours before the workshop, so you will receive a full refund.",
+    "refundLate": "This is within 48 hours of the workshop. Per the cancellation policy, no refund will be issued, but the slot will be released.",
+    "alreadyCancelledTitle": "Booking cancelled",
+    "alreadyCancelled": "This booking was already cancelled.",
+    "cancelledTitle": "Booking cancelled",
+    "cancelledMessageRefunded": "Your booking has been cancelled and {{amount}} has been refunded to your PayPal account.",
+    "cancelledMessage": "Your booking has been cancelled. No refund per the >48h policy.",
+    "emailNote": "A confirmation has been sent to your email.",
+    "bookAnother": "Book another lesson",
+    "errors": {
+      "missingParams": "This cancellation link is missing required information. Please use the link from your confirmation email.",
+      "loadFailed": "Could not load this booking.",
+      "wrongStatus": "This booking can't be cancelled — it has status \"{{status}}\".",
+      "cancelFailed": "Cancellation failed. Please try again or email palavarastudio@gmail.com.",
+      "generic": "We couldn't process this cancellation."
+    },
+    "back": "Back to bookings"
+  }
+}

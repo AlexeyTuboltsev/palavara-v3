@@ -10,6 +10,8 @@
  * Refund eligibility is decided server-side. The page only computes a
  * provisional indication for the prompt — the server's response is what
  * determines whether the refund actually happened.
+ *
+ * All visible strings come from i18next; init runs from `window.boot()`.
  */
 
 'use strict';
@@ -17,6 +19,8 @@
 const API_BASE = window.SCHEDULER_CONFIG?.API_BASE_URL || '';
 
 const REFUND_WINDOW_MS = 48 * 60 * 60 * 1000;
+
+const t = (...args) => window.i18next ? window.i18next.t(...args) : args[0];
 
 const stepLoading    = document.getElementById('step-loading');
 const stepConfirm    = document.getElementById('step-confirm');
@@ -39,13 +43,18 @@ function showStep(step) {
 }
 
 function showError(msg) {
-  errorMsg.textContent = msg || 'We couldn\'t process this cancellation.';
+  errorMsg.textContent = msg || t('cancel.errors.generic');
   showStep(stepError);
 }
 
+function uiLocale() {
+  return (window.i18next && window.i18next.resolvedLanguage) || 'en';
+}
+
 function formatDate(isoDate) {
-  const d = new Date(isoDate + 'T12:00:00Z');
-  return d.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString(uiLocale(), {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
 }
 
 function formatRange(start, end) {
@@ -54,10 +63,27 @@ function formatRange(start, end) {
 
 function isLikelyRefundEligible(booking) {
   if (!booking?.date || !booking?.timeSlot) return false;
-  // Berlin local + CEST in May is UTC+2; this is a UI-side estimate only.
   const startMs = Date.parse(`${booking.date}T${booking.timeSlot}:00+02:00`);
   if (isNaN(startMs)) return false;
   return startMs - Date.now() > REFUND_WINDOW_MS;
+}
+
+function renderBookingDetails(booking) {
+  const price = `€${((booking.amountCents || 0) / 100).toFixed(2)}`;
+  const baseLabel = booking.lessonTypeLabel || 'Workshop';
+  const detailsLabel = booking.numPersons && booking.numPersons > 1
+    ? `${baseLabel} · ${t('confirm.personsSuffix', { count: booking.numPersons })}`
+    : baseLabel;
+
+  const rows = [
+    { label: t('confirm.details.lessonType'), value: detailsLabel },
+    { label: t('confirm.details.date'),       value: formatDate(booking.date) },
+    { label: t('confirm.details.time'),       value: formatRange(booking.timeSlot, booking.slotEnd) },
+    { label: t('confirm.details.paid'),       value: price },
+  ];
+  bookingDetails.innerHTML = rows.map((r) =>
+    `<div class="confirm-row"><span class="label">${r.label}</span><span class="value">${r.value}</span></div>`
+  ).join('');
 }
 
 async function init() {
@@ -66,7 +92,7 @@ async function init() {
   const token     = params.get('token');
 
   if (!bookingId || !token) {
-    showError('This cancellation link is missing required information. Please use the link from your confirmation email.');
+    showError(t('cancel.errors.missingParams'));
     return;
   }
 
@@ -79,31 +105,27 @@ async function init() {
     }
     booking = await res.json();
   } catch (err) {
-    showError(err.message || 'Could not load this booking.');
+    showError(err.message || t('cancel.errors.loadFailed'));
     return;
   }
 
   if (booking.status === 'cancelled') {
-    cancelledMessage.textContent = 'This booking was already cancelled.';
+    cancelledMessage.textContent = t('cancel.alreadyCancelled');
     showStep(stepCancelled);
     return;
   }
   if (booking.status !== 'confirmed') {
-    showError(`This booking can't be cancelled — it has status "${booking.status}".`);
+    showError(t('cancel.errors.wrongStatus', { status: booking.status }));
     return;
   }
 
-  bookingDetails.innerHTML = `
-    ${formatDate(booking.date)}
-    &nbsp;·&nbsp; ${formatRange(booking.timeSlot, booking.slotEnd)}
-    &nbsp;·&nbsp; €${(booking.amountCents / 100).toFixed(2)}
-  `;
+  renderBookingDetails(booking);
 
   if (isLikelyRefundEligible(booking)) {
-    refundNotice.textContent = 'This is more than 48 hours before the workshop, so you will receive a full refund.';
+    refundNotice.textContent = t('cancel.refundEligible');
     refundNotice.classList.add('refund-eligible');
   } else {
-    refundNotice.textContent = 'This is within 48 hours of the workshop. Per the cancellation policy, no refund will be issued, but the slot will be released.';
+    refundNotice.textContent = t('cancel.refundLate');
     refundNotice.classList.add('refund-late');
   }
 
@@ -125,13 +147,15 @@ async function doCancel(bookingId, token) {
 
     const refunded = (body.refundedAmountCents || 0) > 0;
     cancelledMessage.textContent = refunded
-      ? `Your booking has been cancelled and €${(body.refundedAmountCents / 100).toFixed(2)} has been refunded to your PayPal account.`
-      : 'Your booking has been cancelled. No refund per the >48h policy.';
+      ? t('cancel.cancelledMessageRefunded', {
+          amount: `€${(body.refundedAmountCents / 100).toFixed(2)}`,
+        })
+      : t('cancel.cancelledMessage');
 
     showStep(stepCancelled);
   } catch (err) {
-    showError(err.message || 'Cancellation failed. Please try again or email palavarastudio@gmail.com.');
+    showError(err.message || t('cancel.errors.cancelFailed'));
   }
 }
 
-init();
+window.boot = init;
