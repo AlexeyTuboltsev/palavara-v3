@@ -125,16 +125,16 @@ async function sendBookingConfirmation(booking) {
 
   const { subject, text, html } = renderTemplate('booking-student', ctx);
 
+  // No .ics attachment for students — adds clutter and most clients
+  // already have the booking on their calendar via PayPal/Google.
   return sendWithIcs({
-    to:          booking.studentEmail,
+    to:        booking.studentEmail,
     subject,
     text,
     html,
-    icsContent:  buildIcs(booking, { fromAddress: FROM_ADDRESS }),
-    icsFilename: 'workshop.ics',
-    replyTo:     REPLY_TO,
-    logTag:      'student',
-    bookingId:   booking.bookingId,
+    replyTo:   REPLY_TO,
+    logTag:    'student',
+    bookingId: booking.bookingId,
   });
 }
 
@@ -257,17 +257,15 @@ async function sendCancellationConfirmation(booking) {
 
   const { subject, text, html } = renderTemplate('cancel-student', ctx);
 
+  // No .ics attachment — see sendBookingConfirmation.
   return sendWithIcs({
-    to:          booking.studentEmail,
+    to:        booking.studentEmail,
     subject,
     text,
     html,
-    icsContent:  buildIcs(booking, { method: 'CANCEL', fromAddress: FROM_ADDRESS }),
-    icsFilename: 'workshop-cancelled.ics',
-    icsMethod:   'CANCEL',
-    replyTo:     REPLY_TO,
-    logTag:      'student-cancel',
-    bookingId:   booking.bookingId,
+    replyTo:   REPLY_TO,
+    logTag:    'student-cancel',
+    bookingId: booking.bookingId,
   });
 }
 

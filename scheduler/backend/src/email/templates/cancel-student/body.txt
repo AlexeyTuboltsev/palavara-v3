@@ -9,8 +9,6 @@ Hi {{studentName}},
 
 {{closing}}
 
-A calendar update is attached so the event is removed from your calendar.
-
 Palavara Studio
 
 ---

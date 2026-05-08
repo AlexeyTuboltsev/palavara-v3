@@ -1,8 +1,11 @@
 'use strict';
 
 /**
- * Low-level SES sender. Builds a multipart/mixed Raw MIME message so
- * we can attach an .ics calendar file alongside the text+html body.
+ * Low-level SES sender. Builds a multipart/mixed Raw MIME message
+ * carrying a text+html body and (optionally) an .ics calendar
+ * attachment. Pass `icsContent: undefined` to skip the attachment —
+ * student-facing emails do this since clients almost always already
+ * have the booking on a calendar via PayPal/Google.
  *
  * Failures are logged but never throw. The booking is the source of
  * truth in DynamoDB; email is best-effort.
@@ -44,7 +47,7 @@ async function sendWithIcs({
     `Content-Type: multipart/mixed; boundary="${boundary}"`,
   ].filter(Boolean).join('\r\n');
 
-  const body = [
+  const bodyParts = [
     `--${boundary}`,
     `Content-Type: multipart/alternative; boundary="${altBoundary}"`,
     '',
@@ -62,15 +65,21 @@ async function sendWithIcs({
     '',
     `--${altBoundary}--`,
     '',
-    `--${boundary}`,
-    `Content-Type: text/calendar; method=${icsMethod}; charset=UTF-8; name="${icsFilename}"`,
-    `Content-Disposition: attachment; filename="${icsFilename}"`,
-    'Content-Transfer-Encoding: 8bit',
-    '',
-    icsContent,
-    `--${boundary}--`,
-    '',
-  ].join('\r\n');
+  ];
+
+  if (icsContent) {
+    bodyParts.push(
+      `--${boundary}`,
+      `Content-Type: text/calendar; method=${icsMethod}; charset=UTF-8; name="${icsFilename}"`,
+      `Content-Disposition: attachment; filename="${icsFilename}"`,
+      'Content-Transfer-Encoding: 8bit',
+      '',
+      icsContent,
+    );
+  }
+
+  bodyParts.push(`--${boundary}--`, '');
+  const body = bodyParts.join('\r\n');
 
   const rawMessage = headers + '\r\n\r\n' + body;
 
