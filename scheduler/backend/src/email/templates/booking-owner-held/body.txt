@@ -1,0 +1,8 @@
+A slot has been held in the schedule{{paymentNoteDashed}}.
+
+  Date:       {{dateLine}}
+  Time:       {{timeLine}}{{paymentNoteIndented}}
+  Booking ID: {{bookingId}}
+
+Add to Google Calendar: {{gcalUrl}}
+A calendar invite is also attached to this email.

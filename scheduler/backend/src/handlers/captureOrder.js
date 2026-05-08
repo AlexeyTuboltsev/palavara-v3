@@ -20,7 +20,7 @@ const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, notFound, serverError } = require('../utils/response');
 const { captureOrder } = require('../utils/paypal');
-const { sendBookingConfirmation, sendOwnerNotification } = require('../utils/email');
+const { sendBookingConfirmation, sendOwnerNotification } = require('../email');
 const { insertBookingEvent } = require('../utils/googleCalendar');
 
 const TABLE = process.env.BOOKINGS_TABLE;
