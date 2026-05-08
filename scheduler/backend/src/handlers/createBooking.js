@@ -3,14 +3,29 @@
 /**
  * POST /bookings
  *
- * Body (JSON): { date, start, studentName, studentEmail }
+ * Body (JSON): {
+ *   date, start, studentName, studentEmail,
+ *   lessonType, numPersons,
+ *   studentPhone?, comment?
+ * }
+ *
+ *   - lessonType is the id of a row in palavara-lesson-types
+ *     (e.g. "single", "group"). Required.
+ *   - numPersons must fall inside that lesson type's [minPersons, maxPersons]
+ *     range. Optional for fixed types where min==max.
+ *   - studentPhone and comment are free-form, optional, capped server-side.
  *
  * 1. Validates input and that the slot exists for the chosen date.
- * 2. Confirms the slot is still free (best-effort — see TOCTOU note below).
- * 3. Creates a PayPal Order (Orders v2 REST, intent CAPTURE).
- * 4. Writes a `pending` booking to DynamoDB carrying the order id and the
- *    slot's start + end times.
- * 5. Returns { bookingId, approveUrl } — frontend redirects user to approveUrl.
+ * 2. Looks up the lesson type and computes amountCents server-side
+ *    (pricePerPersonCents × numPersons). Client-supplied amount is ignored.
+ * 3. Confirms the slot is still free (best-effort — see TOCTOU note below).
+ * 4. Creates a PayPal Order (Orders v2 REST, intent CAPTURE) with the
+ *    server-computed amount.
+ * 5. Writes a `pending` booking to DynamoDB carrying the order id, the
+ *    slot's start + end times, and a snapshot of the lesson-type fields
+ *    so the booking row stays meaningful even if the type is later edited
+ *    or archived.
+ * 6. Returns { bookingId, approveUrl } — frontend redirects user to approveUrl.
  *
  * Note on race conditions: two concurrent requests for the same date+start
  * can both pass the availability query and both insert. For an MVP studio
@@ -22,14 +37,17 @@ const { PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, serverError } = require('../utils/response');
 const { findSlot, isValidDateString } = require('../utils/slots');
+const { resolveLessonTypeAndPrice } = require('../utils/lessonTypes');
 const { createOrder } = require('../utils/paypal');
 const { v4: uuidv4 } = require('uuid');
 
 const TABLE             = process.env.BOOKINGS_TABLE;
 const PAYPAL_RETURN_URL = process.env.PAYPAL_RETURN_URL;
 const PAYPAL_CANCEL_URL = process.env.PAYPAL_CANCEL_URL;
-const PRICE_CENTS       = parseInt(process.env.PRICE_CENTS || '9500', 10);
 const PRICE_CURRENCY    = process.env.PRICE_CURRENCY || 'EUR';
+
+const MAX_PHONE_CHARS   = 30;
+const MAX_COMMENT_CHARS = 500;
 
 exports.handler = async (event) => {
   try {
@@ -40,7 +58,16 @@ exports.handler = async (event) => {
       return badRequest('Invalid JSON body');
     }
 
-    const { date, start, studentName, studentEmail } = body;
+    const {
+      date,
+      start,
+      studentName,
+      studentEmail,
+      studentPhone,
+      lessonType,
+      numPersons,
+      comment,
+    } = body;
 
     // ── Validate inputs ──────────────────────────────────────────────────────
     if (!date || !start || !studentName || !studentEmail) {
@@ -58,9 +85,22 @@ exports.handler = async (event) => {
     if (!studentEmail.includes('@')) {
       return badRequest('Invalid email address');
     }
-    if (studentName.trim().length < 2) {
-      return badRequest('Name must be at least 2 characters');
+    if (studentName.trim().length < 2 || studentName.trim().length > 99) {
+      return badRequest('Name must be between 2 and 99 characters');
     }
+
+    // ── Resolve lesson type and compute server-trusted amount ────────────────
+    const priced = await resolveLessonTypeAndPrice({ lessonTypeId: lessonType, numPersons });
+    if (!priced.ok) return badRequest(priced.error);
+    const { type: lessonTypeRow, numPersons: persons, amountCents } = priced;
+
+    // ── Cap free-form fields ─────────────────────────────────────────────────
+    const trimmedPhone = typeof studentPhone === 'string'
+      ? studentPhone.trim().slice(0, MAX_PHONE_CHARS)
+      : '';
+    const trimmedComment = typeof comment === 'string'
+      ? comment.trim().slice(0, MAX_COMMENT_CHARS)
+      : '';
 
     // ── Check slot availability ──────────────────────────────────────────────
     const existing = await ddb.send(new QueryCommand({
@@ -90,13 +130,16 @@ exports.handler = async (event) => {
 
     const { orderId, approveUrl } = await createOrder({
       bookingId,
-      amountCents: PRICE_CENTS,
+      amountCents,
       currency:    PRICE_CURRENCY,
       returnUrl,
       cancelUrl,
     });
 
     // ── Persist booking ──────────────────────────────────────────────────────
+    // Lesson-type fields are snapshotted (id + label + per-person price)
+    // so historical bookings stay meaningful if the catalog row is later
+    // edited or archived.
     const now = new Date().toISOString();
     const item = {
       PK:            `BOOKING#${bookingId}`,
@@ -110,9 +153,15 @@ exports.handler = async (event) => {
       studentName:   studentName.trim(),
       studentEmail:  studentEmail.trim().toLowerCase(),
       paypalOrderId: orderId,
-      amountCents:   PRICE_CENTS,
+      amountCents,
+      lessonTypeId:        lessonTypeRow.id,
+      lessonTypeLabel:     lessonTypeRow.label,
+      pricePerPersonCents: lessonTypeRow.pricePerPersonCents,
+      numPersons:          persons,
       createdAt:     now,
     };
+    if (trimmedPhone)   item.studentPhone = trimmedPhone;
+    if (trimmedComment) item.comment      = trimmedComment;
 
     await ddb.send(new PutCommand({
       TableName: TABLE,

@@ -43,11 +43,21 @@ function formatSlotRange(start, end) {
 }
 
 function renderConfirmedDetails(booking) {
+  const price = `€${((booking.amountCents || 0) / 100).toFixed(2)}`;
+  // Compose a human label for the lesson type. Falls back to '—' if the
+  // backend hasn't stored it yet.
+  let lessonLabel = '—';
+  if (booking.lessonTypeLabel) {
+    lessonLabel = booking.numPersons && booking.numPersons > 1
+      ? `${booking.lessonTypeLabel} · ${booking.numPersons} people`
+      : booking.lessonTypeLabel;
+  }
   confirmDetails.innerHTML = `
-    ${formatDate(booking.date)}
-    &nbsp;·&nbsp; ${formatSlotRange(booking.timeSlot, booking.slotEnd)}
-    &nbsp;·&nbsp; €${(booking.amountCents / 100).toFixed(2)}
-    <br/><small style="color:#6b7280">Booking ID: ${booking.bookingId}</small>
+    <div class="confirm-row"><span class="label">Lesson type</span><span class="value">${lessonLabel}</span></div>
+    <div class="confirm-row"><span class="label">Date</span><span class="value">${formatDate(booking.date)}</span></div>
+    <div class="confirm-row"><span class="label">Time</span><span class="value">${formatSlotRange(booking.timeSlot, booking.slotEnd)}</span></div>
+    <div class="confirm-row"><span class="label">Paid</span><span class="value">${price}</span></div>
+    <div class="confirm-row"><span class="label">Booking ID</span><span class="value"><code>${booking.bookingId}</code></span></div>
   `;
 }
 
@@ -88,6 +98,32 @@ async function pollUntilConfirmed(bookingId, maxAttempts = 8, intervalMs = 2000)
 async function init() {
   const params = new URLSearchParams(window.location.search);
   const bookingId = params.get('bookingId');
+
+  // Preview mode: ?preview=confirmed | pending | error — skips the API
+  // call and renders the corresponding state with mock data. Useful for
+  // designing the page without making a real booking.
+  const preview = params.get('preview');
+  if (preview) {
+    if (preview === 'confirmed') {
+      renderConfirmedDetails({
+        bookingId: 'preview-0000-0000-0000-aaaa',
+        date: '2026-05-22',
+        timeSlot: '14:00',
+        slotEnd: '16:00',
+        amountCents: 9500,
+        lessonTypeLabel: 'Single lesson',
+        numPersons: 1,
+      });
+      showStep(stepConfirmed);
+    } else if (preview === 'pending') {
+      pendingBookingId.textContent = 'preview-0000-0000-0000-aaaa';
+      showStep(stepPending);
+    } else {
+      errorMsg.textContent = 'Preview: an example error message would appear here.';
+      showStep(stepError);
+    }
+    return;
+  }
 
   if (!bookingId) {
     showStep(stepError);
