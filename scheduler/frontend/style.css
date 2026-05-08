@@ -106,13 +106,13 @@ body {
 }
 
 /* Legal footer (Impressum / AGB / Datenschutz) — points at studio.palavara.com.
-   Kept identical on mobile per design. § 5 TMG: legal links must be reachable
-   from every page that collects PII or triggers payment. */
+   Mirrors the studio-site SiteFooter styling. § 5 TMG: legal links must be
+   reachable from every page that collects PII or triggers payment. */
 .site-footer {
   display: flex;
   justify-content: space-between;
-  padding: 8px 16px;
-  font-size: 10px;
+  padding: 1px 16px;
+  font-size: 7px;
   flex-shrink: 0;
 }
 .site-footer a {
@@ -120,6 +120,13 @@ body {
   text-decoration: none;
 }
 .site-footer a:hover { color: rgba(0, 0, 0, 0.8); }
+@media (max-width: 600px) {
+  .site-footer {
+    justify-content: flex-end;
+    gap: 12px;
+    font-size: 8px;
+  }
+}
 
 .booking-container {
   flex: 1;
