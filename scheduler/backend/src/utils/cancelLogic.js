@@ -17,7 +17,7 @@ const { refundCapture } = require('./paypal');
 const {
   sendCancellationConfirmation,
   sendCancellationNotification,
-} = require('./email');
+} = require('../email');
 const { deleteBookingEvent } = require('./googleCalendar');
 
 const TABLE          = process.env.BOOKINGS_TABLE;

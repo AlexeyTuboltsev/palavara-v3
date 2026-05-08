@@ -1,0 +1,14 @@
+A new wheel-throwing workshop booking has been confirmed.
+
+  Booker:     {{studentName}} <{{studentEmail}}>
+  Date:       {{dateLine}}
+  Time:       {{timeLine}}{{priceLineIndented}}{{paymentNoteIndented}}
+  Booking ID: {{bookingId}}
+
+Add to Google Calendar: {{gcalUrl}}
+A calendar invite is also attached to this email.
+
+Cancel this booking (always full refund when you cancel):
+  {{cancelUrl}}
+
+Reply to this email to contact the booker directly.
