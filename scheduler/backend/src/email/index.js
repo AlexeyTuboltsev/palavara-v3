@@ -31,6 +31,13 @@ const { renderTemplate } = require('./render');
 const REPLY_TO             = process.env.SES_REPLY_TO;
 const OWNER_NOTIFY_ADDRESS = process.env.OWNER_NOTIFY_ADDRESS;
 
+/** Lesson type label snapshotted on the booking row (e.g. "Single lesson",
+ *  "Group lesson"). Falls back to "Workshop" for legacy bookings that pre-date
+ *  the lesson-types catalog. */
+function lessonLabelOf(booking) {
+  return booking.lessonTypeLabel || 'Workshop';
+}
+
 // ── Booking confirmations ─────────────────────────────────────────────────
 
 async function sendBookingConfirmation(booking) {
@@ -46,6 +53,7 @@ async function sendBookingConfirmation(booking) {
   const priceLine = priceLineText(booking);
   const showPrice = (booking.amountCents ?? 0) > 0;
 
+  const lessonLabel = lessonLabelOf(booking);
   const ctx = {
     studentName:       booking.studentName,
     dateLine,
@@ -54,6 +62,8 @@ async function sendBookingConfirmation(booking) {
     gcalUrl:           buildGoogleCalendarUrl(booking),
     cancelUrl:         buildCancelUrl(booking),
     bookingId:         booking.bookingId,
+    lessonLabel,
+    lessonLabelLower:  lessonLabel.toLowerCase(),
     priceLineIndented: showPrice ? `\n  ${priceLine}` : '',
     priceRowHtml:      showPrice
       ? `<tr><td style="color:#6b7280">Payment</td><td>${escapeHtml(priceLine)}</td></tr>`
@@ -111,11 +121,14 @@ async function sendOwnerNotification(booking) {
     };
   } else {
     templateName = 'booking-owner-student';
+    const lessonLabel = lessonLabelOf(booking);
     ctx = {
       ...sharedCtx,
       studentName:       booking.studentName,
       studentEmail:      booking.studentEmail,
       cancelUrl:         buildCancelUrl(booking),
+      lessonLabel,
+      lessonLabelLower:  lessonLabel.toLowerCase(),
       priceLineIndented: showPrice ? `\n  ${priceLine}` : '',
       priceRowHtml:      showPrice
         ? `<tr><td style="color:#6b7280">Payment</td><td>${escapeHtml(priceLine)}</td></tr>`
@@ -154,9 +167,10 @@ async function sendCancellationConfirmation(booking) {
     : 'No refund per the >48h policy. The slot has been released for other bookings.';
 
   const cancelledByStudio = booking.cancelledBy === 'studio';
+  const lessonLabelLower  = lessonLabelOf(booking).toLowerCase();
   const lead = cancelledByStudio
-    ? 'Your wheel-throwing workshop has been cancelled by the studio.'
-    : 'Your wheel-throwing workshop has been cancelled.';
+    ? `Your ${lessonLabelLower} has been cancelled by the studio.`
+    : `Your ${lessonLabelLower} has been cancelled.`;
   const closing = cancelledByStudio
     ? "We apologise for the inconvenience. Reply to this email if you'd like to rebook."
     : 'You can book another workshop at https://book.palavara.com/ whenever you like.';

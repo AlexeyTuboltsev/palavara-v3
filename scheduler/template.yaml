@@ -19,7 +19,7 @@ Globals:
         PAYPAL_RETURN_URL: !Ref PayPalReturnUrl
         PAYPAL_CANCEL_URL: !Ref PayPalCancelUrl
         PAYPAL_WEBHOOK_ID: !Ref PayPalWebhookId
-        PRICE_CENTS: "9500"                   # €95.00 — wheel-throwing workshop
+        PRICE_CENTS: "9500"                   # legacy fallback only — real price now per-lesson-type
         PRICE_CURRENCY: "EUR"
         SES_FROM_ADDRESS: !Ref SesFromAddress
         SES_REPLY_TO: !Ref SesReplyTo

@@ -112,9 +112,10 @@ function foldIcsLines(text) {
  */
 function buildIcs(booking, { method = 'REQUEST', fromAddress } = {}) {
   const isHeld = booking.bookingType === 'held';
+  const lessonLabel = booking.lessonTypeLabel || 'Workshop';
   const summary = isHeld
     ? `Slot held — ${booking.paymentNote || 'studio reservation'}`
-    : `Wheel-throwing workshop — ${booking.studentName}`;
+    : `${lessonLabel} — ${booking.studentName}`;
   const descLines = isHeld
     ? [
         booking.paymentNote ? `Note: ${booking.paymentNote}` : 'Held by studio',
@@ -154,7 +155,8 @@ function buildIcs(booking, { method = 'REQUEST', fromAddress } = {}) {
 }
 
 function buildGoogleCalendarUrl(booking) {
-  const summary = `Wheel-throwing workshop — ${booking.studentName}`;
+  const lessonLabel = booking.lessonTypeLabel || 'Workshop';
+  const summary = `${lessonLabel} — ${booking.studentName}`;
   const start = icsLocalStamp(booking.date, booking.timeSlot);
   const end   = icsLocalStamp(booking.date, booking.slotEnd);
   const details = [

@@ -44,21 +44,23 @@ function formatSlotRange(start, end) {
 
 function renderConfirmedDetails(booking) {
   const price = `€${((booking.amountCents || 0) / 100).toFixed(2)}`;
-  // Compose a human label for the lesson type. Falls back to '—' if the
-  // backend hasn't stored it yet.
-  let lessonLabel = '—';
-  if (booking.lessonTypeLabel) {
-    lessonLabel = booking.numPersons && booking.numPersons > 1
-      ? `${booking.lessonTypeLabel} · ${booking.numPersons} people`
-      : booking.lessonTypeLabel;
-  }
+  // Lesson label snapshotted on the booking row. Falls back to "Workshop"
+  // for legacy bookings that pre-date the lesson-types catalog.
+  const baseLabel = booking.lessonTypeLabel || 'Workshop';
+  const detailsLabel = booking.numPersons && booking.numPersons > 1
+    ? `${baseLabel} · ${booking.numPersons} people`
+    : baseLabel;
   confirmDetails.innerHTML = `
-    <div class="confirm-row"><span class="label">Lesson type</span><span class="value">${lessonLabel}</span></div>
+    <div class="confirm-row"><span class="label">Lesson type</span><span class="value">${detailsLabel}</span></div>
     <div class="confirm-row"><span class="label">Date</span><span class="value">${formatDate(booking.date)}</span></div>
     <div class="confirm-row"><span class="label">Time</span><span class="value">${formatSlotRange(booking.timeSlot, booking.slotEnd)}</span></div>
     <div class="confirm-row"><span class="label">Paid</span><span class="value">${price}</span></div>
     <div class="confirm-row"><span class="label">Booking ID</span><span class="value"><code>${booking.bookingId}</code></span></div>
   `;
+
+  // Inject the lesson label into the confirmation message paragraph too.
+  const headerLabel = document.getElementById('confirmLessonLabel');
+  if (headerLabel) headerLabel.textContent = baseLabel.toLowerCase();
 }
 
 async function captureBooking(bookingId) {
