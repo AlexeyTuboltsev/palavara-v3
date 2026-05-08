@@ -32,9 +32,9 @@ const REPLY_TO             = process.env.SES_REPLY_TO;
 const OWNER_NOTIFY_ADDRESS = process.env.OWNER_NOTIFY_ADDRESS;
 
 // PNG (not SVG) is the only format Gmail / Outlook / Apple Mail
-// universally render in <img> tags — using the studio site's existing
-// 192-px favicon keeps the email branded without a separate asset.
-const LOGO_URL  = 'https://studio.palavara.com/favicon/favicon-192x192.png';
+// universally render in <img> tags. Source SVG: scheduler/frontend/logo.svg;
+// rasterized copy lives at public/logo.png and ships with the studio site.
+const LOGO_URL  = 'https://studio.palavara.com/logo.png';
 const STUDIO_URL = 'https://studio.palavara.com/';
 
 // § 5/§ 6 TMG: commercial email must reference an Impressum. Static block
