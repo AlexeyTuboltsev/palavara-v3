@@ -5,7 +5,6 @@ import { sectionMenu } from "../common/sectionMenu";
 import { fork, put } from "redux-saga/effects";
 import { setAppState } from "../../store";
 import { actionListenerLoop, imageChanger, screenResize, toggleMobileMenu, toggleSubmenu } from "../../sagas/uiSaga";
-import { actions } from "../../actions";
 import { TResizeEventPayload } from "../../services/resizeObserver";
 import { EScreenSize, screenSize } from "../common/screenSize";
 import { createImageState } from "../common/imageState";
@@ -36,6 +35,5 @@ export function* familySaturday(screenDimensions: TResizeEventPayload): Generato
     ...imageChanger(urls),
     ...toggleMobileMenu
   })
-  yield put(actions.nextImage())
 }
 
