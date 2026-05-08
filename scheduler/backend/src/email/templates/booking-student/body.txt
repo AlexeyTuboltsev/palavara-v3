@@ -1,6 +1,6 @@
 Hi {{studentName}},
 
-Your wheel-throwing workshop is confirmed.
+Your {{lessonLabelLower}} is confirmed.
 
   Date:     {{dateLine}}
   Time:     {{timeLine}}{{priceLineIndented}}

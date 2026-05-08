@@ -1,1 +1,1 @@
-Your wheel-throwing workshop is confirmed — Palavara Studio
+Your {{lessonLabelLower}} is confirmed — Palavara Studio

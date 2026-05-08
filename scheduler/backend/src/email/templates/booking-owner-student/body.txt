@@ -1,4 +1,4 @@
-A new wheel-throwing workshop booking has been confirmed.
+A new {{lessonLabelLower}} booking has been confirmed.
 
   Booker:     {{studentName}} <{{studentEmail}}>
   Date:       {{dateLine}}

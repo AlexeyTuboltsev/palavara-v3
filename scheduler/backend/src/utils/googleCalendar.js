@@ -195,9 +195,10 @@ async function insertBookingEvent(booking) {
     const eventId = eventIdFromBookingId(booking.bookingId);
 
     const isHeld = booking.bookingType === 'held';
+    const lessonLabel = booking.lessonTypeLabel || 'Workshop';
     const summary = isHeld
         ? `Slot held — ${booking.paymentNote || 'studio reservation'}`
-        : `Wheel-throwing workshop — ${booking.studentName || ''}`.trim();
+        : `${lessonLabel} — ${booking.studentName || ''}`.trim();
 
     const description = isHeld
         ? [
