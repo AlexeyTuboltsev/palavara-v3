@@ -1,0 +1,47 @@
+name: Deploy Booking Frontend
+
+# Deploys the static booking page (book.palavara.com) — vanilla HTML, CSS,
+# JS in scheduler/frontend/. The backend (Lambdas, API Gateway, DynamoDB)
+# is deployed separately by deploy-scheduler.yml.
+#
+# Manual trigger only. The bucket lives in us-east-1 even though the
+# scheduler stack is in eu-central-1, because the CloudFront origin sits
+# closest to the PayPal sandbox / live endpoints used during checkout.
+
+on:
+  workflow_dispatch:
+
+env:
+  S3_BUCKET: book.palavara.com
+  CLOUDFRONT_DISTRIBUTION_ID: E3CD29F4JHZ6ED
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sync to S3
+        # Short cache (5 min) so users see new deploys quickly even if
+        # the CloudFront invalidation takes a moment to propagate. The
+        # site is small (~110 KB total) — no win from longer caching.
+        run: |
+          aws s3 sync scheduler/frontend/ "s3://${S3_BUCKET}/" \
+            --delete \
+            --cache-control "public, max-age=300"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
+            --paths "/*"
