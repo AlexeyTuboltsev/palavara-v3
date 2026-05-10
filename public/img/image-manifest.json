@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2026-01-30T13:26:44.436Z",
+  "generated": "2026-05-10T00:07:22.028Z",
   "images": {
     "home-7.jpg": {
       "original": {
@@ -304,31 +304,31 @@
     },
     "09-01.jpg": {
       "original": {
-        "width": 2396,
-        "height": 1804,
-        "size": 340527,
+        "width": 2048,
+        "height": 1150,
+        "size": 238330,
         "format": "jpeg"
       },
       "optimized": {
         "width": 1920,
-        "height": 1446,
+        "height": 1078,
         "jpeg": {
           "path": "09-01.jpg",
-          "size": 346830
+          "size": 290860
         },
         "webp": {
           "path": "09-01.webp",
-          "size": 166940
+          "size": 141846
         },
         "avif": {
           "path": "09-01.avif",
-          "size": 148846
+          "size": 134359
         }
       },
       "lqip": {
         "width": 10,
-        "height": 8,
-        "base64": "data:image/jpeg;base64,/9j/2wBDABsSFBcUERsXFhceHBsgKEIrKCUlKFE6PTBCYFVlZF9VXVtqeJmBanGQc1tdhbWGkJ6jq62rZ4C8ybqmx5moq6T/2wBDARweHigjKE4rK06kbl1upKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKT/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAT/xAAcEAEAAgIDAQAAAAAAAAAAAAABAAMCBBETQSH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABURAQEAAAAAAAAAAAAAAAAAAAAR/9oADAMBAAIRAxEAPwCmim013uryM8eVA88lBrnB8YiWD//Z",
+        "height": 6,
+        "base64": "data:image/jpeg;base64,/9j/2wBDABsSFBcUERsXFhceHBsgKEIrKCUlKFE6PTBCYFVlZF9VXVtqeJmBanGQc1tdhbWGkJ6jq62rZ4C8ybqmx5moq6T/2wBDARweHigjKE4rK06kbl1upKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKT/wAARCAAGAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAT/xAAbEAACAgMBAAAAAAAAAAAAAAABAgASAwQRIf/EABQBAQAAAAAAAAAAAAAAAAAAAAL/xAAVEQEBAAAAAAAAAAAAAAAAAAAAEf/aAAwDAQACEQMRAD8AoUV1QzKGYKLHsoVcTKDU+jsRCUf/2Q==",
         "path": "09-01.lqip.jpg"
       }
     },
