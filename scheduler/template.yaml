@@ -45,11 +45,11 @@ Parameters:
     Description: PayPal REST app Client Secret
   PayPalApiBase:
     Type: String
-    Default: https://api-m.sandbox.paypal.com
+    Default: https://api-m.paypal.com
     AllowedValues:
       - https://api-m.sandbox.paypal.com
       - https://api-m.paypal.com
-    Description: PayPal REST API base URL — sandbox or live
+    Description: PayPal REST API base URL — sandbox or live (default live since 2026-05-18 cutover)
   PayPalReturnUrl:
     Type: String
     Description: URL PayPal redirects to after the buyer approves payment
