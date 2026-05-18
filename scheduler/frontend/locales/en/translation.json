@@ -95,7 +95,8 @@
       "date": "Date",
       "time": "Time",
       "paid": "Paid",
-      "bookingId": "Booking ID"
+      "bookingId": "Booking ID",
+      "sessionOfTotal": "Session {{n}}/{{total}}"
     },
     "personsSuffix_one": "{{count}} person",
     "personsSuffix_other": "{{count}} people",
