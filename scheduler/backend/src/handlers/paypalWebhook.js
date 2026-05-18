@@ -14,13 +14,20 @@
  * path; this webhook is the backup for cases where the user closes the
  * browser before the return URL fires, or where the capture call fails
  * server-side but PayPal has already taken the money.
+ *
+ * Cycle bookings: custom_id is the session-1 bookingId. After confirming
+ * that row, this handler propagates the confirmation to the remaining
+ * cycle siblings via cycleLogic.transactUpdateAll. Email + calendar
+ * side-effects are skipped for cycles (Phase 5 ships a cycle-aware
+ * summary email and a multi-event ICS).
  */
 
-const { UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { verifyWebhookSignature } = require('../utils/paypal');
 const { sendBookingConfirmation, sendOwnerNotification } = require('../email');
 const { insertBookingEvent } = require('../utils/googleCalendar');
+const { findCycleSiblings, transactUpdateAll } = require('../utils/cycleLogic');
 
 const TABLE       = process.env.BOOKINGS_TABLE;
 const WEBHOOK_ID  = process.env.PAYPAL_WEBHOOK_ID;
@@ -59,7 +66,8 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: '' };
     }
 
-    // custom_id was set to bookingId when we created the order.
+    // custom_id was set to bookingId when we created the order (for cycles
+    // it's the session-1 bookingId).
     const bookingId = payload.resource?.custom_id;
     const captureId = payload.resource?.id;
     if (!bookingId) {
@@ -67,8 +75,10 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: '' };
     }
 
+    const now = new Date().toISOString();
+    let updated;
     try {
-      const updated = await ddb.send(new UpdateCommand({
+      const r = await ddb.send(new UpdateCommand({
         TableName: TABLE,
         Key: { PK: `BOOKING#${bookingId}` },
         UpdateExpression: 'SET #s = :confirmed, paypalCaptureId = :cap, confirmedAt = :now',
@@ -78,30 +88,70 @@ exports.handler = async (event) => {
           ':confirmed': 'confirmed',
           ':pending':   'pending',
           ':cap':       captureId || '',
-          ':now':       new Date().toISOString(),
+          ':now':       now,
         },
         ReturnValues: 'ALL_NEW',
       }));
+      updated = r.Attributes;
       console.log('webhook: booking confirmed', { bookingId, captureId });
-      // We won the conditional flip — fire side-effects in parallel.
-      // The sync capture path didn't fire emails / calendar insert, so
-      // this is the only place they happen for bookings where the user
-      // closed the browser before the return URL fired.
-      await Promise.all([
-        sendBookingConfirmation(updated.Attributes),
-        sendOwnerNotification(updated.Attributes),
-        insertBookingEvent(updated.Attributes).catch((e) => {
-          console.error('googleCalendar insert failed', { bookingId, error: e?.message || e });
-        }),
-      ]);
     } catch (err) {
       if (err.name === 'ConditionalCheckFailedException') {
         // Already confirmed (sync capture beat us, or duplicate webhook).
         console.log('webhook: booking already confirmed or missing', { bookingId });
-      } else {
-        throw err;
+        return { statusCode: 200, body: '' };
       }
+      throw err;
     }
+
+    // Cycle propagation: bring the rest of the cycle siblings to confirmed
+    // in a single transaction. Conditional `status = :pending` on each row
+    // makes the operation idempotent if the webhook fires twice.
+    if (updated.cycleId) {
+      try {
+        const siblings = (await findCycleSiblings(updated.cycleId))
+          .filter((row) => row.bookingId !== bookingId);
+        if (siblings.length > 0) {
+          await transactUpdateAll(siblings, {
+            updateExpression: 'SET #s = :confirmed, paypalCaptureId = :cap, confirmedAt = :now',
+            conditionExpression: '#s = :pending',
+            expressionAttributeNames: { '#s': 'status' },
+            expressionAttributeValues: {
+              ':confirmed': 'confirmed',
+              ':pending':   'pending',
+              ':cap':       captureId || '',
+              ':now':       now,
+            },
+          });
+          console.log('webhook: cycle siblings confirmed', {
+            cycleId: updated.cycleId,
+            siblingCount: siblings.length,
+          });
+        }
+      } catch (err) {
+        if (err.name === 'TransactionCanceledException') {
+          // At least one sibling wasn't `pending` (e.g. already confirmed by
+          // a duplicate webhook). Safe to ignore — the cycle is in the right
+          // state either way.
+          console.log('webhook: cycle siblings already confirmed', {
+            cycleId: updated.cycleId,
+          });
+        } else {
+          throw err;
+        }
+      }
+      // Email + calendar are intentionally NOT fired for cycles in Phase 4.
+      // Phase 5 will ship the cycle-aware summary email and multi-event ICS.
+      return { statusCode: 200, body: '' };
+    }
+
+    // Single-session path — fire the usual side-effects.
+    await Promise.all([
+      sendBookingConfirmation(updated),
+      sendOwnerNotification(updated),
+      insertBookingEvent(updated).catch((e) => {
+        console.error('googleCalendar insert failed', { bookingId, error: e?.message || e });
+      }),
+    ]);
   } catch (err) {
     console.error('webhook handler error:', err);
   }

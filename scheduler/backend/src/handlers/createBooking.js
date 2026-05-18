@@ -3,41 +3,37 @@
 /**
  * POST /bookings
  *
- * Body (JSON): {
- *   date, start, studentName, studentEmail,
- *   lessonType, numPersons,
- *   studentPhone?, comment?
- * }
+ * Two shapes, dispatched by whether `slots` is present:
  *
- *   - lessonType is the id of a row in palavara-lesson-types
- *     (e.g. "single", "group"). Required.
- *   - numPersons must fall inside that lesson type's [minPersons, maxPersons]
- *     range. Optional for fixed types where min==max.
- *   - studentPhone and comment are free-form, optional, capped server-side.
+ *   Single session (lesson type sessionCount === 1):
+ *     { date, start, studentName, studentEmail,
+ *       lessonType, numPersons,
+ *       studentPhone?, comment? }
  *
- * 1. Validates input and that the slot exists for the chosen date.
- * 2. Looks up the lesson type and computes amountCents server-side
- *    (pricePerPersonCents × numPersons). Client-supplied amount is ignored.
- * 3. Confirms the slot is still free (best-effort — see TOCTOU note below).
- * 4. Creates a PayPal Order (Orders v2 REST, intent CAPTURE) with the
- *    server-computed amount.
- * 5. Writes a `pending` booking to DynamoDB carrying the order id, the
- *    slot's start + end times, and a snapshot of the lesson-type fields
- *    so the booking row stays meaningful even if the type is later edited
- *    or archived.
- * 6. Returns { bookingId, approveUrl } — frontend redirects user to approveUrl.
+ *   4-session cycle (lesson type sessionCount === 4):
+ *     { slots: [{date, start}, ...x4],
+ *       studentName, studentEmail,
+ *       lessonType, numPersons,
+ *       studentPhone?, comment? }
  *
- * Note on race conditions: two concurrent requests for the same date+start
- * can both pass the availability query and both insert. For an MVP studio
- * with <5 bookings/day this is acceptable; switching to a SLOT#date#start PK
- * is the fix when concurrency matters.
+ * Server-trusted fields: amount is recomputed from the lesson-type catalog
+ * (pricePerPersonCents × numPersons — for cycles, that per-person price IS
+ * the 4-session bundle total). Client-supplied amount is ignored either way.
+ *
+ * Cycle writes go through DynamoDB TransactWriteItems so either all 4 rows
+ * land pending (and the 4 seats reserve atomically), or none do.
+ *
+ * The PayPal order is single (one charge for the bundle); `custom_id` is the
+ * first-session bookingId — the webhook / capture handler propagates the
+ * confirmation across the cycle siblings via cycleLogic.transactUpdateAll.
  */
 
-const { PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { PutCommand, QueryCommand, TransactWriteCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, serverError } = require('../utils/response');
 const { findSlot, isValidDateString } = require('../utils/slots');
 const { resolveLessonTypeAndPrice } = require('../utils/lessonTypes');
+const { validateCycleSlots } = require('../utils/cycleLogic');
 const { createOrder } = require('../utils/paypal');
 const { v4: uuidv4 } = require('uuid');
 
@@ -59,6 +55,7 @@ exports.handler = async (event) => {
     }
 
     const {
+      slots: rawSlots,
       date,
       start,
       studentName,
@@ -69,19 +66,10 @@ exports.handler = async (event) => {
       comment,
     } = body;
 
-    // ── Validate inputs ──────────────────────────────────────────────────────
-    if (!date || !start || !studentName || !studentEmail) {
-      return badRequest('Missing required fields: date, start, studentName, studentEmail');
+    // ── Common student-field validation ──────────────────────────────────────
+    if (!studentName || !studentEmail) {
+      return badRequest('Missing required fields: studentName, studentEmail');
     }
-    if (!isValidDateString(date)) {
-      return badRequest('Invalid date. Use YYYY-MM-DD format.');
-    }
-
-    const slot = await findSlot(date, start);
-    if (!slot) {
-      return badRequest('No workshop slot at that date and start time.');
-    }
-
     if (!studentEmail.includes('@')) {
       return badRequest('Invalid email address');
     }
@@ -89,10 +77,12 @@ exports.handler = async (event) => {
       return badRequest('Name must be between 2 and 99 characters');
     }
 
-    // ── Resolve lesson type and compute server-trusted amount ────────────────
+    // ── Resolve lesson type + price (trusted server-side) ────────────────────
     const priced = await resolveLessonTypeAndPrice({ lessonTypeId: lessonType, numPersons });
     if (!priced.ok) return badRequest(priced.error);
     const { type: lessonTypeRow, numPersons: persons, amountCents } = priced;
+    const sessionCount = lessonTypeRow.sessionCount ?? 1;
+    const isCycle      = sessionCount > 1;
 
     // ── Cap free-form fields ─────────────────────────────────────────────────
     const trimmedPhone = typeof studentPhone === 'string'
@@ -102,7 +92,154 @@ exports.handler = async (event) => {
       ? comment.trim().slice(0, MAX_COMMENT_CHARS)
       : '';
 
-    // ── Check slot availability ──────────────────────────────────────────────
+    // ── Dispatch: single vs cycle ────────────────────────────────────────────
+    if (isCycle) {
+      return await createCycleBooking({
+        rawSlots,
+        sessionCount,
+        studentName,
+        studentEmail,
+        trimmedPhone,
+        trimmedComment,
+        lessonTypeRow,
+        persons,
+        amountCents,
+      });
+    }
+
+    return await createSingleBooking({
+      date,
+      start,
+      studentName,
+      studentEmail,
+      trimmedPhone,
+      trimmedComment,
+      lessonTypeRow,
+      persons,
+      amountCents,
+    });
+  } catch (err) {
+    console.error('createBooking error:', err);
+    return serverError();
+  }
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Single-session path (unchanged behaviour from before cycles existed)
+// ──────────────────────────────────────────────────────────────────────────────
+async function createSingleBooking({
+  date, start, studentName, studentEmail, trimmedPhone, trimmedComment,
+  lessonTypeRow, persons, amountCents,
+}) {
+  if (!date || !start) {
+    return badRequest('Missing required fields: date, start');
+  }
+  if (!isValidDateString(date)) {
+    return badRequest('Invalid date. Use YYYY-MM-DD format.');
+  }
+
+  const slot = await findSlot(date, start);
+  if (!slot) {
+    return badRequest('No workshop slot at that date and start time.');
+  }
+
+  const existing = await ddb.send(new QueryCommand({
+    TableName: TABLE,
+    IndexName: 'date-index',
+    KeyConditionExpression: '#d = :date AND #t = :slot',
+    FilterExpression: '#s IN (:pending, :confirmed)',
+    ExpressionAttributeNames: { '#d': 'date', '#t': 'timeSlot', '#s': 'status' },
+    ExpressionAttributeValues: {
+      ':date': date,
+      ':slot': start,
+      ':pending':   'pending',
+      ':confirmed': 'confirmed',
+    },
+    Limit: 1,
+  }));
+
+  if ((existing.Items || []).length > 0) {
+    return badRequest('This time slot is no longer available. Please choose another.');
+  }
+
+  const bookingId = uuidv4();
+  const returnUrl = appendQuery(PAYPAL_RETURN_URL, { bookingId });
+  const cancelUrl = appendQuery(PAYPAL_CANCEL_URL, { bookingId });
+
+  const { orderId, approveUrl } = await createOrder({
+    bookingId,
+    amountCents,
+    currency:   PRICE_CURRENCY,
+    returnUrl,
+    cancelUrl,
+  });
+
+  const now  = new Date().toISOString();
+  const item = {
+    PK:                  `BOOKING#${bookingId}`,
+    bookingId,
+    date,
+    timeSlot:            slot.start,
+    slotEnd:             slot.end,
+    status:              'pending',
+    bookingType:         'student',
+    paymentMethod:       'paypal',
+    studentName:         studentName.trim(),
+    studentEmail:        studentEmail.trim().toLowerCase(),
+    paypalOrderId:       orderId,
+    amountCents,
+    lessonTypeId:        lessonTypeRow.id,
+    lessonTypeLabel:     lessonTypeRow.label,
+    pricePerPersonCents: lessonTypeRow.pricePerPersonCents,
+    numPersons:          persons,
+    createdAt:           now,
+  };
+  if (trimmedPhone)   item.studentPhone = trimmedPhone;
+  if (trimmedComment) item.comment      = trimmedComment;
+
+  await ddb.send(new PutCommand({
+    TableName: TABLE,
+    Item: item,
+    ConditionExpression: 'attribute_not_exists(PK)',
+  }));
+
+  return ok({ bookingId, approveUrl });
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Cycle path — N rows linked by cycleId, single PayPal order for the bundle
+// ──────────────────────────────────────────────────────────────────────────────
+async function createCycleBooking({
+  rawSlots, sessionCount, studentName, studentEmail, trimmedPhone, trimmedComment,
+  lessonTypeRow, persons, amountCents,
+}) {
+  const v = validateCycleSlots(rawSlots, sessionCount);
+  if (!v.ok) return badRequest(v.error);
+  const slots = v.slots;
+
+  // Every slot must exist in the slots table — `findSlot` returns the
+  // canonical {start, end} pair so we don't trust the client's start.
+  const resolvedSlots = [];
+  for (const s of slots) {
+    if (!isValidDateString(s.date)) {
+      return badRequest(`Invalid date for session ${s.sessionIndex}: ${s.date}`);
+    }
+    const slot = await findSlot(s.date, s.start);
+    if (!slot) {
+      return badRequest(`No workshop slot for session ${s.sessionIndex} (${s.date} ${s.start})`);
+    }
+    resolvedSlots.push({
+      date:         s.date,
+      timeSlot:     slot.start,
+      slotEnd:      slot.end,
+      sessionIndex: s.sessionIndex,
+    });
+  }
+
+  // Capacity: each slot must be free of any pending/confirmed booking.
+  // Sequential queries are fine — N=4, low traffic. If this ever loads up,
+  // a single Scan + in-memory filter would be cheaper than 4 round-trips.
+  for (const s of resolvedSlots) {
     const existing = await ddb.send(new QueryCommand({
       TableName: TABLE,
       IndexName: 'date-index',
@@ -110,71 +247,79 @@ exports.handler = async (event) => {
       FilterExpression: '#s IN (:pending, :confirmed)',
       ExpressionAttributeNames: { '#d': 'date', '#t': 'timeSlot', '#s': 'status' },
       ExpressionAttributeValues: {
-        ':date': date,
-        ':slot': start,
-        ':pending': 'pending',
+        ':date': s.date,
+        ':slot': s.timeSlot,
+        ':pending':   'pending',
         ':confirmed': 'confirmed',
       },
       Limit: 1,
     }));
-
     if ((existing.Items || []).length > 0) {
-      return badRequest('This time slot is no longer available. Please choose another.');
+      return badRequest(`Session ${s.sessionIndex} (${s.date} ${s.timeSlot}) is no longer available.`);
     }
+  }
 
-    // ── Allocate booking id and create PayPal order ──────────────────────────
-    const bookingId = uuidv4();
+  // One PayPal order for the bundle. custom_id is the FIRST session's
+  // bookingId — the webhook handler uses it to look up the row, then
+  // propagates the confirmation across cycle siblings.
+  const cycleId   = uuidv4();
+  const bookingIds = resolvedSlots.map(() => uuidv4());
+  const firstBookingId = bookingIds[0];
 
-    const returnUrl = appendQuery(PAYPAL_RETURN_URL, { bookingId });
-    const cancelUrl = appendQuery(PAYPAL_CANCEL_URL, { bookingId });
+  const returnUrl = appendQuery(PAYPAL_RETURN_URL, { bookingId: firstBookingId });
+  const cancelUrl = appendQuery(PAYPAL_CANCEL_URL, { bookingId: firstBookingId });
 
-    const { orderId, approveUrl } = await createOrder({
-      bookingId,
-      amountCents,
-      currency:    PRICE_CURRENCY,
-      returnUrl,
-      cancelUrl,
-    });
+  const { orderId, approveUrl } = await createOrder({
+    bookingId: firstBookingId,
+    amountCents,
+    currency:  PRICE_CURRENCY,
+    returnUrl,
+    cancelUrl,
+  });
 
-    // ── Persist booking ──────────────────────────────────────────────────────
-    // Lesson-type fields are snapshotted (id + label + per-person price)
-    // so historical bookings stay meaningful if the catalog row is later
-    // edited or archived.
-    const now = new Date().toISOString();
-    const item = {
-      PK:            `BOOKING#${bookingId}`,
-      bookingId,
-      date,
-      timeSlot:      slot.start,
-      slotEnd:       slot.end,
-      status:        'pending',
-      bookingType:   'student',
-      paymentMethod: 'paypal',
-      studentName:   studentName.trim(),
-      studentEmail:  studentEmail.trim().toLowerCase(),
-      paypalOrderId: orderId,
-      amountCents,
+  const now = new Date().toISOString();
+  const rows = resolvedSlots.map((s, i) => {
+    const row = {
+      PK:                  `BOOKING#${bookingIds[i]}`,
+      bookingId:           bookingIds[i],
+      cycleId,
+      sessionIndex:        s.sessionIndex,
+      sessionCount,
+      date:                s.date,
+      timeSlot:            s.timeSlot,
+      slotEnd:             s.slotEnd,
+      status:              'pending',
+      bookingType:         'student',
+      paymentMethod:       'paypal',
+      studentName:         studentName.trim(),
+      studentEmail:        studentEmail.trim().toLowerCase(),
+      paypalOrderId:       orderId,
+      amountCents,         // bundle total, denormalised across all N rows
       lessonTypeId:        lessonTypeRow.id,
       lessonTypeLabel:     lessonTypeRow.label,
       pricePerPersonCents: lessonTypeRow.pricePerPersonCents,
       numPersons:          persons,
-      createdAt:     now,
+      createdAt:           now,
     };
-    if (trimmedPhone)   item.studentPhone = trimmedPhone;
-    if (trimmedComment) item.comment      = trimmedComment;
+    if (trimmedPhone)   row.studentPhone = trimmedPhone;
+    if (trimmedComment) row.comment      = trimmedComment;
+    return row;
+  });
 
-    await ddb.send(new PutCommand({
-      TableName: TABLE,
-      Item: item,
-      ConditionExpression: 'attribute_not_exists(PK)',
-    }));
+  // TransactWriteItems caps at 100 — N=4 is well under. Either all 4 rows
+  // land or none do; partial state is impossible by design.
+  await ddb.send(new TransactWriteCommand({
+    TransactItems: rows.map((Item) => ({
+      Put: {
+        TableName: TABLE,
+        Item,
+        ConditionExpression: 'attribute_not_exists(PK)',
+      },
+    })),
+  }));
 
-    return ok({ bookingId, approveUrl });
-  } catch (err) {
-    console.error('createBooking error:', err);
-    return serverError();
-  }
-};
+  return ok({ bookingId: firstBookingId, cycleId, approveUrl });
+}
 
 function appendQuery(url, params) {
   const u = new URL(url);
