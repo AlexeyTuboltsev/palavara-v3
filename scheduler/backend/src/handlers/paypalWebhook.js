@@ -17,15 +17,19 @@
  *
  * Cycle bookings: custom_id is the session-1 bookingId. After confirming
  * that row, this handler propagates the confirmation to the remaining
- * cycle siblings via cycleLogic.transactUpdateAll. Email + calendar
- * side-effects are skipped for cycles (Phase 5 ships a cycle-aware
- * summary email and a multi-event ICS).
+ * cycle siblings via cycleLogic.transactUpdateAll, then sends one
+ * cycle-aware summary email + a multi-event ICS attachment.
  */
 
 const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { verifyWebhookSignature } = require('../utils/paypal');
-const { sendBookingConfirmation, sendOwnerNotification } = require('../email');
+const {
+  sendBookingConfirmation,
+  sendOwnerNotification,
+  sendCycleBookingConfirmation,
+  sendCycleOwnerNotification,
+} = require('../email');
 const { insertBookingEvent } = require('../utils/googleCalendar');
 const { findCycleSiblings, transactUpdateAll } = require('../utils/cycleLogic');
 
@@ -139,8 +143,19 @@ exports.handler = async (event) => {
           throw err;
         }
       }
-      // Email + calendar are intentionally NOT fired for cycles in Phase 4.
-      // Phase 5 will ship the cycle-aware summary email and multi-event ICS.
+
+      // One cycle-aware summary email each for student + owner; calendar
+      // inserts run per-session. Failures log only.
+      const allSiblings = await findCycleSiblings(updated.cycleId);
+      await Promise.all([
+        sendCycleBookingConfirmation(allSiblings),
+        sendCycleOwnerNotification(allSiblings),
+        ...allSiblings.map((s) =>
+          insertBookingEvent(s).catch((e) => {
+            console.error('googleCalendar insert failed', { bookingId: s.bookingId, error: e?.message || e });
+          })
+        ),
+      ]);
       return { statusCode: 200, body: '' };
     }
 

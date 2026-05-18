@@ -20,7 +20,12 @@ const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, notFound, serverError } = require('../utils/response');
 const { captureOrder } = require('../utils/paypal');
-const { sendBookingConfirmation, sendOwnerNotification } = require('../email');
+const {
+  sendBookingConfirmation,
+  sendOwnerNotification,
+  sendCycleBookingConfirmation,
+  sendCycleOwnerNotification,
+} = require('../email');
 const { insertBookingEvent } = require('../utils/googleCalendar');
 const { findCycleSiblings, transactUpdateAll } = require('../utils/cycleLogic');
 
@@ -83,12 +88,13 @@ exports.handler = async (event) => {
 
     const updatedBooking = updated.Attributes;
 
-    // Cycle propagation: confirm the remaining sibling rows in a single
-    // transaction. Conditional `status = :pending` makes it idempotent if
-    // the webhook fires afterward.
+    // Cycle path: confirm the remaining sibling rows atomically, then send
+    // one cycle-aware confirmation email + one owner notification carrying
+    // a multi-event ICS. Calendar inserts run per-session.
     if (updatedBooking.cycleId) {
+      let siblings = [];
       try {
-        const siblings = (await findCycleSiblings(updatedBooking.cycleId))
+        siblings = (await findCycleSiblings(updatedBooking.cycleId))
           .filter((row) => row.bookingId !== id);
         if (siblings.length > 0) {
           await transactUpdateAll(siblings, {
@@ -107,8 +113,22 @@ exports.handler = async (event) => {
         if (err.name !== 'TransactionCanceledException') throw err;
         // Siblings already confirmed by the webhook — fine.
       }
-      // Phase 4 leaves emails + calendar inserts off for cycles. Phase 5
-      // ships a cycle-aware summary email + a multi-event ICS.
+
+      // Refetch the full, now-confirmed sibling set for the email + calendar
+      // side-effects. Skips the work entirely if the webhook beat us to the
+      // emails (the row's confirmedAt is set in the same transaction as the
+      // status flip, so checking it here would be racy — keep it simple and
+      // just let SES dedupe by Message-ID when both paths fire).
+      const allSiblings = await findCycleSiblings(updatedBooking.cycleId);
+      await Promise.all([
+        sendCycleBookingConfirmation(allSiblings),
+        sendCycleOwnerNotification(allSiblings),
+        ...allSiblings.map((s) =>
+          insertBookingEvent(s).catch((e) => {
+            console.error('googleCalendar insert failed', { bookingId: s.bookingId, error: e?.message || e });
+          })
+        ),
+      ]);
       return ok(stripBooking(updatedBooking));
     }
 

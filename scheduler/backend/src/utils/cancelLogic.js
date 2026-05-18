@@ -22,6 +22,8 @@ const { refundCapture } = require('./paypal');
 const {
   sendCancellationConfirmation,
   sendCancellationNotification,
+  sendCycleCancellationConfirmation,
+  sendCycleCancellationNotification,
 } = require('../email');
 const { deleteBookingEvent } = require('./googleCalendar');
 const { findCycleSiblings, transactUpdateAll } = require('./cycleLogic');
@@ -166,14 +168,22 @@ async function processCancellation({ booking, alwaysRefund, cancelledBy, reason 
       }
       throw err;
     }
-    // No side-effects for cycles in Phase 4 (no per-cycle email yet; that's
-    // Phase 5). Calendar deletes are also skipped — Phase 5 will cancel the
-    // matching 4-event ICS that Phase 5's insert created.
-    const refetch = await ddb.send(new GetCommand({
-      TableName: TABLE,
-      Key: { PK: `BOOKING#${booking.bookingId}` },
-    }));
-    return { booking: refetch.Item, alreadyCancelled: false };
+    // Refetch the now-cancelled siblings so the email senders see the
+    // updated refund + cancellation fields.
+    const cancelledSiblings = await findCycleSiblings(booking.cycleId);
+    const refetched = cancelledSiblings.find((s) => s.bookingId === booking.bookingId);
+
+    await Promise.all([
+      sendCycleCancellationConfirmation(cancelledSiblings),
+      sendCycleCancellationNotification(cancelledSiblings),
+      ...cancelledSiblings.map((s) =>
+        deleteBookingEvent(s).catch((e) => {
+          console.error('googleCalendar delete failed', { bookingId: s.bookingId, error: e?.message || e });
+        })
+      ),
+    ]);
+
+    return { booking: refetched, alreadyCancelled: false };
   }
 
   // Single-session path
