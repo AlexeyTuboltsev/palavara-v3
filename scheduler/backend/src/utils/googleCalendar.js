@@ -1,171 +1,135 @@
 'use strict';
 
 /**
- * Google Calendar API v3 client — minimal wrapper around the four calls
- * the scheduler needs:
- *   - exchangeAuthCode  : POST /token (one-time during OAuth setup)
- *   - getAccessToken    : POST /token (refresh-token grant, cached)
- *   - insertEvent       : POST /calendar/v3/calendars/{id}/events
- *   - deleteEvent       : DELETE /calendar/v3/calendars/{id}/events/{eventId}
+ * Google Calendar API v3 client — service-account flavour.
  *
  * Auth model:
- *   - Owner runs a one-time OAuth consent flow. Refresh token is stored
- *     in SSM Parameter Store under GOOGLE_REFRESH_TOKEN_PARAM_NAME as
- *     a SecureString.
- *   - Lambdas call getAccessToken which loads the refresh token from
- *     SSM (cached per warm container), exchanges for an access token
- *     (also cached, ~50min lifetime), and uses it on Calendar API calls.
+ *   - A service account (palavara-scheduler@palavara-studio.iam.gserviceaccount.com)
+ *     is the principal. Its private key is stored in SSM Parameter Store as
+ *     a SecureString JSON document (the standard Google service-account key file).
+ *   - Lambdas call getAccessToken which loads the SA key from SSM (cached
+ *     per warm container), signs a short-lived JWT, exchanges it via
+ *     Google's /token endpoint for an access token (also cached, ~50min).
+ *   - The target calendar must be explicitly shared with the SA's email
+ *     and granted "Make changes to events". The SA cannot reach the user's
+ *     "primary" calendar — give it the calendar's address (e.g.
+ *     palavarastudio@gmail.com for someone's primary).
+ *
+ * Why service account, not OAuth refresh token? Refresh tokens in apps
+ * with "Testing" OAuth consent screens expire every 7 days. Publishing
+ * the app requires going through Google's verification for sensitive
+ * scopes. Service accounts have neither problem — the key is long-lived
+ * until manually rotated. See palavara-v3 commit history for the swap.
  *
  * All Calendar API failures are surfaced as thrown errors. Callers
  * should wrap in try/catch and treat sync failures as best-effort —
  * the booking row in DynamoDB stays the source of truth.
  */
 
-const { SSMClient, GetParameterCommand, PutParameterCommand } = require('@aws-sdk/client-ssm');
+const crypto = require('crypto');
+const { SSMClient, GetParameterCommand } = require('@aws-sdk/client-ssm');
 
 const ssm = new SSMClient({ region: process.env.AWS_REGION || 'eu-central-1' });
 
-const TOKEN_URL    = 'https://oauth2.googleapis.com/token';
 const CAL_API_BASE = 'https://www.googleapis.com/calendar/v3';
 const SCOPE        = 'https://www.googleapis.com/auth/calendar.events';
+const DEFAULT_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
-const CLIENT_ID         = process.env.GOOGLE_CLIENT_ID;
-const CLIENT_SECRET     = process.env.GOOGLE_CLIENT_SECRET;
-const CALENDAR_ID       = process.env.GOOGLE_CALENDAR_ID || 'primary';
-const REFRESH_TOKEN_PARAM = process.env.GOOGLE_REFRESH_TOKEN_PARAM_NAME;
+const SA_KEY_PARAM = process.env.GOOGLE_SA_KEY_PARAM;
+const CALENDAR_ID  = process.env.GOOGLE_CALENDAR_ID;
 
-let cachedRefreshToken = null;
+let cachedSaKey = null;
 let cachedAccessToken = null;
 let cachedAccessTokenExpiresAt = 0;
 
 
-// ── OAuth setup helpers ────────────────────────────────────────────────
+// ── Service-account key + access token ─────────────────────────────────
 
 
-/**
- * Build the URL the owner visits to start the OAuth consent flow.
- * `state` is an opaque value the callback will receive back unchanged
- * — used as a CSRF token.
- */
-function buildAuthUrl({ redirectUri, state }) {
-    if (!CLIENT_ID) {
-        throw new Error('GOOGLE_CLIENT_ID not configured');
+/** Load the SA key JSON from SSM (cached per Lambda container lifetime). */
+async function loadServiceAccountKey() {
+    if (cachedSaKey) return cachedSaKey;
+    if (!SA_KEY_PARAM) {
+        throw new Error('GOOGLE_SA_KEY_PARAM not configured');
     }
-    const params = new URLSearchParams({
-        client_id:     CLIENT_ID,
-        redirect_uri:  redirectUri,
-        response_type: 'code',
-        scope:         SCOPE,
-        access_type:   'offline',
-        prompt:        'consent',
-        state,
-    });
-    return 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
-}
-
-
-/**
- * Exchange an auth code (from the OAuth callback) for tokens, then
- * persist the refresh token in SSM. Returns the refresh token.
- */
-async function exchangeAuthCodeAndStore({ code, redirectUri }) {
-    if (!CLIENT_ID || !CLIENT_SECRET) {
-        throw new Error('GOOGLE_CLIENT_ID/SECRET not configured');
-    }
-    if (!REFRESH_TOKEN_PARAM) {
-        throw new Error('GOOGLE_REFRESH_TOKEN_PARAM_NAME not configured');
-    }
-
-    const res = await fetch(TOKEN_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            code,
-            client_id:     CLIENT_ID,
-            client_secret: CLIENT_SECRET,
-            redirect_uri:  redirectUri,
-            grant_type:    'authorization_code',
-        }).toString(),
-        signal: AbortSignal.timeout(10_000),
-    });
-
-    if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        throw new Error(`Google token exchange failed (${res.status}): ${text}`);
-    }
-    const data = await res.json();
-    if (!data.refresh_token) {
-        throw new Error('Google token response had no refresh_token — did the user already grant access? Use prompt=consent.');
-    }
-
-    // Persist to SSM.
-    await ssm.send(new PutParameterCommand({
-        Name:      REFRESH_TOKEN_PARAM,
-        Value:     data.refresh_token,
-        Type:      'SecureString',
-        Overwrite: true,
-    }));
-
-    cachedRefreshToken = data.refresh_token;
-    cachedAccessToken = data.access_token;
-    cachedAccessTokenExpiresAt = Date.now() + (data.expires_in || 3600) * 1000 - 60_000;
-
-    return data.refresh_token;
-}
-
-
-// ── Runtime token plumbing ─────────────────────────────────────────────
-
-
-async function loadRefreshToken() {
-    if (cachedRefreshToken) return cachedRefreshToken;
-    if (!REFRESH_TOKEN_PARAM) {
-        throw new Error('GOOGLE_REFRESH_TOKEN_PARAM_NAME not configured');
-    }
-    const result = await ssm.send(new GetParameterCommand({
-        Name:           REFRESH_TOKEN_PARAM,
+    const r = await ssm.send(new GetParameterCommand({
+        Name: SA_KEY_PARAM,
         WithDecryption: true,
     }));
-    if (!result.Parameter?.Value) {
-        throw new Error(`SSM parameter ${REFRESH_TOKEN_PARAM} is empty — has the OAuth flow been completed?`);
+    if (!r.Parameter?.Value) {
+        throw new Error(`SSM parameter ${SA_KEY_PARAM} is empty`);
     }
-    cachedRefreshToken = result.Parameter.Value;
-    return cachedRefreshToken;
+    let parsed;
+    try {
+        parsed = JSON.parse(r.Parameter.Value);
+    } catch (err) {
+        throw new Error(`SSM parameter ${SA_KEY_PARAM} is not valid JSON: ${err.message}`);
+    }
+    if (!parsed.client_email || !parsed.private_key) {
+        throw new Error('SA key missing client_email or private_key');
+    }
+    cachedSaKey = parsed;
+    return cachedSaKey;
 }
 
 
+/** Base64-url-encode an object as compact JSON. Node 16+ supports 'base64url' natively. */
+function base64urlJson(obj) {
+    return Buffer.from(JSON.stringify(obj)).toString('base64url');
+}
+
+
+/**
+ * Get an OAuth access token via the JWT-bearer grant. Tokens are valid
+ * for ~1h; we cache and re-mint when within 60s of expiry. RS256-sign
+ * the JWT with Node's built-in `crypto` so no external dep is needed.
+ */
 async function getAccessToken() {
-    const now = Date.now();
-    if (cachedAccessToken && now < cachedAccessTokenExpiresAt) {
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (cachedAccessToken && nowSec < cachedAccessTokenExpiresAt - 60) {
         return cachedAccessToken;
     }
 
-    const refreshToken = await loadRefreshToken();
+    const key = await loadServiceAccountKey();
+    const tokenUrl = key.token_uri || DEFAULT_TOKEN_URL;
 
-    const res = await fetch(TOKEN_URL, {
-        method: 'POST',
+    const header = base64urlJson({ alg: 'RS256', typ: 'JWT' });
+    const claims = base64urlJson({
+        iss:   key.client_email,
+        scope: SCOPE,
+        aud:   tokenUrl,
+        exp:   nowSec + 3600,
+        iat:   nowSec,
+    });
+    const signingInput = `${header}.${claims}`;
+
+    const signer = crypto.createSign('RSA-SHA256');
+    signer.update(signingInput);
+    const signature = signer.sign(key.private_key).toString('base64url');
+    const jwt = `${signingInput}.${signature}`;
+
+    const res = await fetch(tokenUrl, {
+        method:  'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            client_id:     CLIENT_ID,
-            client_secret: CLIENT_SECRET,
-            refresh_token: refreshToken,
-            grant_type:    'refresh_token',
-        }).toString(),
+        body:    new URLSearchParams({
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            assertion:  jwt,
+        }),
         signal: AbortSignal.timeout(10_000),
     });
 
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        throw new Error(`Google access-token refresh failed (${res.status}): ${text}`);
+        throw new Error(`Google token exchange failed (${res.status}): ${JSON.stringify(data)}`);
     }
-    const data = await res.json();
+
     cachedAccessToken = data.access_token;
-    cachedAccessTokenExpiresAt = now + (data.expires_in || 3600) * 1000 - 60_000;
+    cachedAccessTokenExpiresAt = nowSec + (data.expires_in || 3600);
     return cachedAccessToken;
 }
 
 
-// ── Event ID derivation ────────────────────────────────────────────────
+// ── Calendar API: insert + delete ──────────────────────────────────────
 
 
 /**
@@ -179,9 +143,6 @@ function eventIdFromBookingId(bookingId) {
 }
 
 
-// ── Calendar API: insert + delete ──────────────────────────────────────
-
-
 /**
  * Insert a calendar event for a confirmed booking. Idempotent: if an
  * event with the derived id already exists, Google returns 409 and we
@@ -191,6 +152,9 @@ function eventIdFromBookingId(bookingId) {
  * arithmetic for display in the recipient's calendar.
  */
 async function insertBookingEvent(booking) {
+    if (!CALENDAR_ID) {
+        throw new Error('GOOGLE_CALENDAR_ID not configured');
+    }
     const accessToken = await getAccessToken();
     const eventId = eventIdFromBookingId(booking.bookingId);
 
@@ -259,6 +223,9 @@ async function insertBookingEvent(booking) {
  * treated as success (already deleted / never existed).
  */
 async function deleteBookingEvent(booking) {
+    if (!CALENDAR_ID) {
+        throw new Error('GOOGLE_CALENDAR_ID not configured');
+    }
     const accessToken = await getAccessToken();
     const eventId = eventIdFromBookingId(booking.bookingId);
 
@@ -278,8 +245,6 @@ async function deleteBookingEvent(booking) {
 
 
 module.exports = {
-    buildAuthUrl,
-    exchangeAuthCodeAndStore,
     insertBookingEvent,
     deleteBookingEvent,
     eventIdFromBookingId,
