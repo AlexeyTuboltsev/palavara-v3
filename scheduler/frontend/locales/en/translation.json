@@ -35,7 +35,13 @@
     "noDates": "No upcoming workshops.",
     "noSlotsForDate": "No slots available for this date.",
     "errorLoading": "Could not load workshop dates. Please refresh the page.",
-    "errorAvailability": "Failed to load availability. Please try again."
+    "errorAvailability": "Failed to load availability. Please try again.",
+    "cycleProgress": "Picked {{picked}} of {{total}} sessions. {{hint}}",
+    "cycleProgressFull": "All {{total}} sessions selected. Click Continue to finish booking.",
+    "cycleHintMid": "Pick session {{n}}/{{total}} — must be a later date than the previous session and not the same day.",
+    "cycleHintFinal": "Pick session {{n}}/{{total}} — must be at least {{days}} days after the previous session.",
+    "cycleClear": "Clear selections",
+    "cycleContinue": "Continue"
   },
 
   "form": {

@@ -388,6 +388,61 @@ body {
    not a generic light blue. */
 .cal-slot:hover  { background: color-mix(in srgb, var(--color-blue) 12%, white); }
 .cal-slot:active { background: color-mix(in srgb, var(--color-blue) 22%, white); }
+/* Cycle-mode slot decorations. .selected = one of the picked sessions;
+   .invalid = greyed out because it would break the spacing rules. */
+.cal-slot.selected {
+  background: var(--color-blue);
+  color: #fff;
+}
+.cal-slot.selected:hover { background: var(--color-blue); }
+.cal-slot.invalid {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: var(--color-grey);
+}
+.cal-slot.invalid:hover { background: var(--color-grey); }
+
+/* Mirror on the mobile drawer slot button. */
+.slot-btn.selected {
+  background: var(--color-blue);
+  color: #fff;
+  border-color: var(--color-blue);
+}
+.slot-btn.invalid {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Cycle-progress banner at the top of step-date. */
+.cycle-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 10px 14px;
+  margin-bottom: 0.75rem;
+  background: color-mix(in srgb, var(--color-blue) 5%, white);
+  border: 1px solid color-mix(in srgb, var(--color-blue) 20%, white);
+  border-radius: var(--radius);
+}
+.cycle-progress-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+.cycle-clear-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.cycle-clear-btn:hover { background: var(--color-slot-hover); }
 
 /* Mobile date list with drawer-style slot reveal */
 .date-list { list-style: none; padding: 0; margin: 0; }
