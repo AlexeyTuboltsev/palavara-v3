@@ -3,9 +3,9 @@
 /**
  * PUT /admin/lesson-types/{id}
  *
- * Body (JSON): partial — any subset of {label, pricePerPersonCents,
- * minPersons, maxPersons, sessionCount, sortOrder, active}. The id is the
- * URL path, not the body, and is immutable (rename = create new, delete old).
+ * Body (JSON): partial — any subset of {label, priceCents, numPersons,
+ * sessionCount, sortOrder, active}. The id is the URL path, not the
+ * body, and is immutable (rename = create new, delete old).
  *
  * 404 if the row doesn't exist.
  */
@@ -44,25 +44,19 @@ exports.handler = async (event) => {
       names['#label']   = 'label';
       values[':label']  = body.label.trim();
     }
-    if (body.pricePerPersonCents != null) {
-      const ppc = Number(body.pricePerPersonCents);
-      if (!Number.isInteger(ppc) || ppc <= 0) {
-        return badRequest('pricePerPersonCents must be a positive integer (cents)');
+    if (body.priceCents != null) {
+      const n = Number(body.priceCents);
+      if (!Number.isInteger(n) || n <= 0) {
+        return badRequest('priceCents must be a positive integer (cents)');
       }
-      sets.push('pricePerPersonCents = :ppc');
-      values[':ppc'] = ppc;
+      sets.push('priceCents = :priceCents');
+      values[':priceCents'] = n;
     }
-    if (body.minPersons != null) {
-      const n = Number(body.minPersons);
-      if (!Number.isInteger(n) || n < 1) return badRequest('minPersons must be a positive integer');
-      sets.push('minPersons = :min');
-      values[':min'] = n;
-    }
-    if (body.maxPersons != null) {
-      const n = Number(body.maxPersons);
-      if (!Number.isInteger(n) || n < 1) return badRequest('maxPersons must be a positive integer');
-      sets.push('maxPersons = :max');
-      values[':max'] = n;
+    if (body.numPersons != null) {
+      const n = Number(body.numPersons);
+      if (!Number.isInteger(n) || n < 1) return badRequest('numPersons must be a positive integer');
+      sets.push('numPersons = :numPersons');
+      values[':numPersons'] = n;
     }
     if (body.sortOrder != null) {
       const n = Number(body.sortOrder);
@@ -100,14 +94,7 @@ exports.handler = async (event) => {
         ExpressionAttributeValues: values,
         ReturnValues: 'ALL_NEW',
       }));
-      const item = result.Attributes;
-      // Cross-check minPersons / maxPersons if either side was touched.
-      const min = item.minPersons ?? 1;
-      const max = item.maxPersons ?? min;
-      if (max < min) {
-        return badRequest(`maxPersons (${max}) must be >= minPersons (${min}) — update both together if needed`);
-      }
-      return ok(strip(item));
+      return ok(strip(result.Attributes));
     } catch (err) {
       if (err.name === 'ConditionalCheckFailedException') {
         return notFound(`Lesson type "${id}" not found`);
@@ -122,16 +109,15 @@ exports.handler = async (event) => {
 
 function strip(item) {
   return {
-    id:                  item.id,
-    label:               item.label,
-    pricePerPersonCents: item.pricePerPersonCents,
-    minPersons:          item.minPersons,
-    maxPersons:          item.maxPersons,
-    sessionCount:        item.sessionCount,
-    active:              item.active,
-    sortOrder:           item.sortOrder,
-    createdAt:           item.createdAt,
-    updatedAt:           item.updatedAt,
+    id:           item.id,
+    label:        item.label,
+    priceCents:   item.priceCents,
+    numPersons:   item.numPersons,
+    sessionCount: item.sessionCount,
+    active:       item.active,
+    sortOrder:    item.sortOrder,
+    createdAt:    item.createdAt,
+    updatedAt:    item.updatedAt,
   };
 }
 

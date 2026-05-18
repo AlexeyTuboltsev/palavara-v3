@@ -7,25 +7,26 @@
  *
  *   Single session (lesson type sessionCount === 1):
  *     { date, start, studentName, studentEmail,
- *       lessonType, numPersons,
+ *       lessonType,
  *       studentPhone?, comment? }
  *
  *   4-session cycle (lesson type sessionCount === 4):
  *     { slots: [{date, start}, ...x4],
  *       studentName, studentEmail,
- *       lessonType, numPersons,
+ *       lessonType,
  *       studentPhone?, comment? }
  *
- * Server-trusted fields: amount is recomputed from the lesson-type catalog
- * (pricePerPersonCents × numPersons — for cycles, that per-person price IS
- * the 4-session bundle total). Client-supplied amount is ignored either way.
+ * Server-trusted fields: amount AND person count both come from the
+ * lesson-type catalog (`priceCents` / `numPersons`). Client-supplied
+ * amount / numPersons are ignored. There is no per-person multiplication.
  *
- * Cycle writes go through DynamoDB TransactWriteItems so either all 4 rows
- * land pending (and the 4 seats reserve atomically), or none do.
+ * Cycle writes go through DynamoDB TransactWriteItems so either all 4
+ * rows land pending (and the 4 seats reserve atomically), or none do.
  *
- * The PayPal order is single (one charge for the bundle); `custom_id` is the
- * first-session bookingId — the webhook / capture handler propagates the
- * confirmation across the cycle siblings via cycleLogic.transactUpdateAll.
+ * The PayPal order is single (one charge for the whole booking); for
+ * cycles, `custom_id` is the first-session bookingId and the webhook /
+ * capture handler propagates the confirmation across cycle siblings via
+ * cycleLogic.transactUpdateAll.
  */
 
 const { PutCommand, QueryCommand, TransactWriteCommand } = require('@aws-sdk/lib-dynamodb');
@@ -62,7 +63,6 @@ exports.handler = async (event) => {
       studentEmail,
       studentPhone,
       lessonType,
-      numPersons,
       comment,
     } = body;
 
@@ -78,7 +78,7 @@ exports.handler = async (event) => {
     }
 
     // ── Resolve lesson type + price (trusted server-side) ────────────────────
-    const priced = await resolveLessonTypeAndPrice({ lessonTypeId: lessonType, numPersons });
+    const priced = await resolveLessonTypeAndPrice({ lessonTypeId: lessonType });
     if (!priced.ok) return badRequest(priced.error);
     const { type: lessonTypeRow, numPersons: persons, amountCents } = priced;
     const sessionCount = lessonTypeRow.sessionCount ?? 1;
@@ -125,7 +125,7 @@ exports.handler = async (event) => {
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Single-session path (unchanged behaviour from before cycles existed)
+// Single-session path
 // ──────────────────────────────────────────────────────────────────────────────
 async function createSingleBooking({
   date, start, studentName, studentEmail, trimmedPhone, trimmedComment,
@@ -176,23 +176,22 @@ async function createSingleBooking({
 
   const now  = new Date().toISOString();
   const item = {
-    PK:                  `BOOKING#${bookingId}`,
+    PK:              `BOOKING#${bookingId}`,
     bookingId,
     date,
-    timeSlot:            slot.start,
-    slotEnd:             slot.end,
-    status:              'pending',
-    bookingType:         'student',
-    paymentMethod:       'paypal',
-    studentName:         studentName.trim(),
-    studentEmail:        studentEmail.trim().toLowerCase(),
-    paypalOrderId:       orderId,
+    timeSlot:        slot.start,
+    slotEnd:         slot.end,
+    status:          'pending',
+    bookingType:     'student',
+    paymentMethod:   'paypal',
+    studentName:     studentName.trim(),
+    studentEmail:    studentEmail.trim().toLowerCase(),
+    paypalOrderId:   orderId,
     amountCents,
-    lessonTypeId:        lessonTypeRow.id,
-    lessonTypeLabel:     lessonTypeRow.label,
-    pricePerPersonCents: lessonTypeRow.pricePerPersonCents,
-    numPersons:          persons,
-    createdAt:           now,
+    lessonTypeId:    lessonTypeRow.id,
+    lessonTypeLabel: lessonTypeRow.label,
+    numPersons:      persons,
+    createdAt:       now,
   };
   if (trimmedPhone)   item.studentPhone = trimmedPhone;
   if (trimmedComment) item.comment      = trimmedComment;
@@ -280,26 +279,25 @@ async function createCycleBooking({
   const now = new Date().toISOString();
   const rows = resolvedSlots.map((s, i) => {
     const row = {
-      PK:                  `BOOKING#${bookingIds[i]}`,
-      bookingId:           bookingIds[i],
+      PK:              `BOOKING#${bookingIds[i]}`,
+      bookingId:       bookingIds[i],
       cycleId,
-      sessionIndex:        s.sessionIndex,
+      sessionIndex:    s.sessionIndex,
       sessionCount,
-      date:                s.date,
-      timeSlot:            s.timeSlot,
-      slotEnd:             s.slotEnd,
-      status:              'pending',
-      bookingType:         'student',
-      paymentMethod:       'paypal',
-      studentName:         studentName.trim(),
-      studentEmail:        studentEmail.trim().toLowerCase(),
-      paypalOrderId:       orderId,
-      amountCents,         // bundle total, denormalised across all N rows
-      lessonTypeId:        lessonTypeRow.id,
-      lessonTypeLabel:     lessonTypeRow.label,
-      pricePerPersonCents: lessonTypeRow.pricePerPersonCents,
-      numPersons:          persons,
-      createdAt:           now,
+      date:            s.date,
+      timeSlot:        s.timeSlot,
+      slotEnd:         s.slotEnd,
+      status:          'pending',
+      bookingType:     'student',
+      paymentMethod:   'paypal',
+      studentName:     studentName.trim(),
+      studentEmail:    studentEmail.trim().toLowerCase(),
+      paypalOrderId:   orderId,
+      amountCents,     // bundle total, denormalised across all N rows
+      lessonTypeId:    lessonTypeRow.id,
+      lessonTypeLabel: lessonTypeRow.label,
+      numPersons:      persons,
+      createdAt:       now,
     };
     if (trimmedPhone)   row.studentPhone = trimmedPhone;
     if (trimmedComment) row.comment      = trimmedComment;

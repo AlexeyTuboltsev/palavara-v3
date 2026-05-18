@@ -499,7 +499,7 @@ async function loadLessonTypes() {
     } else {
       const d = await r.json();
       lessonTypes = (d.lessonTypes || []).filter((lt) =>
-        lt && lt.id && lt.pricePerPersonCents > 0
+        lt && lt.id && lt.priceCents > 0
       );
     }
   } catch {
@@ -518,8 +518,6 @@ function renderLessonTypeList() {
     return;
   }
   for (const lt of lessonTypes) {
-    const persons = clampPersons(lt.maxPersons, lt);
-    const totalCents = lt.pricePerPersonCents * persons;
     const li = document.createElement('li');
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -531,7 +529,7 @@ function renderLessonTypeList() {
     label.textContent = lt.label;
     const price = document.createElement('span');
     price.className = 'lesson-type-card-price';
-    price.textContent = formatEuro(totalCents);
+    price.textContent = formatEuro(lt.priceCents);
     btn.appendChild(label);
     btn.appendChild(price);
     btn.addEventListener('click', () => onLessonPicked(lt.id));
@@ -557,19 +555,9 @@ function selectedLessonType() {
   return lessonTypes.find((lt) => lt.id === selectedLessonId) || null;
 }
 
-function clampPersons(n, type) {
-  const min = type ? type.minPersons : 1;
-  const max = type ? type.maxPersons : 1;
-  if (!Number.isFinite(n)) return min;
-  return Math.max(min, Math.min(max, Math.round(n)));
-}
-
 function priceCents() {
   const lt = selectedLessonType();
-  if (!lt) return 0;
-  // Each lesson type now encodes a fixed person count (min === max), so
-  // the total is just per-person × maxPersons. Kept defensive.
-  return lt.pricePerPersonCents * clampPersons(lt.maxPersons, lt);
+  return lt ? (lt.priceCents || 0) : 0;
 }
 
 // ── Form refs + live validation ──────────────────────────────────────────
@@ -617,7 +605,6 @@ bookingForm.addEventListener('submit', async (e) => {
   const studentPhone = phoneInp.value.trim();
   const comment      = commentInp.value.trim();
   const lt           = selectedLessonType();
-  const numPersons   = lt ? clampPersons(lt.maxPersons, lt) : 1;
 
   if (!lt) {
     showError(formError, t('form.errors.missingLesson'));
@@ -659,7 +646,6 @@ bookingForm.addEventListener('submit', async (e) => {
         studentEmail,
         studentPhone: studentPhone || undefined,
         lessonType: lt.id,
-        numPersons,
         comment: comment || undefined,
       }
     : {
@@ -669,7 +655,6 @@ bookingForm.addEventListener('submit', async (e) => {
         studentEmail,
         studentPhone: studentPhone || undefined,
         lessonType: lt.id,
-        numPersons,
         comment: comment || undefined,
       };
 

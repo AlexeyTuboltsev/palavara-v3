@@ -3,8 +3,8 @@
 /**
  * GET /lesson-types
  *
- * Returns the catalog of lesson types — the booking page renders the
- * dropdown options + price math from this single source of truth.
+ * Returns the catalog of lesson types — the booking page renders its
+ * picker cards from this list.
  *
  * Response shape:
  *   {
@@ -12,16 +12,17 @@
  *       {
  *         "id": "single",
  *         "label": "Single lesson",
- *         "pricePerPersonCents": 9500,
- *         "minPersons": 1,
- *         "maxPersons": 1
+ *         "priceCents": 9500,
+ *         "numPersons": 1,
+ *         "sessionCount": 1
  *       },
  *       ...
  *     ]
  *   }
  *
- * Total price is always pricePerPersonCents × numPersons. A "single"
- * lesson is just minPersons = maxPersons = 1.
+ * The price the customer pays is `priceCents` flat — there is no per-person
+ * multiplication. `numPersons` is informational (studio bookkeeping) and is
+ * snapshotted onto the booking row at create time.
  *
  * Inactive rows (`active = false`) are filtered out so the owner can
  * archive a lesson type without deleting the row.
@@ -51,16 +52,11 @@ exports.handler = async () => {
 
     const lessonTypes = items
       .map((it) => ({
-        id:                  it.id,
-        label:               it.label,
-        pricePerPersonCents: it.pricePerPersonCents,
-        minPersons:          it.minPersons ?? 1,
-        maxPersons:          it.maxPersons ?? 1,
-        // sessionCount: 1 = single session, 4 = 4-session cycle. Existing rows
-        // pre-date the field and default to 1 (single session). The booking
-        // page hides any lesson type with sessionCount !== 1 until the cycle
-        // UI ships.
-        sessionCount:        it.sessionCount ?? 1,
+        id:           it.id,
+        label:        it.label,
+        priceCents:   it.priceCents,
+        numPersons:   it.numPersons ?? 1,
+        sessionCount: it.sessionCount ?? 1,
       }))
       .sort((a, b) => {
         // Re-fetch sortOrder from the original items for stable ordering.
