@@ -17,5 +17,6 @@ capabilities = "CAPABILITY_IAM"
 # parameter you don't pass on a subsequent deploy.
 parameter_overrides = [
   "PayPalApiBase=https://api-m.sandbox.paypal.com",
+  "GoogleCalendarId=palavarastudio@gmail.com",
 ]
 resolve_s3 = true
