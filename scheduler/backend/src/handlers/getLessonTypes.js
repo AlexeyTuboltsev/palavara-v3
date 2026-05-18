@@ -56,6 +56,11 @@ exports.handler = async () => {
         pricePerPersonCents: it.pricePerPersonCents,
         minPersons:          it.minPersons ?? 1,
         maxPersons:          it.maxPersons ?? 1,
+        // sessionCount: 1 = single session, 4 = 4-session cycle. Existing rows
+        // pre-date the field and default to 1 (single session). The booking
+        // page hides any lesson type with sessionCount !== 1 until the cycle
+        // UI ships.
+        sessionCount:        it.sessionCount ?? 1,
       }))
       .sort((a, b) => {
         // Re-fetch sortOrder from the original items for stable ordering.

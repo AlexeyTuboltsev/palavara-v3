@@ -9,6 +9,7 @@
  *   pricePerPersonCents,     // required, positive int
  *   minPersons,              // optional, default 1
  *   maxPersons,              // optional, default = minPersons
+ *   sessionCount,            // optional, default 1 (1 = single session, 4 = 4-session cycle)
  *   sortOrder,               // optional, default 100 (so it sorts after the seed rows)
  *   active                   // optional, default true
  * }
@@ -48,6 +49,7 @@ exports.handler = async (event) => {
       pricePerPersonCents: validation.pricePerPersonCents,
       minPersons:          validation.minPersons,
       maxPersons:          validation.maxPersons,
+      sessionCount:        validation.sessionCount,
       sortOrder:           validation.sortOrder,
       active:              validation.active,
       createdAt:           now,
@@ -97,6 +99,10 @@ function validate(body) {
   if (!Number.isInteger(sortOrder)) {
     return { error: 'sortOrder must be an integer' };
   }
+  const sessionCount = body.sessionCount == null ? 1 : Number(body.sessionCount);
+  if (sessionCount !== 1 && sessionCount !== 4) {
+    return { error: 'sessionCount must be 1 (single session) or 4 (4-session cycle)' };
+  }
   const active = body.active == null ? true : Boolean(body.active);
 
   return {
@@ -105,6 +111,7 @@ function validate(body) {
     pricePerPersonCents: ppc,
     minPersons,
     maxPersons,
+    sessionCount,
     sortOrder,
     active,
   };
@@ -117,6 +124,7 @@ function strip(item) {
     pricePerPersonCents: item.pricePerPersonCents,
     minPersons:          item.minPersons,
     maxPersons:          item.maxPersons,
+    sessionCount:        item.sessionCount,
     active:              item.active,
     sortOrder:           item.sortOrder,
     createdAt:           item.createdAt,

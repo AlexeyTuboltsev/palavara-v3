@@ -4,8 +4,8 @@
  * PUT /admin/lesson-types/{id}
  *
  * Body (JSON): partial — any subset of {label, pricePerPersonCents,
- * minPersons, maxPersons, sortOrder, active}. The id is the URL path,
- * not the body, and is immutable (rename = create new, delete old).
+ * minPersons, maxPersons, sessionCount, sortOrder, active}. The id is the
+ * URL path, not the body, and is immutable (rename = create new, delete old).
  *
  * 404 if the row doesn't exist.
  */
@@ -70,6 +70,14 @@ exports.handler = async (event) => {
       sets.push('sortOrder = :sortOrder');
       values[':sortOrder'] = n;
     }
+    if (body.sessionCount != null) {
+      const n = Number(body.sessionCount);
+      if (n !== 1 && n !== 4) {
+        return badRequest('sessionCount must be 1 (single) or 4 (4-session cycle)');
+      }
+      sets.push('sessionCount = :sessionCount');
+      values[':sessionCount'] = n;
+    }
     if (body.active != null) {
       sets.push('#active = :active');
       names['#active']  = 'active';
@@ -119,6 +127,7 @@ function strip(item) {
     pricePerPersonCents: item.pricePerPersonCents,
     minPersons:          item.minPersons,
     maxPersons:          item.maxPersons,
+    sessionCount:        item.sessionCount,
     active:              item.active,
     sortOrder:           item.sortOrder,
     createdAt:           item.createdAt,

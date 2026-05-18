@@ -165,7 +165,7 @@ body {
   flex-direction: column;
 }
 
-/* Prominent centered title above the form (date · time slot).
+/* Prominent centered title above the form (lesson · date · time slot).
    Hidden on mobile — mobile shows the title in the page header. */
 .step-context {
   font-size: 1.4rem;
@@ -174,8 +174,59 @@ body {
   color: var(--color-blue);
   margin-bottom: 1.5rem;
 }
+.step-context .summary-lesson {
+  font-size: 1rem;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.55);
+}
 @media (max-width: 600px) {
   .step-context { display: none; }
+}
+
+/* Lesson-type picker (step 1) — vertical list of cards. Each card spans
+   the row, click anywhere selects. Same styling on mobile (just narrower). */
+.lesson-type-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lesson-type-loading {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+  padding: 24px;
+}
+.lesson-type-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--color-surface);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.lesson-type-card:hover,
+.lesson-type-card:focus-visible {
+  border-color: var(--color-blue);
+  background: color-mix(in srgb, var(--color-blue) 4%, white);
+  outline: none;
+}
+.lesson-type-card-label {
+  flex: 1;
+  font-size: 1.05rem;
+}
+.lesson-type-card-price {
+  font-weight: 500;
+  color: var(--color-blue);
+  white-space: nowrap;
 }
 
 .step-close {

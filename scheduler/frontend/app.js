@@ -1,14 +1,14 @@
 /**
  * Palavara Scheduler — main booking page script (app.js)
  *
- * Desktop:
- *   1. Calendar with slots rendered inside each day cell.
- *   2. Click a slot → form (step 2).
+ * Three-step flow:
+ *   1. Pick a lesson type (cards listing the active types).
+ *   2. Pick a slot — calendar on desktop, drawer-list on mobile.
+ *   3. Fill the form + Pay with PayPal.
  *
- * Mobile (≤ 600 px):
- *   1. Vertical list of dates that have workshops.
- *   2. Tap a date → drawer expands inline with that date's slots.
- *   3. Tap a slot → form (step 2).
+ * 4-session cycle lesson types (sessionCount === 4) are filtered out in
+ * step 1 for now — they need the multi-slot picker that's coming in a
+ * later PR.
  *
  * All visible strings come from i18next (locales/<lng>/translation.json).
  * The page is wired so this file is loaded BEFORE i18next.init() resolves —
@@ -24,13 +24,17 @@ const STUDIO_URL = 'https://studio.palavara.com/';
 const t = (...args) => window.i18next ? window.i18next.t(...args) : args[0];
 
 // ── DOM refs ───────────────────────────────────────────────────────────────
+const stepLesson  = document.getElementById('step-lesson');
 const stepDate    = document.getElementById('step-date');
 const stepForm    = document.getElementById('step-form');
+const lessonTypeList = document.getElementById('lessonTypeList');
+const lessonError = document.getElementById('lessonError');
 const calendarGrid = document.getElementById('calendarGrid');
 const calMonthLabel = document.getElementById('calMonthLabel');
 const calPrev = document.getElementById('calPrev');
 const calNext = document.getElementById('calNext');
 const dateList = document.getElementById('dateList');
+const summaryLesson = document.getElementById('summaryLesson');
 const summaryDate = document.getElementById('summaryDate');
 const summarySlot = document.getElementById('summarySlot');
 const bookingForm = document.getElementById('bookingForm');
@@ -42,13 +46,14 @@ const headerTitle = document.getElementById('headerTitle');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const loadingMsg  = document.getElementById('loadingMsg');
 
-const STEPS = [stepDate, stepForm];
+const STEPS = [stepLesson, stepDate, stepForm];
 
 // ── State ──────────────────────────────────────────────────────────────────
 let availableDates = [];
 let availableDateSet = new Set();
 let slotsByDate = {};
 let lessonTypes = [];
+let selectedLessonId = '';
 let calendarYear  = 0;
 let calendarMonth = 0;
 let selectedDate = '';
@@ -306,62 +311,81 @@ function onSlotPicked(iso, slot) {
   selectedDate  = iso;
   selectedStart = slot.start;
   selectedEnd   = slot.end;
+  const lt = selectedLessonType();
   const dateLong = formatDateLong(iso);
   const slotRange = formatSlotRange(slot);
+  summaryLesson.textContent = lt ? lt.label : '';
   summaryDate.textContent = dateLong;
   summarySlot.textContent = slotRange;
   headerTitle.textContent = `${dateLong} · ${slotRange}`;
   showStep(stepForm);
+  refreshSubmitLabel();
   updateBookBtnEnabled();
   document.getElementById('studentName').focus();
 }
 
-// ── Form: lesson type → persons reveal + live price + live validation ────
-const nameInp       = document.getElementById('studentName');
-const emailInp      = document.getElementById('studentEmail');
-const lessonTypeSel = document.getElementById('lessonType');
-const personsGroup  = document.getElementById('personsGroup');
-const numPersonsInp = document.getElementById('numPersons');
-const phoneInp      = document.getElementById('studentPhone');
-const commentInp    = document.getElementById('comment');
-
+// ── Step 1: lesson-type picker ───────────────────────────────────────────
 async function loadLessonTypes() {
   try {
     const r = await fetch(`${API_BASE}/lesson-types`);
-    if (!r.ok) return;
-    const d = await r.json();
-    lessonTypes = (d.lessonTypes || []).filter((lt) => lt && lt.id && lt.pricePerPersonCents > 0);
+    if (!r.ok) {
+      lessonTypes = [];
+    } else {
+      const d = await r.json();
+      lessonTypes = (d.lessonTypes || []).filter((lt) =>
+        lt && lt.id && lt.pricePerPersonCents > 0
+        // Phase 1: hide 4-session cycles until the multi-slot picker ships.
+        && (lt.sessionCount ?? 1) === 1
+      );
+    }
   } catch {
     lessonTypes = [];
   }
-  populateLessonTypes();
-  updateLessonUi();
+  renderLessonTypeList();
 }
 
-function populateLessonTypes() {
-  lessonTypeSel.innerHTML = '';
+function renderLessonTypeList() {
+  lessonTypeList.innerHTML = '';
   if (lessonTypes.length === 0) {
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = t('form.lessonType.noTypes');
-    lessonTypeSel.appendChild(opt);
-    lessonTypeSel.disabled = true;
+    const li = document.createElement('li');
+    li.className = 'lesson-type-loading';
+    li.textContent = t('lessonType.noTypes');
+    lessonTypeList.appendChild(li);
     return;
   }
-  lessonTypeSel.disabled = false;
   for (const lt of lessonTypes) {
-    const opt = document.createElement('option');
-    opt.value = lt.id;
-    const price = formatEuro(lt.pricePerPersonCents);
-    opt.textContent = lt.maxPersons > lt.minPersons
-      ? t('form.lessonType.optionPerPerson', { label: lt.label, price })
-      : t('form.lessonType.optionFlat', { label: lt.label, price });
-    lessonTypeSel.appendChild(opt);
+    const persons = clampPersons(lt.maxPersons, lt);
+    const totalCents = lt.pricePerPersonCents * persons;
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'lesson-type-card';
+    btn.dataset.id = lt.id;
+    btn.innerHTML = '';
+    const label = document.createElement('span');
+    label.className = 'lesson-type-card-label';
+    label.textContent = lt.label;
+    const price = document.createElement('span');
+    price.className = 'lesson-type-card-price';
+    price.textContent = formatEuro(totalCents);
+    btn.appendChild(label);
+    btn.appendChild(price);
+    btn.addEventListener('click', () => onLessonPicked(lt.id));
+    li.appendChild(btn);
+    lessonTypeList.appendChild(li);
   }
+}
+
+function onLessonPicked(id) {
+  const lt = lessonTypes.find((x) => x.id === id);
+  if (!lt) return;
+  selectedLessonId = id;
+  hideError(lessonError);
+  showStep(stepDate);
 }
 
 function selectedLessonType() {
-  return lessonTypes.find((lt) => lt.id === lessonTypeSel.value) || null;
+  return lessonTypes.find((lt) => lt.id === selectedLessonId) || null;
 }
 
 function clampPersons(n, type) {
@@ -374,20 +398,25 @@ function clampPersons(n, type) {
 function priceCents() {
   const lt = selectedLessonType();
   if (!lt) return 0;
-  return lt.pricePerPersonCents * clampPersons(parseInt(numPersonsInp.value, 10), lt);
+  // Each lesson type now encodes a fixed person count (min === max), so
+  // the total is just per-person × maxPersons. Kept defensive.
+  return lt.pricePerPersonCents * clampPersons(lt.maxPersons, lt);
 }
+
+// ── Form refs + live validation ──────────────────────────────────────────
+const nameInp    = document.getElementById('studentName');
+const emailInp   = document.getElementById('studentEmail');
+const phoneInp   = document.getElementById('studentPhone');
+const commentInp = document.getElementById('comment');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isFormValid() {
+  if (!selectedLessonType()) return false;
   const n = nameInp.value.trim();
   const e = emailInp.value.trim();
   if (n.length < 2 || n.length > 99) return false;
   if (!EMAIL_RE.test(e))             return false;
   if (commentInp.value.length > 500) return false;
-  const lt = selectedLessonType();
-  if (!lt)                           return false;
-  const p = clampPersons(parseInt(numPersonsInp.value, 10), lt);
-  if (p < lt.minPersons || p > lt.maxPersons) return false;
   return true;
 }
 function updateBookBtnEnabled() {
@@ -398,36 +427,11 @@ function refreshSubmitLabel() {
   bookBtnLabel.textContent = t('form.submitWithPrice', { price: formatEuro(priceCents()) });
 }
 
-function updateLessonUi() {
-  const lt = selectedLessonType();
-  if (lt && lt.maxPersons > lt.minPersons) {
-    personsGroup.classList.remove('hidden');
-    numPersonsInp.min = String(lt.minPersons);
-    numPersonsInp.max = String(lt.maxPersons);
-    const current = parseInt(numPersonsInp.value, 10);
-    numPersonsInp.value = String(clampPersons(current, lt));
-  } else {
-    personsGroup.classList.add('hidden');
-  }
-  refreshSubmitLabel();
-  updateBookBtnEnabled();
-}
-
-lessonTypeSel.addEventListener('change', updateLessonUi);
-numPersonsInp.addEventListener('input', () => {
-  const lt = selectedLessonType();
-  if (!lt) return;
-  const clamped = clampPersons(parseInt(numPersonsInp.value, 10), lt);
-  if (String(clamped) !== numPersonsInp.value) numPersonsInp.value = String(clamped);
-  refreshSubmitLabel();
-  updateBookBtnEnabled();
-});
-
 [nameInp, emailInp, commentInp].forEach((el) => {
   el.addEventListener('input', updateBookBtnEnabled);
 });
 
-// ── Step 2: submit ────────────────────────────────────────────────────────
+// ── Step 3: submit ────────────────────────────────────────────────────────
 bookingForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   hideError(formError);
@@ -436,10 +440,13 @@ bookingForm.addEventListener('submit', async (e) => {
   const studentEmail = emailInp.value.trim();
   const studentPhone = phoneInp.value.trim();
   const comment      = commentInp.value.trim();
-  const lessonType   = lessonTypeSel.value;
-  const lessonTypeObj = selectedLessonType();
-  const numPersons   = clampPersons(parseInt(numPersonsInp.value, 10), lessonTypeObj);
+  const lt           = selectedLessonType();
+  const numPersons   = lt ? clampPersons(lt.maxPersons, lt) : 1;
 
+  if (!lt) {
+    showError(formError, t('form.errors.missingLesson'));
+    return;
+  }
   if (studentName.length < 2 || studentName.length > 99) {
     showError(formError, t('form.errors.nameLength'));
     nameInp.focus();
@@ -473,7 +480,7 @@ bookingForm.addEventListener('submit', async (e) => {
         studentName,
         studentEmail,
         studentPhone: studentPhone || undefined,
-        lessonType,
+        lessonType: lt.id,
         numPersons,
         comment: comment || undefined,
       }),
@@ -494,6 +501,12 @@ function backFromStep(step) {
   if (step === stepForm) {
     headerTitle.textContent = '';
     showStep(stepDate);
+  } else if (step === stepDate) {
+    selectedLessonId = '';
+    selectedDate = '';
+    selectedStart = '';
+    selectedEnd = '';
+    showStep(stepLesson);
   }
 }
 

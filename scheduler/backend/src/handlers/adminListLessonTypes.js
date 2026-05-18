@@ -57,6 +57,7 @@ function strip(item) {
     pricePerPersonCents: item.pricePerPersonCents,
     minPersons:          item.minPersons,
     maxPersons:          item.maxPersons,
+    sessionCount:        item.sessionCount ?? 1,
     active:              item.active,
     sortOrder:           item.sortOrder,
     createdAt:           item.createdAt,
