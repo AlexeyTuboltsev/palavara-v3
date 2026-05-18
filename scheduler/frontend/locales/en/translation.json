@@ -13,6 +13,12 @@
     "cancelTitle": "Cancel booking — Palavara Studio"
   },
 
+  "lessonType": {
+    "ariaList": "Lesson types",
+    "loading": "Loading lesson types…",
+    "noTypes": "No lesson types available right now. Please try again later."
+  },
+
   "datePicker": {
     "calendarPrev": "Previous month",
     "calendarNext": "Next month",
@@ -29,7 +35,13 @@
     "noDates": "No upcoming workshops.",
     "noSlotsForDate": "No slots available for this date.",
     "errorLoading": "Could not load workshop dates. Please refresh the page.",
-    "errorAvailability": "Failed to load availability. Please try again."
+    "errorAvailability": "Failed to load availability. Please try again.",
+    "cycleProgress": "Picked {{picked}} of {{total}} sessions. {{hint}}",
+    "cycleProgressFull": "All {{total}} sessions selected. Click Continue to finish booking.",
+    "cycleHintMid": "Pick session {{n}}/{{total}} — must be a later date than the previous session and not the same day.",
+    "cycleHintFinal": "Pick session {{n}}/{{total}} — must be at least {{days}} days after the previous session.",
+    "cycleClear": "Clear selections",
+    "cycleContinue": "Continue"
   },
 
   "form": {
@@ -65,6 +77,7 @@
       "nameLength": "Please enter your full name (2 to 99 characters).",
       "emailFormat": "Please enter a valid email address.",
       "commentLength": "Comment must be 500 characters or fewer.",
+      "missingLesson": "Missing lesson type. Please go back and select one.",
       "missingSlot": "Missing date or time slot. Please go back and select again.",
       "noPaymentUrl": "No payment URL returned. Please try again.",
       "generic": "Failed to create booking. Please try again."
@@ -82,7 +95,8 @@
       "date": "Date",
       "time": "Time",
       "paid": "Paid",
-      "bookingId": "Booking ID"
+      "bookingId": "Booking ID",
+      "sessionOfTotal": "Session {{n}}/{{total}}"
     },
     "personsSuffix_one": "{{count}} person",
     "personsSuffix_other": "{{count}} people",

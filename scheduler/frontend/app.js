@@ -1,14 +1,19 @@
 /**
  * Palavara Scheduler — main booking page script (app.js)
  *
- * Desktop:
- *   1. Calendar with slots rendered inside each day cell.
- *   2. Click a slot → form (step 2).
+ * Three-step flow:
+ *   1. Pick a lesson type (cards listing the active types).
+ *   2. Pick a slot (single session) OR pick N slots (4-session cycle).
+ *      Calendar on desktop, drawer-list on mobile.
+ *   3. Fill the form + Pay with PayPal.
  *
- * Mobile (≤ 600 px):
- *   1. Vertical list of dates that have workshops.
- *   2. Tap a date → drawer expands inline with that date's slots.
- *   3. Tap a slot → form (step 2).
+ * Cycle mode (sessionCount > 1): the calendar lets the user pick N slots
+ * in chronological order. Constraints validated client-side and mirrored
+ * server-side in cycleLogic.validateCycleSlots:
+ *   - Sessions 1..N-1 must each be on a different calendar date.
+ *   - Session N must be ≥ 7 days after the previous session.
+ * Slots that violate the rules given the current picks are rendered
+ * disabled (.cal-slot.invalid); already-picked slots get .cal-slot.selected.
  *
  * All visible strings come from i18next (locales/<lng>/translation.json).
  * The page is wired so this file is loaded BEFORE i18next.init() resolves —
@@ -24,13 +29,21 @@ const STUDIO_URL = 'https://studio.palavara.com/';
 const t = (...args) => window.i18next ? window.i18next.t(...args) : args[0];
 
 // ── DOM refs ───────────────────────────────────────────────────────────────
+const stepLesson  = document.getElementById('step-lesson');
 const stepDate    = document.getElementById('step-date');
 const stepForm    = document.getElementById('step-form');
+const lessonTypeList = document.getElementById('lessonTypeList');
+const lessonError = document.getElementById('lessonError');
+const cycleProgress     = document.getElementById('cycleProgress');
+const cycleProgressText = document.getElementById('cycleProgressText');
+const cycleClearBtn     = document.getElementById('cycleClearBtn');
+const cycleContinueBtn  = document.getElementById('cycleContinueBtn');
 const calendarGrid = document.getElementById('calendarGrid');
 const calMonthLabel = document.getElementById('calMonthLabel');
 const calPrev = document.getElementById('calPrev');
 const calNext = document.getElementById('calNext');
 const dateList = document.getElementById('dateList');
+const summaryLesson = document.getElementById('summaryLesson');
 const summaryDate = document.getElementById('summaryDate');
 const summarySlot = document.getElementById('summarySlot');
 const bookingForm = document.getElementById('bookingForm');
@@ -42,18 +55,25 @@ const headerTitle = document.getElementById('headerTitle');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const loadingMsg  = document.getElementById('loadingMsg');
 
-const STEPS = [stepDate, stepForm];
+const STEPS = [stepLesson, stepDate, stepForm];
 
 // ── State ──────────────────────────────────────────────────────────────────
 let availableDates = [];
 let availableDateSet = new Set();
 let slotsByDate = {};
 let lessonTypes = [];
+let selectedLessonId = '';
 let calendarYear  = 0;
 let calendarMonth = 0;
 let selectedDate = '';
 let selectedStart = '';
 let selectedEnd   = '';
+
+// Cycle-mode picker state. Empty when picking a single-session lesson.
+// Filled in chronological order; rules are enforced at click time.
+let selectedSlots = []; // [{date, start, end}, ...]
+
+const MIN_CYCLE_GAP_DAYS = 7;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function showStep(step) {
@@ -201,6 +221,7 @@ function renderCalendar() {
         btn.type = 'button';
         btn.className = 'cal-slot';
         btn.textContent = slot.start;
+        decorateSlotButton(btn, c.iso, slot);
         btn.addEventListener('click', () => onSlotPicked(c.iso, slot));
         slotsBox.appendChild(btn);
       }
@@ -269,10 +290,24 @@ function renderDrawerSlots(drawer, iso) {
     sb.type = 'button';
     sb.className = 'slot-btn';
     sb.textContent = formatSlotRange(slot);
+    decorateSlotButton(sb, iso, slot);
     sb.addEventListener('click', () => onSlotPicked(iso, slot));
     grid.appendChild(sb);
   }
   drawer.appendChild(grid);
+}
+
+/** Apply .selected / .invalid classes + disabled state for cycle-mode picks. */
+function decorateSlotButton(btn, iso, slot) {
+  if (!isInCycleMode()) return;
+  if (isSlotAlreadySelected(iso, slot)) {
+    btn.classList.add('selected');
+    return;
+  }
+  if (!isSlotValidForNextPick(iso, slot)) {
+    btn.classList.add('invalid');
+    btn.disabled = true;
+  }
 }
 
 function toggleDrawer(head, drawer, iso) {
@@ -301,93 +336,251 @@ calNext.addEventListener('click', () => {
   renderCalendar();
 });
 
-// ── Slot picked: store + open the form ───────────────────────────────────
+// ── Slot picked: dispatch by mode ────────────────────────────────────────
 function onSlotPicked(iso, slot) {
+  const lt = selectedLessonType();
+  if (lt && (lt.sessionCount ?? 1) > 1) {
+    onCycleSlotPicked(iso, slot);
+    return;
+  }
   selectedDate  = iso;
   selectedStart = slot.start;
   selectedEnd   = slot.end;
   const dateLong = formatDateLong(iso);
   const slotRange = formatSlotRange(slot);
+  summaryLesson.textContent = lt ? lt.label : '';
   summaryDate.textContent = dateLong;
   summarySlot.textContent = slotRange;
   headerTitle.textContent = `${dateLong} · ${slotRange}`;
   showStep(stepForm);
+  refreshSubmitLabel();
   updateBookBtnEnabled();
   document.getElementById('studentName').focus();
 }
 
-// ── Form: lesson type → persons reveal + live price + live validation ────
-const nameInp       = document.getElementById('studentName');
-const emailInp      = document.getElementById('studentEmail');
-const lessonTypeSel = document.getElementById('lessonType');
-const personsGroup  = document.getElementById('personsGroup');
-const numPersonsInp = document.getElementById('numPersons');
-const phoneInp      = document.getElementById('studentPhone');
-const commentInp    = document.getElementById('comment');
+// ── Cycle-mode picker ────────────────────────────────────────────────────
+function daysBetweenIso(aIso, bIso) {
+  const aMs = Date.parse(aIso + 'T00:00:00Z');
+  const bMs = Date.parse(bIso + 'T00:00:00Z');
+  return Math.round((bMs - aMs) / 86400000);
+}
 
+/** Returns true if (iso, slot) can be the next pick given selectedSlots. */
+function isSlotValidForNextPick(iso, slot) {
+  if (!isInCycleMode()) return true;
+  const lt = selectedLessonType();
+  const N = lt.sessionCount;
+  const nextIndex = selectedSlots.length; // 0-based — pick #nextIndex+1
+  if (nextIndex >= N) return false; // already full
+
+  // Must be strictly after the previous pick (chronological order).
+  if (nextIndex > 0) {
+    const prev = selectedSlots[nextIndex - 1];
+    const prevKey = prev.date + 'T' + prev.start;
+    const curKey  = iso + 'T' + slot.start;
+    if (curKey <= prevKey) return false;
+  }
+
+  // Final session: ≥ 7 days after the previous session's date.
+  if (nextIndex === N - 1) {
+    const prev = selectedSlots[nextIndex - 1];
+    if (daysBetweenIso(prev.date, iso) < MIN_CYCLE_GAP_DAYS) return false;
+    return true;
+  }
+
+  // Sessions 1..N-1: different date from all previously picked.
+  for (let i = 0; i < nextIndex; i++) {
+    if (selectedSlots[i].date === iso) return false;
+  }
+  return true;
+}
+
+function isSlotAlreadySelected(iso, slot) {
+  return selectedSlots.some((s) => s.date === iso && s.start === slot.start);
+}
+
+function isInCycleMode() {
+  const lt = selectedLessonType();
+  return !!(lt && (lt.sessionCount ?? 1) > 1);
+}
+
+function onCycleSlotPicked(iso, slot) {
+  // Clicking an already-selected slot deselects it (and everything after).
+  const idx = selectedSlots.findIndex((s) => s.date === iso && s.start === slot.start);
+  if (idx >= 0) {
+    selectedSlots = selectedSlots.slice(0, idx);
+    afterCycleSelectionChange();
+    return;
+  }
+  if (!isSlotValidForNextPick(iso, slot)) return;
+  selectedSlots.push({ date: iso, start: slot.start, end: slot.end });
+  afterCycleSelectionChange();
+}
+
+function clearCycleSelection() {
+  selectedSlots = [];
+  afterCycleSelectionChange();
+}
+
+function afterCycleSelectionChange() {
+  renderCalendar();
+  renderDateList();
+  renderCycleProgress();
+}
+
+function continueFromCycleSelection() {
+  const lt = selectedLessonType();
+  if (!lt || selectedSlots.length !== lt.sessionCount) return;
+  // Header summary: list sessions on one line, full detail goes in stepForm.
+  summaryLesson.textContent = lt.label;
+  const lines = selectedSlots.map((s, i) =>
+    `Session ${i + 1}/${lt.sessionCount}: ${formatDateLong(s.date)} · ${s.start} – ${s.end}`
+  );
+  summaryDate.textContent = lines[0];
+  summarySlot.textContent = '';
+  // Override the .step-context with all four lines stacked.
+  const summary = document.querySelector('#step-form .step-context');
+  if (summary) {
+    summary.innerHTML = `<span class="summary-lesson">${escapeText(lt.label)}</span><br/>`
+      + lines.map((l) => escapeText(l)).join('<br/>');
+  }
+  headerTitle.textContent = `${lt.label} · ${selectedSlots.length} sessions`;
+  showStep(stepForm);
+  refreshSubmitLabel();
+  updateBookBtnEnabled();
+  document.getElementById('studentName').focus();
+}
+
+function escapeText(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function renderCycleProgress() {
+  if (!isInCycleMode()) {
+    cycleProgress.classList.add('hidden');
+    cycleContinueBtn.classList.add('hidden');
+    return;
+  }
+  const lt = selectedLessonType();
+  const N = lt.sessionCount;
+  const picked = selectedSlots.length;
+  cycleProgress.classList.remove('hidden');
+  if (picked < N) {
+    const nextIdx = picked + 1;
+    const hint = nextIdx === N
+      ? t('datePicker.cycleHintFinal', {
+          n: nextIdx, total: N, days: MIN_CYCLE_GAP_DAYS,
+        })
+      : t('datePicker.cycleHintMid', {
+          n: nextIdx, total: N,
+        });
+    cycleProgressText.textContent = t('datePicker.cycleProgress', {
+      picked, total: N, hint,
+    });
+    cycleContinueBtn.classList.add('hidden');
+  } else {
+    cycleProgressText.textContent = t('datePicker.cycleProgressFull', { total: N });
+    cycleContinueBtn.classList.remove('hidden');
+  }
+}
+
+cycleClearBtn.addEventListener('click', clearCycleSelection);
+cycleContinueBtn.addEventListener('click', continueFromCycleSelection);
+
+// ── Step 1: lesson-type picker ───────────────────────────────────────────
 async function loadLessonTypes() {
   try {
     const r = await fetch(`${API_BASE}/lesson-types`);
-    if (!r.ok) return;
-    const d = await r.json();
-    lessonTypes = (d.lessonTypes || []).filter((lt) => lt && lt.id && lt.pricePerPersonCents > 0);
+    if (!r.ok) {
+      lessonTypes = [];
+    } else {
+      const d = await r.json();
+      lessonTypes = (d.lessonTypes || []).filter((lt) =>
+        lt && lt.id && lt.priceCents > 0
+      );
+    }
   } catch {
     lessonTypes = [];
   }
-  populateLessonTypes();
-  updateLessonUi();
+  renderLessonTypeList();
 }
 
-function populateLessonTypes() {
-  lessonTypeSel.innerHTML = '';
+function renderLessonTypeList() {
+  lessonTypeList.innerHTML = '';
   if (lessonTypes.length === 0) {
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = t('form.lessonType.noTypes');
-    lessonTypeSel.appendChild(opt);
-    lessonTypeSel.disabled = true;
+    const li = document.createElement('li');
+    li.className = 'lesson-type-loading';
+    li.textContent = t('lessonType.noTypes');
+    lessonTypeList.appendChild(li);
     return;
   }
-  lessonTypeSel.disabled = false;
   for (const lt of lessonTypes) {
-    const opt = document.createElement('option');
-    opt.value = lt.id;
-    const price = formatEuro(lt.pricePerPersonCents);
-    opt.textContent = lt.maxPersons > lt.minPersons
-      ? t('form.lessonType.optionPerPerson', { label: lt.label, price })
-      : t('form.lessonType.optionFlat', { label: lt.label, price });
-    lessonTypeSel.appendChild(opt);
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'lesson-type-card';
+    btn.dataset.id = lt.id;
+    btn.innerHTML = '';
+    const label = document.createElement('span');
+    label.className = 'lesson-type-card-label';
+    label.textContent = lt.label;
+    const price = document.createElement('span');
+    price.className = 'lesson-type-card-price';
+    price.textContent = formatEuro(lt.priceCents);
+    btn.appendChild(label);
+    btn.appendChild(price);
+    btn.addEventListener('click', () => onLessonPicked(lt.id));
+    li.appendChild(btn);
+    lessonTypeList.appendChild(li);
   }
+}
+
+function onLessonPicked(id) {
+  const lt = lessonTypes.find((x) => x.id === id);
+  if (!lt) return;
+  selectedLessonId = id;
+  selectedSlots = [];
+  hideError(lessonError);
+  // Re-render to apply (or hide) the cycle decorations + progress.
+  renderCalendar();
+  renderDateList();
+  renderCycleProgress();
+  showStep(stepDate);
 }
 
 function selectedLessonType() {
-  return lessonTypes.find((lt) => lt.id === lessonTypeSel.value) || null;
-}
-
-function clampPersons(n, type) {
-  const min = type ? type.minPersons : 1;
-  const max = type ? type.maxPersons : 1;
-  if (!Number.isFinite(n)) return min;
-  return Math.max(min, Math.min(max, Math.round(n)));
+  return lessonTypes.find((lt) => lt.id === selectedLessonId) || null;
 }
 
 function priceCents() {
   const lt = selectedLessonType();
-  if (!lt) return 0;
-  return lt.pricePerPersonCents * clampPersons(parseInt(numPersonsInp.value, 10), lt);
+  return lt ? (lt.priceCents || 0) : 0;
 }
+
+// ── Form refs + live validation ──────────────────────────────────────────
+const nameInp    = document.getElementById('studentName');
+const emailInp   = document.getElementById('studentEmail');
+const phoneInp   = document.getElementById('studentPhone');
+const commentInp = document.getElementById('comment');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isFormValid() {
+  const lt = selectedLessonType();
+  if (!lt) return false;
+  // Cycle: need N slots picked. Single: need date + start.
+  if ((lt.sessionCount ?? 1) > 1) {
+    if (selectedSlots.length !== lt.sessionCount) return false;
+  } else if (!selectedDate || !selectedStart) {
+    return false;
+  }
   const n = nameInp.value.trim();
   const e = emailInp.value.trim();
   if (n.length < 2 || n.length > 99) return false;
   if (!EMAIL_RE.test(e))             return false;
   if (commentInp.value.length > 500) return false;
-  const lt = selectedLessonType();
-  if (!lt)                           return false;
-  const p = clampPersons(parseInt(numPersonsInp.value, 10), lt);
-  if (p < lt.minPersons || p > lt.maxPersons) return false;
   return true;
 }
 function updateBookBtnEnabled() {
@@ -398,36 +591,11 @@ function refreshSubmitLabel() {
   bookBtnLabel.textContent = t('form.submitWithPrice', { price: formatEuro(priceCents()) });
 }
 
-function updateLessonUi() {
-  const lt = selectedLessonType();
-  if (lt && lt.maxPersons > lt.minPersons) {
-    personsGroup.classList.remove('hidden');
-    numPersonsInp.min = String(lt.minPersons);
-    numPersonsInp.max = String(lt.maxPersons);
-    const current = parseInt(numPersonsInp.value, 10);
-    numPersonsInp.value = String(clampPersons(current, lt));
-  } else {
-    personsGroup.classList.add('hidden');
-  }
-  refreshSubmitLabel();
-  updateBookBtnEnabled();
-}
-
-lessonTypeSel.addEventListener('change', updateLessonUi);
-numPersonsInp.addEventListener('input', () => {
-  const lt = selectedLessonType();
-  if (!lt) return;
-  const clamped = clampPersons(parseInt(numPersonsInp.value, 10), lt);
-  if (String(clamped) !== numPersonsInp.value) numPersonsInp.value = String(clamped);
-  refreshSubmitLabel();
-  updateBookBtnEnabled();
-});
-
 [nameInp, emailInp, commentInp].forEach((el) => {
   el.addEventListener('input', updateBookBtnEnabled);
 });
 
-// ── Step 2: submit ────────────────────────────────────────────────────────
+// ── Step 3: submit ────────────────────────────────────────────────────────
 bookingForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   hideError(formError);
@@ -436,10 +604,12 @@ bookingForm.addEventListener('submit', async (e) => {
   const studentEmail = emailInp.value.trim();
   const studentPhone = phoneInp.value.trim();
   const comment      = commentInp.value.trim();
-  const lessonType   = lessonTypeSel.value;
-  const lessonTypeObj = selectedLessonType();
-  const numPersons   = clampPersons(parseInt(numPersonsInp.value, 10), lessonTypeObj);
+  const lt           = selectedLessonType();
 
+  if (!lt) {
+    showError(formError, t('form.errors.missingLesson'));
+    return;
+  }
   if (studentName.length < 2 || studentName.length > 99) {
     showError(formError, t('form.errors.nameLength'));
     nameInp.focus();
@@ -455,7 +625,13 @@ bookingForm.addEventListener('submit', async (e) => {
     commentInp.focus();
     return;
   }
-  if (!selectedDate || !selectedStart) {
+  const isCycle = (lt.sessionCount ?? 1) > 1;
+  if (isCycle) {
+    if (selectedSlots.length !== lt.sessionCount) {
+      showError(formError, t('form.errors.missingSlot'));
+      return;
+    }
+  } else if (!selectedDate || !selectedStart) {
     showError(formError, t('form.errors.missingSlot'));
     return;
   }
@@ -463,20 +639,30 @@ bookingForm.addEventListener('submit', async (e) => {
   bookBtn.disabled = true;
   showLoading(t('form.submitting'));
 
-  try {
-    const res = await fetch(`${API_BASE}/bookings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+  const body = isCycle
+    ? {
+        slots: selectedSlots.map((s) => ({ date: s.date, start: s.start })),
+        studentName,
+        studentEmail,
+        studentPhone: studentPhone || undefined,
+        lessonType: lt.id,
+        comment: comment || undefined,
+      }
+    : {
         date: selectedDate,
         start: selectedStart,
         studentName,
         studentEmail,
         studentPhone: studentPhone || undefined,
-        lessonType,
-        numPersons,
+        lessonType: lt.id,
         comment: comment || undefined,
-      }),
+      };
+
+  try {
+    const res = await fetch(`${API_BASE}/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
@@ -494,6 +680,14 @@ function backFromStep(step) {
   if (step === stepForm) {
     headerTitle.textContent = '';
     showStep(stepDate);
+  } else if (step === stepDate) {
+    selectedLessonId = '';
+    selectedDate = '';
+    selectedStart = '';
+    selectedEnd = '';
+    selectedSlots = [];
+    renderCycleProgress();
+    showStep(stepLesson);
   }
 }
 

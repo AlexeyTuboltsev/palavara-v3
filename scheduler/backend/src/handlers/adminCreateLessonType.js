@@ -4,13 +4,13 @@
  * POST /admin/lesson-types
  *
  * Body (JSON): {
- *   id,                      // required, slug — used in the URL of /admin/lesson-types/{id}
- *   label,                   // required, 1-100 chars
- *   pricePerPersonCents,     // required, positive int
- *   minPersons,              // optional, default 1
- *   maxPersons,              // optional, default = minPersons
- *   sortOrder,               // optional, default 100 (so it sorts after the seed rows)
- *   active                   // optional, default true
+ *   id,            // required, slug — used in the URL of /admin/lesson-types/{id}
+ *   label,         // required, 1-100 chars
+ *   priceCents,    // required, positive int — the total price charged
+ *   numPersons,    // optional, default 1 (informational headcount only)
+ *   sessionCount,  // optional, default 1 (1 = single session, 4 = 4-session cycle)
+ *   sortOrder,     // optional, default 100 (so it sorts after the seed rows)
+ *   active         // optional, default true
  * }
  *
  * Refuses to overwrite an existing id (use PUT /admin/lesson-types/{id} to update).
@@ -42,16 +42,16 @@ exports.handler = async (event) => {
 
     const now = new Date().toISOString();
     const item = {
-      PK:                  `LESSONTYPE#${validation.id}`,
-      id:                  validation.id,
-      label:               validation.label,
-      pricePerPersonCents: validation.pricePerPersonCents,
-      minPersons:          validation.minPersons,
-      maxPersons:          validation.maxPersons,
-      sortOrder:           validation.sortOrder,
-      active:              validation.active,
-      createdAt:           now,
-      updatedAt:           now,
+      PK:           `LESSONTYPE#${validation.id}`,
+      id:           validation.id,
+      label:        validation.label,
+      priceCents:   validation.priceCents,
+      numPersons:   validation.numPersons,
+      sessionCount: validation.sessionCount,
+      sortOrder:    validation.sortOrder,
+      active:       validation.active,
+      createdAt:    now,
+      updatedAt:    now,
     };
 
     try {
@@ -81,30 +81,30 @@ function validate(body) {
   if (typeof body.label !== 'string' || body.label.trim().length < 1 || body.label.length > 100) {
     return { error: 'label is required (1-100 chars)' };
   }
-  const ppc = Number(body.pricePerPersonCents);
-  if (!Number.isInteger(ppc) || ppc <= 0) {
-    return { error: 'pricePerPersonCents must be a positive integer (cents)' };
+  const priceCents = Number(body.priceCents);
+  if (!Number.isInteger(priceCents) || priceCents <= 0) {
+    return { error: 'priceCents must be a positive integer (cents)' };
   }
-  const minPersons = body.minPersons == null ? 1 : Number(body.minPersons);
-  if (!Number.isInteger(minPersons) || minPersons < 1) {
-    return { error: 'minPersons must be a positive integer' };
-  }
-  const maxPersons = body.maxPersons == null ? minPersons : Number(body.maxPersons);
-  if (!Number.isInteger(maxPersons) || maxPersons < minPersons) {
-    return { error: 'maxPersons must be an integer >= minPersons' };
+  const numPersons = body.numPersons == null ? 1 : Number(body.numPersons);
+  if (!Number.isInteger(numPersons) || numPersons < 1) {
+    return { error: 'numPersons must be a positive integer' };
   }
   const sortOrder = body.sortOrder == null ? 100 : Number(body.sortOrder);
   if (!Number.isInteger(sortOrder)) {
     return { error: 'sortOrder must be an integer' };
+  }
+  const sessionCount = body.sessionCount == null ? 1 : Number(body.sessionCount);
+  if (sessionCount !== 1 && sessionCount !== 4) {
+    return { error: 'sessionCount must be 1 (single session) or 4 (4-session cycle)' };
   }
   const active = body.active == null ? true : Boolean(body.active);
 
   return {
     id: body.id,
     label: body.label.trim(),
-    pricePerPersonCents: ppc,
-    minPersons,
-    maxPersons,
+    priceCents,
+    numPersons,
+    sessionCount,
     sortOrder,
     active,
   };
@@ -112,15 +112,15 @@ function validate(body) {
 
 function strip(item) {
   return {
-    id:                  item.id,
-    label:               item.label,
-    pricePerPersonCents: item.pricePerPersonCents,
-    minPersons:          item.minPersons,
-    maxPersons:          item.maxPersons,
-    active:              item.active,
-    sortOrder:           item.sortOrder,
-    createdAt:           item.createdAt,
-    updatedAt:           item.updatedAt,
+    id:           item.id,
+    label:        item.label,
+    priceCents:   item.priceCents,
+    numPersons:   item.numPersons,
+    sessionCount: item.sessionCount,
+    active:       item.active,
+    sortOrder:    item.sortOrder,
+    createdAt:    item.createdAt,
+    updatedAt:    item.updatedAt,
   };
 }
 

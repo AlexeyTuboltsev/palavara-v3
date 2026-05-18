@@ -7,8 +7,13 @@
  * `LESSONTYPE#<id>`). Fields:
  *   - id
  *   - label
- *   - pricePerPersonCents
- *   - minPersons / maxPersons
+ *   - priceCents       — the total price for this lesson type. Charged as-is;
+ *                        there is no per-person multiplication anywhere.
+ *   - numPersons       — informational headcount. Snapshotted onto the
+ *                        booking row for the studio's bookkeeping; the
+ *                        booking flow does NOT enforce it against the
+ *                        request and does NOT use it for pricing.
+ *   - sessionCount     — 1 (single session) or 4 (4-session cycle)
  *   - active
  *   - sortOrder
  *
@@ -38,39 +43,36 @@ async function getLessonType(id) {
 }
 
 /**
- * Validate {lessonType, numPersons} against the catalog and compute the
- * authoritative price.
+ * Validate a lesson type id against the catalog and return its trusted
+ * price + person count. The booking flow doesn't accept a customer-supplied
+ * person count or price — both come from the catalog row.
  *
  * @returns {Promise<
  *   | { ok: true, type: object, numPersons: number, amountCents: number }
  *   | { ok: false, error: string }
  * >}
  */
-async function resolveLessonTypeAndPrice({ lessonTypeId, numPersons }) {
+async function resolveLessonTypeAndPrice({ lessonTypeId }) {
   if (!lessonTypeId) return { ok: false, error: 'Missing required field: lessonType' };
 
   const type = await getLessonType(lessonTypeId);
   if (!type) return { ok: false, error: `Unknown lesson type: ${lessonTypeId}` };
   if (type.active === false) return { ok: false, error: `Lesson type "${lessonTypeId}" is no longer offered` };
 
-  const min = type.minPersons ?? 1;
-  const max = type.maxPersons ?? 1;
-  let n = parseInt(numPersons, 10);
-  if (!Number.isFinite(n)) n = min;
-  if (n < min || n > max) {
-    return { ok: false, error: `numPersons must be between ${min} and ${max} for ${type.label}` };
-  }
-
-  const ppCents = type.pricePerPersonCents;
-  if (!Number.isFinite(ppCents) || ppCents <= 0) {
+  const priceCents = type.priceCents;
+  if (!Number.isFinite(priceCents) || priceCents <= 0) {
     return { ok: false, error: `Lesson type "${lessonTypeId}" has no valid price configured` };
   }
+
+  const numPersons = Number.isFinite(type.numPersons) && type.numPersons > 0
+    ? type.numPersons
+    : 1;
 
   return {
     ok: true,
     type,
-    numPersons: n,
-    amountCents: ppCents * n,
+    numPersons,
+    amountCents: priceCents,
   };
 }
 

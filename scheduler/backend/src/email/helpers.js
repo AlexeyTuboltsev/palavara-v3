@@ -104,18 +104,16 @@ function foldIcsLines(text) {
 }
 
 /**
- * Build a VCALENDAR. method='REQUEST' for new bookings, 'CANCEL' to
- * remove the previously-sent event from the recipient's calendar.
- *
- * For CANCEL we increment SEQUENCE to 1 — calendar clients use this to
- * know the cancellation supersedes the original REQUEST (SEQUENCE:0).
+ * Build a single VEVENT block (without the VCALENDAR wrapper). Used as the
+ * building block for both single-event and multi-event (cycle) ICS files.
  */
-function buildIcs(booking, { method = 'REQUEST', fromAddress } = {}) {
+function buildVEvent(booking, { method, fromAddress, sessionLabel }) {
   const isHeld = booking.bookingType === 'held';
   const lessonLabel = booking.lessonTypeLabel || 'Workshop';
+  const cycleSuffix = sessionLabel ? ` (${sessionLabel})` : '';
   const summary = isHeld
     ? `Slot held — ${booking.paymentNote || 'studio reservation'}`
-    : `${lessonLabel} — ${booking.studentName}`;
+    : `${lessonLabel}${cycleSuffix} — ${booking.studentName}`;
   const descLines = isHeld
     ? [
         booking.paymentNote ? `Note: ${booking.paymentNote}` : 'Held by studio',
@@ -129,12 +127,7 @@ function buildIcs(booking, { method = 'REQUEST', fromAddress } = {}) {
   const desc = descLines.join('\\n');
 
   const isCancel = method === 'CANCEL';
-  const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Palavara Studio//Scheduler//EN',
-    'CALSCALE:GREGORIAN',
-    `METHOD:${method}`,
+  return [
     'BEGIN:VEVENT',
     `UID:${booking.bookingId}@studio.palavara.com`,
     `DTSTAMP:${icsUtcNow()}`,
@@ -148,6 +141,52 @@ function buildIcs(booking, { method = 'REQUEST', fromAddress } = {}) {
     `SEQUENCE:${isCancel ? '1' : '0'}`,
     'TRANSP:OPAQUE',
     'END:VEVENT',
+  ];
+}
+
+/**
+ * Build a VCALENDAR. method='REQUEST' for new bookings, 'CANCEL' to
+ * remove the previously-sent event from the recipient's calendar.
+ *
+ * For CANCEL we increment SEQUENCE to 1 — calendar clients use this to
+ * know the cancellation supersedes the original REQUEST (SEQUENCE:0).
+ */
+function buildIcs(booking, { method = 'REQUEST', fromAddress } = {}) {
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Palavara Studio//Scheduler//EN',
+    'CALSCALE:GREGORIAN',
+    `METHOD:${method}`,
+    ...buildVEvent(booking, { method, fromAddress }),
+    'END:VCALENDAR',
+  ].join('\r\n');
+
+  return foldIcsLines(lines) + '\r\n';
+}
+
+/**
+ * Build a single VCALENDAR with N VEVENTs — one per session of a 4-session
+ * cycle. Each VEVENT carries its own UID (from each booking's bookingId)
+ * so calendar clients track them independently; a CANCEL ICS with the same
+ * UIDs supersedes the originals.
+ */
+function buildCycleIcs(siblings, { method = 'REQUEST', fromAddress } = {}) {
+  const sorted = [...siblings].sort(
+    (a, b) => (a.sessionIndex ?? 0) - (b.sessionIndex ?? 0)
+  );
+  const total = sorted.length;
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Palavara Studio//Scheduler//EN',
+    'CALSCALE:GREGORIAN',
+    `METHOD:${method}`,
+    ...sorted.flatMap((row) => buildVEvent(row, {
+      method,
+      fromAddress,
+      sessionLabel: `session ${row.sessionIndex} of ${total}`,
+    })),
     'END:VCALENDAR',
   ].join('\r\n');
 
@@ -197,6 +236,7 @@ module.exports = {
   escapeHtml,
   stripDisplayName,
   buildIcs,
+  buildCycleIcs,
   buildGoogleCalendarUrl,
   buildCancelUrl,
 };
