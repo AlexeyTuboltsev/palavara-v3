@@ -13,6 +13,12 @@
     "cancelTitle": "Cancel booking — Palavara Studio"
   },
 
+  "lessonType": {
+    "ariaList": "Lesson types",
+    "loading": "Loading lesson types…",
+    "noTypes": "No lesson types available right now. Please try again later."
+  },
+
   "datePicker": {
     "calendarPrev": "Previous month",
     "calendarNext": "Next month",
@@ -65,6 +71,7 @@
       "nameLength": "Please enter your full name (2 to 99 characters).",
       "emailFormat": "Please enter a valid email address.",
       "commentLength": "Comment must be 500 characters or fewer.",
+      "missingLesson": "Missing lesson type. Please go back and select one.",
       "missingSlot": "Missing date or time slot. Please go back and select again.",
       "noPaymentUrl": "No payment URL returned. Please try again.",
       "generic": "Failed to create booking. Please try again."
