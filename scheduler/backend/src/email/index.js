@@ -253,7 +253,7 @@ async function sendCancellationConfirmation(booking) {
   const refunded = (booking.refundedAmountCents || 0) > 0;
   const refundLine = refunded
     ? `${formatPrice(booking.refundedAmountCents)} has been refunded to your PayPal account.`
-    : 'No refund per the >48h policy. The slot has been released for other bookings.';
+    : 'No refund — cancellations less than 7 days before the workshop are not refundable. The slot has been released for other bookings.';
 
   const cancelledByStudio = booking.cancelledBy === 'studio';
   const lessonLabelLower  = lessonLabelOf(booking).toLowerCase();
@@ -307,7 +307,7 @@ async function sendCancellationNotification(booking) {
   const refunded = (booking.refundedAmountCents || 0) > 0;
   const refundLine = refunded
     ? `Refund: ${formatPrice(booking.refundedAmountCents)} processed (PayPal refund id ${booking.paypalRefundId || '?'})`
-    : 'Refund: none (cancellation within 48h of workshop)';
+    : 'Refund: none (cancellation less than 7 days before the workshop)';
 
   const cancelledBy = booking.cancelledBy === 'studio' ? 'studio' : 'student';
 
@@ -469,7 +469,7 @@ async function sendCycleCancellationConfirmation(siblings) {
   const refunded = (lead.refundedAmountCents || 0) > 0;
   const refundLine = refunded
     ? `${formatPrice(lead.refundedAmountCents)} has been refunded to your PayPal account.`
-    : 'No refund per the >7-day cycle policy.';
+    : 'No refund — cancellations less than 7 days before the first session are not refundable.';
 
   const cancelledByStudio = lead.cancelledBy === 'studio';
   const lessonLabelLower  = lessonLabelOf(lead).toLowerCase();
@@ -526,7 +526,7 @@ async function sendCycleCancellationNotification(siblings) {
   const refunded = (lead.refundedAmountCents || 0) > 0;
   const refundLine = refunded
     ? `Refund: ${formatPrice(lead.refundedAmountCents)} processed (PayPal refund id ${lead.paypalRefundId || '?'})`
-    : 'Refund: none (cancellation within 7 days of the first session)';
+    : 'Refund: none (cancellation less than 7 days before the first session)';
   const cancelledBy = lead.cancelledBy === 'studio' ? 'studio' : 'student';
 
   const ctx = {

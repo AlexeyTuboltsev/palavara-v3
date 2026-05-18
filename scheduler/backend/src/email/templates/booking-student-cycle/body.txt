@@ -8,10 +8,8 @@ Your {{lessonLabelLower}} is confirmed. Here's your full schedule:
 
 Need to cancel? Use this link:
   {{cancelUrl}}
-Cancellations more than 7 days before the first session receive a full
-refund of the bundle. Later than that, no refund is possible.
-
-Need to reschedule a session? Please write to palavarastudio@gmail.com.
+Full refund of the bundle for cancellations made at least 7 days
+before the first session.
 
 For anything else, reply to this email or write to palavarastudio@gmail.com.
 

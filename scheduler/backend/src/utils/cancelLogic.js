@@ -5,15 +5,20 @@
  * email side-effects. Used by the student-facing /bookings/:id/cancel and
  * the admin-only /admin/bookings/:id/cancel handlers.
  *
- * Single-session refund window: 48 h before the slot.
- * 4-session cycle refund window: 7 days before the EARLIEST session.
- * Cancellation of a cycle cancels all sibling rows atomically and issues
- * a single PayPal refund for the bundle.
+ * Refund policy (same for singles and cycles): full refund if the
+ * cancellation happens at least 7 calendar days before the session
+ * (the earliest session, for cycles). Calendar-day arithmetic — a
+ * session on day D is refundable any time on day D-7 or earlier.
  *
- * Refund call is idempotent on PayPal's side (PayPal-Request-Id keyed by
- * bookingId for singles, or cycleId for cycles), so a second cancellation
- * attempt returns the same refund without double-refunding. The DB update
- * is conditional on status='confirmed' so it can only succeed once.
+ * Reschedule policy: up to 3 calendar days before the session. Not
+ * enforced by code today (reschedules are handled manually via email);
+ * the constant is exported so copy can stay in lockstep.
+ *
+ * Cancellation of a cycle cancels all sibling rows atomically and issues
+ * a single PayPal refund for the bundle. Refund call is idempotent on
+ * PayPal's side (PayPal-Request-Id keyed by bookingId for singles, or
+ * cycleId for cycles). The DB update is conditional on status='confirmed'
+ * so it can only succeed once.
  */
 
 const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
@@ -31,28 +36,30 @@ const { findCycleSiblings, transactUpdateAll } = require('./cycleLogic');
 const TABLE          = process.env.BOOKINGS_TABLE;
 const PRICE_CURRENCY = process.env.PRICE_CURRENCY || 'EUR';
 
-/** Single-session refund cutoff. */
-const SINGLE_REFUND_WINDOW_MS = 48 * 60 * 60 * 1000;
-
-/** 4-session cycle refund cutoff (measured from earliest session). */
-const CYCLE_REFUND_WINDOW_MS  = 7 * 24 * 60 * 60 * 1000;
+const REFUND_WINDOW_DAYS     = 7;
+const RESCHEDULE_WINDOW_DAYS = 3;
 
 /**
- * Parse a slot start (Europe/Berlin local time) into ms since epoch.
- * May 2026 is CEST (UTC+2); we hardcode it for now — see the original
- * note in this file before refactor. If slots later span DST boundaries
- * switch to a proper IANA offset lookup.
+ * Calendar-day diff between "today in Europe/Berlin" and a YYYY-MM-DD
+ * session date. Returns sessionDate - today in whole days, ignoring
+ * time-of-day. So a session on 2026-05-25 from "today" 2026-05-18
+ * returns 7 — eligible right up until end-of-day on the 18th.
  */
-function slotStartMs(date, timeSlot) {
-  if (!date) return NaN;
-  const local = `${date}T${timeSlot || '00:00'}:00+02:00`;
-  return Date.parse(local);
+function daysUntilSessionDate(dateYmd, nowMs = Date.now()) {
+  if (!dateYmd) return NaN;
+  const [y, m, d] = dateYmd.split('-').map(Number);
+  if (!y || !m || !d) return NaN;
+  const sessionUtcMidnight = Date.UTC(y, m - 1, d);
+  const todayYmd = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date(nowMs));
+  const [ty, tm, td] = todayYmd.split('-').map(Number);
+  const todayUtcMidnight = Date.UTC(ty, tm - 1, td);
+  return Math.round((sessionUtcMidnight - todayUtcMidnight) / 86_400_000);
 }
 
 /**
  * Compute refund eligibility. For a cycle, eligibility is measured against
- * the earliest session — once any session is within 7 days, the whole
- * bundle is past the refund window.
+ * the earliest session — once any session is within REFUND_WINDOW_DAYS, the
+ * whole bundle is past the refund window.
  *
  * @param {object} booking   The booking row the user is acting on.
  * @param {Array<object>=} cycleSiblings  Pre-fetched cycle rows (incl. `booking`).
@@ -62,23 +69,20 @@ function slotStartMs(date, timeSlot) {
 function isRefundEligible(booking, cycleSiblings, nowMs = Date.now()) {
   if (!booking || !booking.date) return false;
 
+  let targetDate = booking.date;
   if (booking.cycleId) {
     if (!Array.isArray(cycleSiblings) || cycleSiblings.length === 0) {
-      // Caller forgot to load siblings — be conservative.
       return false;
     }
-    let earliest = Infinity;
-    for (const row of cycleSiblings) {
-      const ms = slotStartMs(row.date, row.timeSlot);
-      if (!isNaN(ms) && ms < earliest) earliest = ms;
-    }
-    if (!isFinite(earliest)) return false;
-    return earliest - nowMs > CYCLE_REFUND_WINDOW_MS;
+    // YYYY-MM-DD sorts lexicographically the same as chronologically.
+    targetDate = cycleSiblings
+      .map((s) => s.date)
+      .filter(Boolean)
+      .sort()[0];
+    if (!targetDate) return false;
   }
 
-  const startMs = slotStartMs(booking.date, booking.timeSlot);
-  if (isNaN(startMs)) return false;
-  return startMs - nowMs > SINGLE_REFUND_WINDOW_MS;
+  return daysUntilSessionDate(targetDate, nowMs) >= REFUND_WINDOW_DAYS;
 }
 
 /**
@@ -224,6 +228,7 @@ async function processCancellation({ booking, alwaysRefund, cancelledBy, reason 
 module.exports = {
   processCancellation,
   isRefundEligible,
-  SINGLE_REFUND_WINDOW_MS,
-  CYCLE_REFUND_WINDOW_MS,
+  daysUntilSessionDate,
+  REFUND_WINDOW_DAYS,
+  RESCHEDULE_WINDOW_DAYS,
 };

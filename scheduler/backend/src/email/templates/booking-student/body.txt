@@ -8,10 +8,8 @@ Your {{lessonLabelLower}} is confirmed.
 
 Need to cancel? Use this link:
   {{cancelUrl}}
-Cancellations more than 48 hours before the workshop receive a full refund;
-later than that, no refund is possible.
-
-Need to reschedule? Please write to palavarastudio@gmail.com.
+Full refund for cancellations made at least 7 days before the workshop
+(the first session, for multi-session lessons).
 
 For anything else, reply to this email or write to palavarastudio@gmail.com.
 

@@ -5,7 +5,8 @@
  *
  * Student-facing cancellation. The token in the query string is a HMAC bound
  * to the booking id (set in the confirmation email). Refund is full only if
- * the cancellation is more than 48 hours before the workshop start.
+ * the cancellation happens at least 7 calendar days before the session (or
+ * the earliest session, for cycles). See utils/cancelLogic for the policy.
  *
  * Idempotent: a second call after a successful cancellation refetches the
  * cancelled row and returns it without re-refunding or re-emailing.

@@ -154,7 +154,7 @@ const variants = [
   {
     name: 'cancel-student',
     title: 'Cancellation — student (cancelled by student, refunded)',
-    description: '>48h before, full refund issued.',
+    description: '≥7 days before, full refund issued.',
     template: 'cancel-student',
     ctx: {
       studentName: 'Jane Smith',
