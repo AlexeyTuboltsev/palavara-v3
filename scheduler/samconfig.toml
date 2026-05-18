@@ -16,7 +16,7 @@ capabilities = "CAPABILITY_IAM"
 # CloudFormation will reuse previously-supplied parameter values for any
 # parameter you don't pass on a subsequent deploy.
 parameter_overrides = [
-  "PayPalApiBase=https://api-m.sandbox.paypal.com",
+  "PayPalApiBase=https://api-m.paypal.com",
   "GoogleCalendarId=palavarastudio@gmail.com",
 ]
 resolve_s3 = true
