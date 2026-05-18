@@ -27,11 +27,15 @@ Bei Buchungen per E-Mail erfolgt die Bezahlung nach Absprache vor Ort in bar ode
 
 Sofern nicht ausdrücklich im Preis enthalten, werden Material- und Brennkosten separat berechnet (z. B. pro Kilogramm). Die fertigen Arbeiten werden vor dem Glasur- und Brennprozess gewogen.
 
-### 4. Stornierung und Rückerstattung
+### 4. Stornierung, Umbuchung und Rückerstattung
 
-Eine kostenfreie Stornierung mit voller Rückerstattung des bereits gezahlten Teilnahmebetrags ist bis **48 Stunden vor Beginn des Workshops** möglich. Online gebuchte Workshops können dazu über den persönlichen Stornierungslink in der Buchungsbestätigungs-E-Mail storniert werden; die Rückerstattung erfolgt automatisch über PayPal.
+Eine kostenfreie Stornierung mit voller Rückerstattung des bereits gezahlten Teilnahmebetrags ist bis **mindestens 7 Kalendertage vor Beginn des Workshops** möglich. Bei mehrteiligen Lehrgängen (z. B. 4-Sessions-Kursen) ist der Stichtag die **erste Session**; eine Rückerstattung umfasst in diesem Fall das gesamte Paket.
+
+Online gebuchte Workshops können dazu über den persönlichen Stornierungslink in der Buchungsbestätigungs-E-Mail storniert werden; die Rückerstattung erfolgt automatisch über PayPal.
 
 Bei späterer Stornierung oder Nichterscheinen ist eine Rückerstattung ausgeschlossen, sofern der Platz nicht kurzfristig neu vergeben werden kann.
+
+Eine **Umbuchung** einer Session ist bis **mindestens 3 Kalendertage vor der jeweiligen Session** möglich und erfolgt formlos per E-Mail an [palavarastudio@gmail.com](mailto:palavarastudio@gmail.com).
 
 ### 5. Widerrufsrecht
 

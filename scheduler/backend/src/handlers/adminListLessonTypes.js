@@ -52,15 +52,15 @@ exports.handler = async (event) => {
 
 function strip(item) {
   return {
-    id:                  item.id,
-    label:               item.label,
-    pricePerPersonCents: item.pricePerPersonCents,
-    minPersons:          item.minPersons,
-    maxPersons:          item.maxPersons,
-    active:              item.active,
-    sortOrder:           item.sortOrder,
-    createdAt:           item.createdAt,
-    updatedAt:           item.updatedAt,
+    id:           item.id,
+    label:        item.label,
+    priceCents:   item.priceCents,
+    numPersons:   item.numPersons ?? 1,
+    sessionCount: item.sessionCount ?? 1,
+    active:       item.active,
+    sortOrder:    item.sortOrder,
+    createdAt:    item.createdAt,
+    updatedAt:    item.updatedAt,
   };
 }
 

@@ -22,6 +22,7 @@ const {
   priceLineText,
   escapeHtml,
   buildIcs,
+  buildCycleIcs,
   buildGoogleCalendarUrl,
   buildCancelUrl,
 } = require('./helpers');
@@ -72,6 +73,32 @@ function phoneBlocks(booking) {
   return {
     text: `\n  Phone:      ${phone}`,
     html: `<tr><td style="color:#6b7280">Phone</td><td>${escapeHtml(phone)}</td></tr>`,
+  };
+}
+
+/** Pre-rendered "Sessions" block for cycle emails. Text version is a
+ *  monospace-friendly list, HTML version is table rows that slot inside
+ *  the templates' existing <table>. Siblings come in any order; we sort
+ *  by sessionIndex so "Session 1" reads correctly. */
+function sessionBlocks(siblings) {
+  const sorted = [...siblings].sort(
+    (a, b) => (a.sessionIndex ?? 0) - (b.sessionIndex ?? 0)
+  );
+  const total = sorted.length;
+  const textLines = sorted.map((s) => {
+    const dateLine = formatDate(s.date);
+    const timeLine = `${s.timeSlot} – ${s.slotEnd}`;
+    return `  Session ${s.sessionIndex}/${total}: ${dateLine}, ${timeLine}`;
+  });
+  const htmlRows = sorted.map((s) => {
+    const dateLine = formatDate(s.date);
+    const timeLine = `${s.timeSlot} – ${s.slotEnd}`;
+    return `<tr><td style="color:#6b7280">Session ${s.sessionIndex}/${total}</td>`
+      + `<td><strong>${escapeHtml(dateLine)}</strong>, ${escapeHtml(timeLine)}</td></tr>`;
+  });
+  return {
+    text: textLines.join('\n'),
+    html: htmlRows.join(''),
   };
 }
 
@@ -226,7 +253,7 @@ async function sendCancellationConfirmation(booking) {
   const refunded = (booking.refundedAmountCents || 0) > 0;
   const refundLine = refunded
     ? `${formatPrice(booking.refundedAmountCents)} has been refunded to your PayPal account.`
-    : 'No refund per the >48h policy. The slot has been released for other bookings.';
+    : 'No refund — cancellations less than 7 days before the workshop are not refundable. The slot has been released for other bookings.';
 
   const cancelledByStudio = booking.cancelledBy === 'studio';
   const lessonLabelLower  = lessonLabelOf(booking).toLowerCase();
@@ -280,7 +307,7 @@ async function sendCancellationNotification(booking) {
   const refunded = (booking.refundedAmountCents || 0) > 0;
   const refundLine = refunded
     ? `Refund: ${formatPrice(booking.refundedAmountCents)} processed (PayPal refund id ${booking.paypalRefundId || '?'})`
-    : 'Refund: none (cancellation within 48h of workshop)';
+    : 'Refund: none (cancellation less than 7 days before the workshop)';
 
   const cancelledBy = booking.cancelledBy === 'studio' ? 'studio' : 'student';
 
@@ -314,9 +341,231 @@ async function sendCancellationNotification(booking) {
   });
 }
 
+// ── 4-session cycle senders ───────────────────────────────────────────────
+//
+// Each takes the array of cycle siblings (typically N=4 rows sharing one
+// cycleId). All siblings carry the same shared fields (studentName, email,
+// lessonType, amountCents, paypalOrderId/CaptureId, etc.); per-row fields
+// are only the slot timing + sessionIndex.
+
+/** Pick the row used as "the booking" for shared fields. Sorted by
+ *  sessionIndex so the bookingId we emit in the email is always session-1's. */
+function cycleLead(siblings) {
+  return [...siblings].sort(
+    (a, b) => (a.sessionIndex ?? 0) - (b.sessionIndex ?? 0)
+  )[0];
+}
+
+async function sendCycleBookingConfirmation(siblings) {
+  if (!FROM_ADDRESS) {
+    console.warn('SES_FROM_ADDRESS not configured — skipping cycle student email');
+    return false;
+  }
+  if (!Array.isArray(siblings) || siblings.length === 0) return false;
+  const lead = cycleLead(siblings);
+  if (!lead?.studentEmail) return false;
+
+  const sessions   = sessionBlocks(siblings);
+  const priceLine  = priceLineText(lead);
+  const showPrice  = (lead.amountCents ?? 0) > 0;
+  const lessonLabel = lessonLabelOf(lead);
+
+  const ctx = {
+    studentName:       lead.studentName,
+    studioAddress:     STUDIO_ADDRESS,
+    cancelUrl:         buildCancelUrl(lead),
+    bookingId:         lead.bookingId,
+    logoUrl:           LOGO_URL,
+    studioUrl:         STUDIO_URL,
+    lessonLabel,
+    lessonLabelLower:  lessonLabel.toLowerCase(),
+    sessionsText:      sessions.text,
+    sessionsHtml:      sessions.html,
+    priceLineIndented: showPrice ? `\n  ${priceLine}` : '',
+    priceRowHtml:      showPrice
+      ? `<tr><td style="color:#6b7280">Payment</td><td>${escapeHtml(priceLine)}</td></tr>`
+      : '',
+    impressumText:     IMPRESSUM_TEXT,
+    impressumHtml:     IMPRESSUM_HTML,
+  };
+
+  const { subject, text, html } = renderTemplate('booking-student-cycle', ctx);
+
+  return sendWithIcs({
+    to:          lead.studentEmail,
+    subject,
+    text,
+    html,
+    icsContent:  buildCycleIcs(siblings, { fromAddress: FROM_ADDRESS }),
+    icsFilename: 'cycle.ics',
+    replyTo:     REPLY_TO,
+    logTag:      'student-cycle',
+    bookingId:   lead.bookingId,
+  });
+}
+
+async function sendCycleOwnerNotification(siblings) {
+  if (!FROM_ADDRESS || !OWNER_NOTIFY_ADDRESS) {
+    console.warn('SES sender or OWNER_NOTIFY_ADDRESS not configured — skipping cycle owner email');
+    return false;
+  }
+  if (!Array.isArray(siblings) || siblings.length === 0) return false;
+  const lead = cycleLead(siblings);
+
+  const sessions  = sessionBlocks(siblings);
+  const priceLine = priceLineText(lead);
+  const showPrice = (lead.amountCents ?? 0) > 0;
+  const lessonLabel = lessonLabelOf(lead);
+  const phone     = phoneBlocks(lead);
+  const cmt       = commentBlocks(lead);
+
+  const ctx = {
+    studentName:       lead.studentName,
+    studentEmail:      lead.studentEmail,
+    cancelUrl:         buildCancelUrl(lead),
+    bookingId:         lead.bookingId,
+    logoUrl:           LOGO_URL,
+    studioUrl:         STUDIO_URL,
+    lessonLabel,
+    lessonLabelLower:  lessonLabel.toLowerCase(),
+    sessionsText:      sessions.text,
+    sessionsHtml:      sessions.html,
+    priceLineIndented: showPrice ? `\n  ${priceLine}` : '',
+    priceRowHtml:      showPrice
+      ? `<tr><td style="color:#6b7280">Payment</td><td>${escapeHtml(priceLine)}</td></tr>`
+      : '',
+    phoneBlockText:    phone.text,
+    phoneRowHtml:      phone.html,
+    commentBlockText:  cmt.text,
+    commentBlockHtml:  cmt.html,
+    impressumText:     IMPRESSUM_TEXT,
+    impressumHtml:     IMPRESSUM_HTML,
+  };
+
+  const { subject, text, html } = renderTemplate('booking-owner-cycle', ctx);
+
+  return sendWithIcs({
+    to:          OWNER_NOTIFY_ADDRESS,
+    subject,
+    text,
+    html,
+    icsContent:  buildCycleIcs(siblings, { fromAddress: FROM_ADDRESS }),
+    icsFilename: `cycle-${(lead.cycleId || '').slice(0, 8)}.ics`,
+    replyTo:     lead.studentEmail || undefined,
+    logTag:      'owner-cycle',
+    bookingId:   lead.bookingId,
+  });
+}
+
+async function sendCycleCancellationConfirmation(siblings) {
+  if (!FROM_ADDRESS) {
+    console.warn('SES_FROM_ADDRESS not configured — skipping cycle student cancel email');
+    return false;
+  }
+  if (!Array.isArray(siblings) || siblings.length === 0) return false;
+  const lead = cycleLead(siblings);
+
+  const sessions = sessionBlocks(siblings);
+  const refunded = (lead.refundedAmountCents || 0) > 0;
+  const refundLine = refunded
+    ? `${formatPrice(lead.refundedAmountCents)} has been refunded to your PayPal account.`
+    : 'No refund — cancellations less than 7 days before the first session are not refundable.';
+
+  const cancelledByStudio = lead.cancelledBy === 'studio';
+  const lessonLabelLower  = lessonLabelOf(lead).toLowerCase();
+  const lead_msg = cancelledByStudio
+    ? `Your ${lessonLabelLower} has been cancelled by the studio.`
+    : `Your ${lessonLabelLower} has been cancelled.`;
+  const closing = cancelledByStudio
+    ? "We apologise for the inconvenience. Reply to this email if you'd like to rebook."
+    : 'You can book another workshop at https://book.palavara.com/ whenever you like.';
+  const closingHtml = cancelledByStudio
+    ? "<p>We apologise for the inconvenience. Reply to this email if you'd like to rebook.</p>"
+    : '<p>You can book another workshop at <a href="https://book.palavara.com/">book.palavara.com</a> whenever you like.</p>';
+
+  const ctx = {
+    studentName:   lead.studentName,
+    bookingId:     lead.bookingId,
+    logoUrl:       LOGO_URL,
+    studioUrl:     STUDIO_URL,
+    lead:          lead_msg,
+    refundLine,
+    closing,
+    closingHtml,
+    sessionsText:  sessions.text,
+    sessionsHtml:  sessions.html,
+    impressumText: IMPRESSUM_TEXT,
+    impressumHtml: IMPRESSUM_HTML,
+  };
+
+  const { subject, text, html } = renderTemplate('cancel-student-cycle', ctx);
+
+  return sendWithIcs({
+    to:          lead.studentEmail,
+    subject,
+    text,
+    html,
+    icsContent:  buildCycleIcs(siblings, { method: 'CANCEL', fromAddress: FROM_ADDRESS }),
+    icsFilename: 'cycle-cancelled.ics',
+    icsMethod:   'CANCEL',
+    replyTo:     REPLY_TO,
+    logTag:      'student-cycle-cancel',
+    bookingId:   lead.bookingId,
+  });
+}
+
+async function sendCycleCancellationNotification(siblings) {
+  if (!FROM_ADDRESS || !OWNER_NOTIFY_ADDRESS) {
+    console.warn('SES sender or OWNER_NOTIFY_ADDRESS not configured — skipping cycle owner cancel email');
+    return false;
+  }
+  if (!Array.isArray(siblings) || siblings.length === 0) return false;
+  const lead = cycleLead(siblings);
+
+  const sessions = sessionBlocks(siblings);
+  const refunded = (lead.refundedAmountCents || 0) > 0;
+  const refundLine = refunded
+    ? `Refund: ${formatPrice(lead.refundedAmountCents)} processed (PayPal refund id ${lead.paypalRefundId || '?'})`
+    : 'Refund: none (cancellation less than 7 days before the first session)';
+  const cancelledBy = lead.cancelledBy === 'studio' ? 'studio' : 'student';
+
+  const ctx = {
+    cancelledBy,
+    studentName:  lead.studentName,
+    studentEmail: lead.studentEmail,
+    bookingId:    lead.bookingId,
+    logoUrl:      LOGO_URL,
+    studioUrl:    STUDIO_URL,
+    refundLine,
+    sessionsText: sessions.text,
+    sessionsHtml: sessions.html,
+    impressumText: IMPRESSUM_TEXT,
+    impressumHtml: IMPRESSUM_HTML,
+  };
+
+  const { subject, text, html } = renderTemplate('cancel-owner-cycle', ctx);
+
+  return sendWithIcs({
+    to:          OWNER_NOTIFY_ADDRESS,
+    subject,
+    text,
+    html,
+    icsContent:  buildCycleIcs(siblings, { method: 'CANCEL', fromAddress: FROM_ADDRESS }),
+    icsFilename: `cycle-cancel-${(lead.cycleId || '').slice(0, 8)}.ics`,
+    icsMethod:   'CANCEL',
+    replyTo:     lead.studentEmail,
+    logTag:      'owner-cycle-cancel',
+    bookingId:   lead.bookingId,
+  });
+}
+
 module.exports = {
   sendBookingConfirmation,
   sendOwnerNotification,
   sendCancellationConfirmation,
   sendCancellationNotification,
+  sendCycleBookingConfirmation,
+  sendCycleOwnerNotification,
+  sendCycleCancellationConfirmation,
+  sendCycleCancellationNotification,
 };

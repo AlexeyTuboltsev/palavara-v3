@@ -154,7 +154,7 @@ const variants = [
   {
     name: 'cancel-student',
     title: 'Cancellation — student (cancelled by student, refunded)',
-    description: '>48h before, full refund issued.',
+    description: '≥7 days before, full refund issued.',
     template: 'cancel-student',
     ctx: {
       studentName: 'Jane Smith',
@@ -187,7 +187,120 @@ const variants = [
       refundLine: 'Refund: €95.00 processed (PayPal refund id 1XX84336LG453953M)',
     },
   },
+  // ── 4-session cycle variants (Phase 5) ──────────────────────────────────
+  // Each cycle variant lists 4 sessions with the spacing rules satisfied:
+  // sessions 1-3 on different consecutive days; session 4 at least 7 days
+  // after session 3.
+  ((() => {
+    const cycleSessions = [
+      'Session 1/4: Tuesday, 19 May 2026, 14:00 – 16:00',
+      'Session 2/4: Wednesday, 20 May 2026, 14:00 – 16:00',
+      'Session 3/4: Thursday, 21 May 2026, 14:00 – 16:00',
+      'Session 4/4: Thursday, 28 May 2026, 14:00 – 16:00',
+    ];
+    const sessionsText = cycleSessions.map((l) => '  ' + l).join('\n');
+    const sessionsHtml = [
+      ['Session 1/4', 'Tuesday, 19 May 2026', '14:00 – 16:00'],
+      ['Session 2/4', 'Wednesday, 20 May 2026', '14:00 – 16:00'],
+      ['Session 3/4', 'Thursday, 21 May 2026', '14:00 – 16:00'],
+      ['Session 4/4', 'Thursday, 28 May 2026', '14:00 – 16:00'],
+    ].map(([s, d, t]) =>
+      `<tr><td style="color:#6b7280">${s}</td><td><strong>${d}</strong>, ${t}</td></tr>`
+    ).join('');
+    return { sessionsText, sessionsHtml };
+  })()),
 ];
+
+// The IIFE above pushed a {sessionsText, sessionsHtml} into variants — hoist
+// those into the cycle ctx variants below.
+const { sessionsText: CYCLE_SESSIONS_TEXT, sessionsHtml: CYCLE_SESSIONS_HTML } =
+  variants.pop();
+
+variants.push(
+  {
+    name: 'booking-student-cycle',
+    title: 'Cycle booking confirmation — student',
+    description: '4-session cycle, €365 bundle paid via PayPal.',
+    template: 'booking-student-cycle',
+    ctx: {
+      studentName: 'Jane Smith',
+      studioAddress: STUDIO_ADDRESS,
+      cancelUrl: 'https://book.palavara.com/cancel.html?bookingId=demo&token=xyz',
+      bookingId: 'preview-cycle-0000-1111',
+      logoUrl: LOGO_URL,
+      studioUrl: STUDIO_URL,
+      lessonLabel: '4-session Wheel-Throwing class for 1 person',
+      lessonLabelLower: '4-session wheel-throwing class for 1 person',
+      sessionsText: CYCLE_SESSIONS_TEXT,
+      sessionsHtml: CYCLE_SESSIONS_HTML,
+      priceLineIndented: '\n  Price: €365.00 (paid via PayPal)',
+      priceRowHtml:
+        '<tr><td style="color:#6b7280">Payment</td><td>Price: €365.00 (paid via PayPal)</td></tr>',
+    },
+  },
+  {
+    name: 'booking-owner-cycle',
+    title: 'Cycle booking notification — owner',
+    description: '4-session cycle, 1 person, €365 bundle.',
+    template: 'booking-owner-cycle',
+    ctx: {
+      studentName: 'Jane Smith',
+      studentEmail: 'jane@example.com',
+      cancelUrl: 'https://book.palavara.com/cancel.html?bookingId=demo&token=xyz',
+      bookingId: 'preview-cycle-0000-2222',
+      logoUrl: LOGO_URL,
+      studioUrl: STUDIO_URL,
+      lessonLabel: '4-session Wheel-Throwing class for 1 person',
+      lessonLabelLower: '4-session wheel-throwing class for 1 person',
+      sessionsText: CYCLE_SESSIONS_TEXT,
+      sessionsHtml: CYCLE_SESSIONS_HTML,
+      priceLineIndented: '\n  Price: €365.00 (paid via PayPal)',
+      priceRowHtml:
+        '<tr><td style="color:#6b7280">Payment</td><td>Price: €365.00 (paid via PayPal)</td></tr>',
+      phoneBlockText: '\n  Phone:      +49 30 12345678',
+      phoneRowHtml:
+        '<tr><td style="color:#6b7280">Phone</td><td>+49 30 12345678</td></tr>',
+      commentBlockText: '',
+      commentBlockHtml: '',
+    },
+  },
+  {
+    name: 'cancel-student-cycle',
+    title: 'Cycle cancellation — student (refunded)',
+    description: '>7 days before first session, full refund.',
+    template: 'cancel-student-cycle',
+    ctx: {
+      studentName: 'Jane Smith',
+      bookingId: 'preview-cycle-0000-3333',
+      logoUrl: LOGO_URL,
+      studioUrl: STUDIO_URL,
+      lead: 'Your 4-session wheel-throwing class for 1 person has been cancelled.',
+      refundLine: '€365.00 has been refunded to your PayPal account.',
+      closing: 'You can book another workshop at https://book.palavara.com/ whenever you like.',
+      closingHtml:
+        '<p>You can book another workshop at <a href="https://book.palavara.com/">book.palavara.com</a> whenever you like.</p>',
+      sessionsText: CYCLE_SESSIONS_TEXT,
+      sessionsHtml: CYCLE_SESSIONS_HTML,
+    },
+  },
+  {
+    name: 'cancel-owner-cycle',
+    title: 'Cycle cancellation — owner notification',
+    description: 'Cancelled by student, refund processed.',
+    template: 'cancel-owner-cycle',
+    ctx: {
+      cancelledBy: 'student',
+      studentName: 'Jane Smith',
+      studentEmail: 'jane@example.com',
+      bookingId: 'preview-cycle-0000-4444',
+      logoUrl: LOGO_URL,
+      studioUrl: STUDIO_URL,
+      refundLine: 'Refund: €365.00 processed (PayPal refund id 2XX84336LG453953M)',
+      sessionsText: CYCLE_SESSIONS_TEXT,
+      sessionsHtml: CYCLE_SESSIONS_HTML,
+    },
+  },
+);
 
 // ── Render ─────────────────────────────────────────────────────────────
 const indexLinks = [];

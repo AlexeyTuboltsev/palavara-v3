@@ -20,8 +20,14 @@ const { GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, notFound, serverError } = require('../utils/response');
 const { captureOrder } = require('../utils/paypal');
-const { sendBookingConfirmation, sendOwnerNotification } = require('../email');
+const {
+  sendBookingConfirmation,
+  sendOwnerNotification,
+  sendCycleBookingConfirmation,
+  sendCycleOwnerNotification,
+} = require('../email');
 const { insertBookingEvent } = require('../utils/googleCalendar');
+const { findCycleSiblings, transactUpdateAll } = require('../utils/cycleLogic');
 
 const TABLE = process.env.BOOKINGS_TABLE;
 
@@ -80,19 +86,62 @@ exports.handler = async (event) => {
       ReturnValues: 'ALL_NEW',
     }));
 
-    // We won the conditional flip — fire all post-confirm side-effects in
-    // parallel: student email, owner email, and Google Calendar insert.
-    // None of these can fail the booking; errors are logged but the
-    // DynamoDB row stays the source of truth.
+    const updatedBooking = updated.Attributes;
+
+    // Cycle path: confirm the remaining sibling rows atomically, then send
+    // one cycle-aware confirmation email + one owner notification carrying
+    // a multi-event ICS. Calendar inserts run per-session.
+    if (updatedBooking.cycleId) {
+      let siblings = [];
+      try {
+        siblings = (await findCycleSiblings(updatedBooking.cycleId))
+          .filter((row) => row.bookingId !== id);
+        if (siblings.length > 0) {
+          await transactUpdateAll(siblings, {
+            updateExpression: 'SET #s = :confirmed, paypalCaptureId = :cap, confirmedAt = :now',
+            conditionExpression: '#s = :pending',
+            expressionAttributeNames: { '#s': 'status' },
+            expressionAttributeValues: {
+              ':confirmed': 'confirmed',
+              ':pending':   'pending',
+              ':cap':       captureId,
+              ':now':       now,
+            },
+          });
+        }
+      } catch (err) {
+        if (err.name !== 'TransactionCanceledException') throw err;
+        // Siblings already confirmed by the webhook — fine.
+      }
+
+      // Refetch the full, now-confirmed sibling set for the email + calendar
+      // side-effects. Skips the work entirely if the webhook beat us to the
+      // emails (the row's confirmedAt is set in the same transaction as the
+      // status flip, so checking it here would be racy — keep it simple and
+      // just let SES dedupe by Message-ID when both paths fire).
+      const allSiblings = await findCycleSiblings(updatedBooking.cycleId);
+      await Promise.all([
+        sendCycleBookingConfirmation(allSiblings),
+        sendCycleOwnerNotification(allSiblings),
+        ...allSiblings.map((s) =>
+          insertBookingEvent(s).catch((e) => {
+            console.error('googleCalendar insert failed', { bookingId: s.bookingId, error: e?.message || e });
+          })
+        ),
+      ]);
+      return ok(stripBooking(updatedBooking));
+    }
+
+    // Single-session path — fire the usual side-effects.
     await Promise.all([
-      sendBookingConfirmation(updated.Attributes),
-      sendOwnerNotification(updated.Attributes),
-      insertBookingEvent(updated.Attributes).catch((e) => {
+      sendBookingConfirmation(updatedBooking),
+      sendOwnerNotification(updatedBooking),
+      insertBookingEvent(updatedBooking).catch((e) => {
         console.error('googleCalendar insert failed', { bookingId: id, error: e?.message || e });
       }),
     ]);
 
-    return ok(stripBooking(updated.Attributes));
+    return ok(stripBooking(updatedBooking));
   } catch (err) {
     console.error('captureOrder error:', err);
     // ConditionalCheckFailedException = the webhook beat us to it.

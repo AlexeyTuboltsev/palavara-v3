@@ -54,6 +54,13 @@ function formatSlotRange(start, end) {
   return `${start} – ${end}`;
 }
 
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function renderConfirmedDetails(booking) {
   const price = `€${((booking.amountCents || 0) / 100).toFixed(2)}`;
   const baseLabel = booking.lessonTypeLabel || 'Workshop';
@@ -61,12 +68,29 @@ function renderConfirmedDetails(booking) {
     ? `${baseLabel} · ${t('confirm.personsSuffix', { count: booking.numPersons })}`
     : baseLabel;
 
+  const isCycle = Array.isArray(booking.cycleSiblings) && booking.cycleSiblings.length > 0;
+
+  let dateTimeRows;
+  if (isCycle) {
+    // One row per session — "Session N/M | date · time".
+    dateTimeRows = booking.cycleSiblings.map((s) => ({
+      label: t('confirm.details.sessionOfTotal', {
+        n: s.sessionIndex, total: booking.cycleSiblings.length,
+      }),
+      value: `${escapeHtml(formatDate(s.date))} · ${escapeHtml(formatSlotRange(s.timeSlot, s.slotEnd))}`,
+    }));
+  } else {
+    dateTimeRows = [
+      { label: t('confirm.details.date'), value: escapeHtml(formatDate(booking.date)) },
+      { label: t('confirm.details.time'), value: escapeHtml(formatSlotRange(booking.timeSlot, booking.slotEnd)) },
+    ];
+  }
+
   const rows = [
-    { label: t('confirm.details.lessonType'), value: detailsLabel },
-    { label: t('confirm.details.date'),       value: formatDate(booking.date) },
-    { label: t('confirm.details.time'),       value: formatSlotRange(booking.timeSlot, booking.slotEnd) },
-    { label: t('confirm.details.paid'),       value: price },
-    { label: t('confirm.details.bookingId'),  value: `<code>${booking.bookingId}</code>` },
+    { label: t('confirm.details.lessonType'), value: escapeHtml(detailsLabel) },
+    ...dateTimeRows,
+    { label: t('confirm.details.paid'),       value: escapeHtml(price) },
+    { label: t('confirm.details.bookingId'),  value: `<code>${escapeHtml(booking.bookingId)}</code>` },
   ];
   confirmDetails.innerHTML = rows.map((r) =>
     `<div class="confirm-row"><span class="label">${r.label}</span><span class="value">${r.value}</span></div>`
@@ -113,8 +137,8 @@ async function init() {
   const params = new URLSearchParams(window.location.search);
   const bookingId = params.get('bookingId');
 
-  // Preview mode: ?preview=confirmed | pending | error — skips the API
-  // call and renders the corresponding state with mock data.
+  // Preview mode: ?preview=confirmed | cycle | pending | error — skips the
+  // API call and renders the corresponding state with mock data.
   const preview = params.get('preview');
   if (preview) {
     if (preview === 'confirmed') {
@@ -126,6 +150,23 @@ async function init() {
         amountCents: 9500,
         lessonTypeLabel: 'Single lesson',
         numPersons: 1,
+      });
+      showStep(stepConfirmed);
+    } else if (preview === 'cycle') {
+      renderConfirmedDetails({
+        bookingId: 'preview-cycle-0000-1111',
+        amountCents: 36500,
+        lessonTypeLabel: '4-session Wheel-Throwing class for 1 person',
+        numPersons: 1,
+        cycleId: 'preview-cycle',
+        sessionIndex: 1,
+        sessionCount: 4,
+        cycleSiblings: [
+          { sessionIndex: 1, date: '2026-06-02', timeSlot: '14:00', slotEnd: '16:00' },
+          { sessionIndex: 2, date: '2026-06-03', timeSlot: '14:00', slotEnd: '16:00' },
+          { sessionIndex: 3, date: '2026-06-04', timeSlot: '14:00', slotEnd: '16:00' },
+          { sessionIndex: 4, date: '2026-06-11', timeSlot: '14:00', slotEnd: '16:00' },
+        ],
       });
       showStep(stepConfirmed);
     } else if (preview === 'pending') {
@@ -147,9 +188,12 @@ async function init() {
   showStep(stepVerifying);
 
   try {
-    const booking = await captureBooking(bookingId);
-    if (booking.status === 'confirmed') {
-      renderConfirmedDetails(booking);
+    const captured = await captureBooking(bookingId);
+    if (captured.status === 'confirmed') {
+      // captureOrder returns the row only; re-fetch via GET so we pick up
+      // cycleSiblings for cycle bookings (the GET handler inlines them).
+      const full = await fetchBooking(bookingId).catch(() => captured);
+      renderConfirmedDetails(full);
       showStep(stepConfirmed);
       return;
     }

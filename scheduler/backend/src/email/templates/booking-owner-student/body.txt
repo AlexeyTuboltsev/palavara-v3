@@ -5,10 +5,5 @@ A new {{lessonLabelLower}} booking has been confirmed.
   Time:       {{timeLine}}{{priceLineIndented}}{{paymentNoteIndented}}
   Booking ID: {{bookingId}}{{commentBlockText}}
 
-A calendar invite is attached to this email.
-
-Cancel this booking (always full refund when you cancel):
-  {{cancelUrl}}
-
 Reply to this email to contact the booker directly.
 {{impressumText}}

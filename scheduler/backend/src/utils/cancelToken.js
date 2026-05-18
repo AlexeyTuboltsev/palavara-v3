@@ -9,8 +9,9 @@
  *   - Booking IDs are UUIDs (unguessable on their own).
  *   - A successfully cancelled booking has status='cancelled' and the
  *     conditional update on cancel rejects double-cancels.
- *   - The 48h refund-eligibility check is time-of-use, so re-using a stale
- *     token within the window only affects refund availability, not security.
+ *   - The refund-eligibility check (7-day window) is time-of-use, so re-using
+ *     a stale token within the window only affects refund availability, not
+ *     security.
  *
  * If the secret is rotated, all outstanding cancellation links become
  * invalid. That's a feature, not a bug.

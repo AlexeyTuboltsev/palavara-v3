@@ -27,11 +27,8 @@ Globals:
         CANCEL_URL_BASE: !Ref CancelUrlBase
         CANCEL_TOKEN_SECRET: !Ref CancelTokenSecret
         ADMIN_SECRET: !Ref AdminSecret
-        GOOGLE_CLIENT_ID: !Ref GoogleClientId
-        GOOGLE_CLIENT_SECRET: !Ref GoogleClientSecret
         GOOGLE_CALENDAR_ID: !Ref GoogleCalendarId
-        GOOGLE_OAUTH_REDIRECT_URI: !Ref GoogleOAuthRedirectUri
-        GOOGLE_REFRESH_TOKEN_PARAM_NAME: !Ref GoogleRefreshTokenParamName
+        GOOGLE_SA_KEY_PARAM: !Ref GoogleServiceAccountKeyParamName
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
@@ -100,40 +97,22 @@ Parameters:
     Description: >
       Shared secret required in the X-Admin-Secret header on /admin endpoints.
       Generate with `openssl rand -hex 32`. Use only over HTTPS.
-  GoogleClientId:
-    Type: String
-    Default: ""
-    Description: >
-      Google OAuth 2.0 Client ID (Web application) for the Calendar API.
-      Leave empty to disable Google Calendar sync.
-  GoogleClientSecret:
-    Type: String
-    Default: ""
-    NoEcho: true
-    Description: Google OAuth 2.0 Client Secret matching GoogleClientId.
   GoogleCalendarId:
     Type: String
-    Default: "primary"
+    Default: ""
     Description: >
-      Calendar ID to write events to. "primary" = the OAuth'd user's
-      default calendar; or pass a specific calendar id like
-      "abcdef@group.calendar.google.com".
-  GoogleRefreshTokenParamName:
+      Calendar ID to write booking events to. For a "primary"-style
+      calendar this is the account's email address (e.g.
+      `palavarastudio@gmail.com`). The service account named in the
+      key parameter below MUST be shared on that calendar with
+      "Make changes to events" permission.
+  GoogleServiceAccountKeyParamName:
     Type: String
-    Default: "/palavara/google-refresh-token"
+    Default: "/palavara/google-service-account-key"
     Description: >
-      SSM Parameter Store name (SecureString) where the refresh token
-      lives. Created automatically by the OAuth callback handler on
-      first successful consent.
-  GoogleOAuthRedirectUri:
-    Type: String
-    Default: "https://74c5ex58qa.execute-api.eu-central-1.amazonaws.com/Prod/admin/google/oauth/callback"
-    Description: >
-      OAuth redirect URI registered in the Google Cloud OAuth client.
-      Hardcoded by default to the existing API Gateway invoke URL —
-      avoids a circular dependency between Lambdas (which need the URL
-      as an env var) and the API (which depends on the Lambdas).
-      Update if the API Gateway is ever recreated with a new id.
+      SSM Parameter Store name (SecureString) holding the Google
+      service-account key JSON. Uploaded once via
+      `aws ssm put-parameter ... --type SecureString`.
   PendingTtlMinutes:
     Type: Number
     Default: 30
@@ -329,7 +308,7 @@ Resources:
             - Effect: Allow
               Action:
                 - ssm:GetParameter
-              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleServiceAccountKeyParamName}"
       Events:
         Api:
           Type: Api
@@ -356,7 +335,7 @@ Resources:
             - Effect: Allow
               Action:
                 - ssm:GetParameter
-              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleServiceAccountKeyParamName}"
       Events:
         Api:
           Type: Api
@@ -407,7 +386,7 @@ Resources:
             - Effect: Allow
               Action:
                 - ssm:GetParameter
-              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleServiceAccountKeyParamName}"
       Events:
         Api:
           Type: Api
@@ -434,7 +413,7 @@ Resources:
             - Effect: Allow
               Action:
                 - ssm:GetParameter
-              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleServiceAccountKeyParamName}"
       Events:
         Api:
           Type: Api
@@ -463,48 +442,13 @@ Resources:
             - Effect: Allow
               Action:
                 - ssm:GetParameter
-              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleServiceAccountKeyParamName}"
       Events:
         Api:
           Type: Api
           Properties:
             Path: /admin/bookings
             Method: post
-
-  GoogleOauthStartFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: palavara-google-oauth-start
-      CodeUri: backend/
-      Handler: src/handlers/adminGoogleOauthStart.handler
-      Timeout: 10
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /admin/google/oauth/start
-            Method: get
-
-  GoogleOauthCallbackFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: palavara-google-oauth-callback
-      CodeUri: backend/
-      Handler: src/handlers/adminGoogleOauthCallback.handler
-      Timeout: 30
-      Policies:
-        - Statement:
-            - Effect: Allow
-              Action:
-                - ssm:PutParameter
-                - ssm:GetParameter
-              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GoogleRefreshTokenParamName}"
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /admin/google/oauth/callback
-            Method: get
 
   AdminListSlotsFunction:
     Type: AWS::Serverless::Function
