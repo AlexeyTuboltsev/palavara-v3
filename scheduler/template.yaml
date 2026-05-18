@@ -134,6 +134,15 @@ Parameters:
       avoids a circular dependency between Lambdas (which need the URL
       as an env var) and the API (which depends on the Lambdas).
       Update if the API Gateway is ever recreated with a new id.
+  PendingTtlMinutes:
+    Type: Number
+    Default: 30
+    MinValue: 5
+    MaxValue: 180
+    Description: >
+      How long an abandoned `pending` booking is allowed to live before
+      the auto-expire Lambda flips it to `expired` and frees its seat.
+      Capped at 180 since PayPal Orders v2 orders expire after ~3 h anyway.
 
 Resources:
 
@@ -354,6 +363,30 @@ Resources:
           Properties:
             Path: /webhooks/paypal
             Method: post
+
+  # Scheduled sweep that flips abandoned `pending` bookings to `expired`
+  # so their seats free up. Runs every 5 min via EventBridge — keeps the
+  # worst-case phantom-reservation window to ~5 min + the configured TTL.
+  ExpirePendingBookingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: palavara-expire-pending-bookings
+      CodeUri: backend/
+      Handler: src/handlers/expirePendingBookings.handler
+      Timeout: 60
+      Environment:
+        Variables:
+          PENDING_TTL_MINUTES: !Ref PendingTtlMinutes
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingsTable
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(5 minutes)
+            Description: Auto-expire abandoned pending bookings
+            Enabled: true
 
   CancelBookingFunction:
     Type: AWS::Serverless::Function
