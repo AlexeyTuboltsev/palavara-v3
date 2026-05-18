@@ -16,6 +16,7 @@ const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, notFound, serverError } = require('../utils/response');
 const { verifyCancelToken } = require('../utils/cancelToken');
 const { processCancellation, isRefundEligible } = require('../utils/cancelLogic');
+const { findCycleSiblings } = require('../utils/cycleLogic');
 
 const TABLE = process.env.BOOKINGS_TABLE;
 
@@ -51,7 +52,10 @@ exports.handler = async (event) => {
       return badRequest(`Cannot cancel a booking with status "${booking.status}"`);
     }
 
-    const eligible = isRefundEligible(booking);
+    // For cycles, refund eligibility is measured against the EARLIEST
+    // session — load siblings up-front so isRefundEligible can see them.
+    const siblings = booking.cycleId ? await findCycleSiblings(booking.cycleId) : null;
+    const eligible = isRefundEligible(booking, siblings);
 
     const { booking: updated } = await processCancellation({
       booking,

@@ -26,7 +26,8 @@ exports.handler = async (event) => {
       Key: { PK: `BOOKING#${id}` },
       ProjectionExpression:
         'bookingId, #d, timeSlot, slotEnd, #s, studentName, amountCents, '
-        + 'lessonTypeId, lessonTypeLabel, numPersons, createdAt, confirmedAt',
+        + 'lessonTypeId, lessonTypeLabel, numPersons, createdAt, confirmedAt, '
+        + 'cycleId, sessionIndex, sessionCount',
       ExpressionAttributeNames: {
         '#d': 'date',
         '#s': 'status',
