@@ -4,13 +4,16 @@
  * POST /admin/bookings/{id}/cancel
  *
  * Studio-side cancellation. Authenticated by an X-Admin-Secret header
- * matching the ADMIN_SECRET env var. Always issues a full refund regardless
- * of how close to the workshop the cancellation happens — this is a
- * good-will override (sick teacher, weather, etc.).
+ * matching the ADMIN_SECRET env var. Refund amount is an explicit input
+ * from the caller — defaults to 0 (no refund). The studio can issue any
+ * amount up to the booking's bundle total at its discretion.
  *
- * Optional body: {"reason": "<free text>"} stored on the booking row for
- * audit / inclusion in future reporting. Not surfaced in emails by design —
- * the student just sees "cancelled by the studio".
+ * Body: {
+ *   "refundCents": <int 0..amountCents>,  // optional, default 0
+ *   "reason":      "<free text>"           // optional, stored for audit
+ * }
+ * The reason is not surfaced in student-facing emails — the student just
+ * sees "cancelled by the studio".
  */
 
 const { GetCommand } = require('@aws-sdk/lib-dynamodb');
@@ -39,13 +42,18 @@ exports.handler = async (event) => {
     }
 
     let reason;
+    let refundCents = 0;
     if (event.body) {
       try {
         const parsed = JSON.parse(event.body);
         if (parsed && typeof parsed.reason === 'string') reason = parsed.reason.trim() || undefined;
+        if (parsed && Number.isInteger(parsed.refundCents)) refundCents = parsed.refundCents;
       } catch {
-        // Body wasn't JSON — ignore. Reason is optional.
+        // Body wasn't JSON — ignore. Both fields optional; refund defaults to 0.
       }
+    }
+    if (refundCents < 0) {
+      return badRequest('refundCents must be >= 0');
     }
 
     const existing = await ddb.send(new GetCommand({
@@ -66,10 +74,14 @@ exports.handler = async (event) => {
       return badRequest(`Cannot cancel a booking with status "${booking.status}"`);
     }
 
+    if (refundCents > (booking.amountCents || 0)) {
+      return badRequest(`refundCents ${refundCents} exceeds booking total ${booking.amountCents}`);
+    }
+
     const { booking: updated } = await processCancellation({
       booking,
-      alwaysRefund: true,
-      cancelledBy:  'studio',
+      refundAmountCents: refundCents,
+      cancelledBy:       'studio',
       reason,
     });
 

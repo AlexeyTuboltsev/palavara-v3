@@ -86,44 +86,55 @@ function isRefundEligible(booking, cycleSiblings, nowMs = Date.now()) {
 }
 
 /**
- * Process a cancellation. Caller has already authenticated.
+ * Process a cancellation. Caller has already authenticated and decided
+ * how much to refund. The refund amount is an explicit input — there is
+ * no implicit "full refund" anymore. Student handler computes it from
+ * the 7-day rule (full or zero); admin handler reads it from the request
+ * body so the studio can issue partial / zero / full refunds at will.
  *
  * For cycle bookings: cancels all sibling rows in a single transaction,
- * issues exactly one PayPal refund (the captureId is the same across
+ * issues at most one PayPal refund (the captureId is the same across
  * siblings; the bundle's amountCents is denormalised onto every row).
  *
  * @param {object} args
- * @param {object} args.booking      The row the user acted on (must be confirmed).
- * @param {boolean} args.alwaysRefund Admin path passes true; student path passes the result of isRefundEligible.
+ * @param {object} args.booking            The row the user acted on (must be confirmed).
+ * @param {number} args.refundAmountCents  Integer cents to refund. 0 = no refund.
+ *                                          Must be 0 <= n <= booking.amountCents.
  * @param {'student'|'studio'} args.cancelledBy
- * @param {string=} args.reason       Optional free-text reason (used for studio cancellations).
+ * @param {string=} args.reason            Optional free-text reason (used for studio cancellations).
  * @returns {Promise<{booking: object, alreadyCancelled: boolean}>}
  */
-async function processCancellation({ booking, alwaysRefund, cancelledBy, reason }) {
+async function processCancellation({ booking, refundAmountCents, cancelledBy, reason }) {
   const isCycle = !!booking.cycleId;
   const siblings = isCycle ? await findCycleSiblings(booking.cycleId) : [booking];
+
+  const requested = Number.isInteger(refundAmountCents) ? refundAmountCents : 0;
+  const bundleTotal = booking.amountCents || 0;
+  if (requested < 0 || requested > bundleTotal) {
+    throw new Error(`refundAmountCents ${requested} out of range [0..${bundleTotal}]`);
+  }
 
   let refundedAmountCents = 0;
   let paypalRefundId      = '';
 
   const paymentMethod = booking.paymentMethod || 'paypal';
-  const refundable = alwaysRefund && paymentMethod === 'paypal' && booking.paypalCaptureId;
+  const refundable = requested > 0 && paymentMethod === 'paypal' && booking.paypalCaptureId;
 
   if (refundable) {
-    // Bundle total is denormalised onto every row, so we just take it
-    // from `booking`. PayPal-Request-Id is keyed by cycleId for cycles
-    // (single shared refund) or bookingId for singles — keeps the refund
-    // idempotent across retries.
+    // PayPal-Request-Id is keyed by cycleId for cycles (single shared refund)
+    // or bookingId for singles — keeps the refund idempotent across retries.
+    // PayPal accepts partial refunds against a capture as long as the cumulative
+    // refunded amount doesn't exceed the captured amount.
     const r = await refundCapture({
       captureId:   booking.paypalCaptureId,
-      amountCents: booking.amountCents,
+      amountCents: requested,
       currency:    PRICE_CURRENCY,
       bookingId:   isCycle ? `cycle-${booking.cycleId}` : booking.bookingId,
     });
     if (r.status !== 'COMPLETED' && r.status !== 'PENDING') {
       throw new Error(`PayPal refund returned unexpected status: ${r.status}`);
     }
-    refundedAmountCents = booking.amountCents;
+    refundedAmountCents = requested;
     paypalRefundId      = r.refundId;
   }
 

@@ -57,11 +57,12 @@ exports.handler = async (event) => {
     // session — load siblings up-front so isRefundEligible can see them.
     const siblings = booking.cycleId ? await findCycleSiblings(booking.cycleId) : null;
     const eligible = isRefundEligible(booking, siblings);
+    const refundAmountCents = eligible ? (booking.amountCents || 0) : 0;
 
     const { booking: updated } = await processCancellation({
       booking,
-      alwaysRefund: eligible,
-      cancelledBy:  'student',
+      refundAmountCents,
+      cancelledBy: 'student',
     });
 
     return ok(stripBooking(updated));
