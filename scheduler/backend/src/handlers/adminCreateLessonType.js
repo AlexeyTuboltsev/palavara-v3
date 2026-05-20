@@ -4,7 +4,6 @@
  * POST /admin/lesson-types
  *
  * Body (JSON): {
- *   id,            // required, slug — used in the URL of /admin/lesson-types/{id}
  *   label,         // required, 1-100 chars
  *   priceCents,    // required, positive int — the total price charged
  *   numPersons,    // optional, default 1 (informational headcount only)
@@ -13,18 +12,19 @@
  *   active         // optional, default true
  * }
  *
- * Refuses to overwrite an existing id (use PUT /admin/lesson-types/{id} to update).
+ * The row id is generated server-side as a UUID — callers no longer pick it.
+ * Old slug-style ids (e.g. "single", "group-large") still exist in the table
+ * from before the change; they coexist with new UUIDs without trouble.
  */
 
 const { PutCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, serverError } = require('../utils/response');
+const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
 const TABLE        = process.env.LESSON_TYPES_TABLE;
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
-
-const ID_RE = /^[a-z0-9][a-z0-9-]{0,39}$/;
 
 exports.handler = async (event) => {
   try {
@@ -40,10 +40,11 @@ exports.handler = async (event) => {
     const validation = validate(body);
     if (validation.error) return badRequest(validation.error);
 
+    const id = uuidv4();
     const now = new Date().toISOString();
     const item = {
-      PK:           `LESSONTYPE#${validation.id}`,
-      id:           validation.id,
+      PK:           `LESSONTYPE#${id}`,
+      id,
       label:        validation.label,
       priceCents:   validation.priceCents,
       numPersons:   validation.numPersons,
@@ -54,18 +55,13 @@ exports.handler = async (event) => {
       updatedAt:    now,
     };
 
-    try {
-      await ddb.send(new PutCommand({
-        TableName: TABLE,
-        Item: item,
-        ConditionExpression: 'attribute_not_exists(PK)',
-      }));
-    } catch (err) {
-      if (err.name === 'ConditionalCheckFailedException') {
-        return badRequest(`Lesson type "${validation.id}" already exists. Use PUT to update it.`);
-      }
-      throw err;
-    }
+    // UUID v4 collisions are vanishingly rare, but the conditional keeps the
+    // write idempotent in the face of any pathological case.
+    await ddb.send(new PutCommand({
+      TableName: TABLE,
+      Item: item,
+      ConditionExpression: 'attribute_not_exists(PK)',
+    }));
 
     return ok(strip(item));
   } catch (err) {
@@ -75,9 +71,6 @@ exports.handler = async (event) => {
 };
 
 function validate(body) {
-  if (typeof body.id !== 'string' || !ID_RE.test(body.id)) {
-    return { error: 'id is required and must match /^[a-z0-9][a-z0-9-]{0,39}$/' };
-  }
   if (typeof body.label !== 'string' || body.label.trim().length < 1 || body.label.length > 100) {
     return { error: 'label is required (1-100 chars)' };
   }
@@ -100,7 +93,6 @@ function validate(body) {
   const active = body.active == null ? true : Boolean(body.active);
 
   return {
-    id: body.id,
     label: body.label.trim(),
     priceCents,
     numPersons,
