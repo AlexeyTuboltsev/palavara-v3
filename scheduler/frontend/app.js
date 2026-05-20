@@ -34,7 +34,9 @@ const stepDate    = document.getElementById('step-date');
 const stepForm    = document.getElementById('step-form');
 const lessonTypeList = document.getElementById('lessonTypeList');
 const lessonError = document.getElementById('lessonError');
-const cycleProgress     = document.getElementById('cycleProgress');
+// cycleProgressText sits in the site-header (left of the logo); cycleClearBtn
+// lives in step-date's step-actions row. Both are toggled by renderCycleProgress
+// — hidden for single-session lessons, shown for cycles.
 const cycleProgressText = document.getElementById('cycleProgressText');
 const cycleClearBtn     = document.getElementById('cycleClearBtn');
 const cycleContinueBtn  = document.getElementById('cycleContinueBtn');
@@ -89,6 +91,14 @@ function showStep(step) {
   });
   step.classList.remove('hidden');
   step.classList.add('active');
+  // The cycle-progress sticky header is only relevant on step-date; hide it
+  // on the lesson picker (no selection yet) and the form step (selection
+  // finalized; the booking summary in the form body covers what's needed).
+  if (step !== stepDate) {
+    cycleProgressText.classList.add('hidden');
+  } else if (isInCycleMode()) {
+    cycleProgressText.classList.remove('hidden');
+  }
 }
 
 function showLoading(msg) {
@@ -486,14 +496,17 @@ function escapeText(s) {
 
 function renderCycleProgress() {
   if (!isInCycleMode()) {
-    cycleProgress.classList.add('hidden');
+    cycleProgressText.classList.add('hidden');
+    cycleProgressText.textContent = '';
+    cycleClearBtn.classList.add('hidden');
     cycleContinueBtn.classList.add('hidden');
     return;
   }
   const lt = selectedLessonType();
   const N = lt.sessionCount;
   const picked = selectedSlots.length;
-  cycleProgress.classList.remove('hidden');
+  cycleProgressText.classList.remove('hidden');
+  cycleClearBtn.classList.remove('hidden');
   if (picked < N) {
     const nextIdx = picked + 1;
     const hint = nextIdx === N
@@ -713,6 +726,7 @@ function backFromStep(step) {
     selectedStart = '';
     selectedEnd = '';
     selectedSlots = [];
+    openDateIsos.clear();
     renderCycleProgress();
     showStep(stepLesson);
   }
