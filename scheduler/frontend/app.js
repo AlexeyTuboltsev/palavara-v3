@@ -523,11 +523,11 @@ function renderCycleProgress() {
     cycleContinueBtn.classList.remove('hidden');
   }
 
-  // One line per session, label + (picked date | constraint hint for the
-  // next-to-pick session | empty otherwise). Session 1 never carries a hint
-  // — it has no predecessor, so there's no constraint to spell out. The
-  // hint is rendered in the page's body color (black) so it visually
-  // contrasts with the blue session labels.
+  // One line per session, label + (picked date | constraint hint | empty).
+  // Only the FINAL session carries a constraint hint, and only when it's
+  // the next-to-pick — the mid-cycle rule ("different day, later than prev")
+  // is obvious from the greyed-out invalid slots, no copy needed. The hint
+  // renders in body black so it contrasts with the blue session labels.
   const lines = [];
   for (let i = 1; i <= N; i++) {
     const label = t('datePicker.cycleSessionLabel', { n: i, total: N });
@@ -536,10 +536,8 @@ function renderCycleProgress() {
     if (pickedSlot) {
       const dateText = `${formatDateCompact(pickedSlot.date)} · ${pickedSlot.start}–${pickedSlot.end}`;
       valueHtml = ` ${escapeText(dateText)}`;
-    } else if (i === nextIdx && i > 1) {
-      const hint = i === N
-        ? t('datePicker.cycleConstraintFinal', { days: MIN_CYCLE_GAP_DAYS })
-        : t('datePicker.cycleConstraintMid');
+    } else if (i === N && i === nextIdx && N > 1) {
+      const hint = t('datePicker.cycleConstraintFinal', { prev: N - 1 });
       valueHtml = ` <span class="cycle-session-hint">${escapeText(hint)}</span>`;
     }
     lines.push(`<span class="cycle-session-label">${escapeText(label)}</span>${valueHtml}`);
