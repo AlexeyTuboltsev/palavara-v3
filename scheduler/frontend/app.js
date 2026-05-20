@@ -73,10 +73,12 @@ let selectedEnd   = '';
 // Filled in chronological order; rules are enforced at click time.
 let selectedSlots = []; // [{date, start, end}, ...]
 
-// Which date drawer is open in the mobile/list view. Persisted across
-// renderDateList() calls so that picking a session in cycle mode (which
-// re-renders the whole list) doesn't collapse the user's current day.
-let expandedDateIso = null;
+// At-most-one explicitly-opened date in the mobile/list view — the date
+// the user tapped open and has neither picked a slot on (yet) nor toggled
+// shut. Dates that already carry a selected cycle slot are "sticky-open"
+// automatically (see isStickyOpen); they don't go in here, and they stay
+// open even when the user taps another day's header.
+let explicitlyOpenDate = null;
 
 const MIN_CYCLE_GAP_DAYS = 7;
 
@@ -277,20 +279,27 @@ function renderDateList() {
     dateList.appendChild(li);
   }
 
-  // Restore the previously-open drawer if its date is still in the list
-  // (after a cycle slot pick, renderDateList runs again — we want the user
-  // to stay on the same day so they can pick another session).
-  if (expandedDateIso && availableDates.includes(expandedDateIso)) {
-    const head   = dateList.querySelector(`.date-list-item[data-iso="${expandedDateIso}"]`);
-    const drawer = head?.nextElementSibling;
-    if (head && drawer && drawer.classList.contains('date-drawer')) {
-      renderDrawerSlots(drawer, expandedDateIso);
-      drawer.classList.add('open');
-      head.classList.add('expanded');
-      head.setAttribute('aria-expanded', 'true');
+  // Restore every drawer that should be open: dates that carry a selected
+  // cycle slot (sticky-open) + the one date the user has explicitly tapped
+  // open without picking a slot yet. After a slot pick the picked date is
+  // now sticky; if it was also the explicitly-open date, it's covered by
+  // the sticky path and explicitlyOpenDate doesn't need to keep tracking it.
+  const datesToOpen = new Set(selectedSlots.map((s) => s.date));
+  if (explicitlyOpenDate) datesToOpen.add(explicitlyOpenDate);
+
+  for (const iso of datesToOpen) {
+    if (!availableDates.includes(iso)) continue;
+    const h = dateList.querySelector(`.date-list-item[data-iso="${iso}"]`);
+    const d = h?.nextElementSibling;
+    if (h && d && d.classList.contains('date-drawer')) {
+      renderDrawerSlots(d, iso);
+      d.classList.add('open');
+      h.classList.add('expanded');
+      h.setAttribute('aria-expanded', 'true');
     }
-  } else {
-    expandedDateIso = null;
+  }
+  if (explicitlyOpenDate && !availableDates.includes(explicitlyOpenDate)) {
+    explicitlyOpenDate = null;
   }
 }
 
@@ -331,23 +340,44 @@ function decorateSlotButton(btn, iso, slot) {
   }
 }
 
+/** A date that carries at least one selected cycle slot is sticky-open:
+ *  the head-click toggle ignores it, and opening another date doesn't
+ *  collapse it. The user can only re-collapse it by deselecting its slot. */
+function isStickyOpen(iso) {
+  return selectedSlots.some((s) => s.date === iso);
+}
+
 function toggleDrawer(head, drawer, iso) {
+  // Sticky-open dates ignore the head-click.
+  if (isStickyOpen(iso)) return;
+
   const isOpen = drawer.classList.contains('open');
-  dateList.querySelectorAll('.date-drawer.open').forEach((d) => d.classList.remove('open'));
-  dateList.querySelectorAll('.date-list-item.expanded').forEach((b) => {
-    b.classList.remove('expanded');
-    b.setAttribute('aria-expanded', 'false');
-  });
   if (isOpen) {
-    expandedDateIso = null;
+    drawer.classList.remove('open');
+    head.classList.remove('expanded');
+    head.setAttribute('aria-expanded', 'false');
+    if (explicitlyOpenDate === iso) explicitlyOpenDate = null;
     return;
+  }
+
+  // Opening a new date — collapse the previously-explicit one (if any),
+  // but leave sticky drawers alone so selected days stay visible across
+  // exploration of other dates.
+  if (explicitlyOpenDate && explicitlyOpenDate !== iso) {
+    const prevHead   = dateList.querySelector(`.date-list-item[data-iso="${explicitlyOpenDate}"]`);
+    const prevDrawer = prevHead?.nextElementSibling;
+    if (prevHead && prevDrawer && prevDrawer.classList.contains('date-drawer')) {
+      prevDrawer.classList.remove('open');
+      prevHead.classList.remove('expanded');
+      prevHead.setAttribute('aria-expanded', 'false');
+    }
   }
 
   renderDrawerSlots(drawer, iso);
   drawer.classList.add('open');
   head.classList.add('expanded');
   head.setAttribute('aria-expanded', 'true');
-  expandedDateIso = iso;
+  explicitlyOpenDate = iso;
 }
 
 calPrev.addEventListener('click', () => {
@@ -434,6 +464,9 @@ function onCycleSlotPicked(iso, slot) {
   const idx = selectedSlots.findIndex((s) => s.date === iso && s.start === slot.start);
   if (idx >= 0) {
     selectedSlots = selectedSlots.slice(0, idx);
+    // Just-interacted-with drawer should stay visible even though the date
+    // is no longer sticky — promote it to explicitlyOpenDate.
+    explicitlyOpenDate = iso;
     afterCycleSelectionChange();
     return;
   }
@@ -568,6 +601,7 @@ function onLessonPicked(id) {
   if (!lt) return;
   selectedLessonId = id;
   selectedSlots = [];
+  explicitlyOpenDate = null;
   hideError(lessonError);
   // Re-render to apply (or hide) the cycle decorations + progress.
   renderCalendar();
