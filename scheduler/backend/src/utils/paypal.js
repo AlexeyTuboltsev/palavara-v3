@@ -57,7 +57,10 @@ async function getAccessToken() {
  * user should be redirected to.
  *
  * @param {object} args
- * @param {string} args.bookingId       Our internal booking UUID
+ * @param {string} args.bookingId       Our internal booking id (short code or
+ *                                       legacy UUID). Surfaced to the payer
+ *                                       via the order's description and
+ *                                       invoice_id so they can quote it back.
  * @param {number} args.amountCents     Price in minor units
  * @param {string} args.currency        ISO 4217 (EUR)
  * @param {string} args.returnUrl       URL PayPal redirects to after approval
@@ -71,9 +74,15 @@ async function createOrder({ bookingId, amountCents, currency, returnUrl, cancel
   const body = {
     intent: 'CAPTURE',
     purchase_units: [{
+      // reference_id + custom_id: internal lookup keys used by the webhook.
+      // invoice_id: shows in the payer's PayPal transaction history and
+      //   the receipts PayPal emails them — this is the booking number the
+      //   customer will see and quote back to us.
+      // description: shows on the PayPal checkout / approval screen.
       reference_id: bookingId,
-      custom_id: bookingId,
-      description: `Palavara lesson booking ${bookingId}`,
+      custom_id:    bookingId,
+      invoice_id:   bookingId,
+      description:  `Palavara booking #${bookingId}`,
       amount: { currency_code: currency, value },
     }],
     application_context: {
