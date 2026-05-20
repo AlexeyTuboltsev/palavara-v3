@@ -253,7 +253,7 @@ async function sendCancellationConfirmation(booking) {
   const refunded = (booking.refundedAmountCents || 0) > 0;
   const refundLine = refunded
     ? `${formatPrice(booking.refundedAmountCents)} has been refunded to your PayPal account.`
-    : 'No refund — cancellations less than 7 days before the workshop are not refundable. The slot has been released for other bookings.';
+    : 'Cancellations less than 7 days before the workshop are not refundable. The slot has been released for other bookings.';
 
   const cancelledByStudio = booking.cancelledBy === 'studio';
   const lessonLabelLower  = lessonLabelOf(booking).toLowerCase();
@@ -469,7 +469,7 @@ async function sendCycleCancellationConfirmation(siblings) {
   const refunded = (lead.refundedAmountCents || 0) > 0;
   const refundLine = refunded
     ? `${formatPrice(lead.refundedAmountCents)} has been refunded to your PayPal account.`
-    : 'No refund — cancellations less than 7 days before the first session are not refundable.';
+    : 'Cancellations less than 7 days before the first session are not refundable.';
 
   const cancelledByStudio = lead.cancelledBy === 'studio';
   const lessonLabelLower  = lessonLabelOf(lead).toLowerCase();
