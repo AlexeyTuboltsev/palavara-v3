@@ -128,6 +128,12 @@ body {
   /* Tiny right-edge align gap so labels stay flush even when values vary. */
   margin-right: 0.25rem;
 }
+/* Constraint hint reads in the body color (black), so it contrasts with the
+   blue session labels and doesn't look like another picked-date line. */
+.cycle-progress-header .cycle-session-hint {
+  color: var(--color-text);
+  font-weight: 300;
+}
 
 /* Legal footer (Impressum / AGB / Datenschutz) — points at studio.palavara.com.
    Mirrors the studio-site SiteFooter styling. § 5 TMG: legal links must be
