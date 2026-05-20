@@ -110,17 +110,24 @@ body {
 }
 
 /* Cycle-mode progress: sits LEFT of the logo (flex source order), styled
-   like the header title — same font/color, just text, no panel. Hidden on
-   single-session bookings; populated by renderCycleProgress in app.js. */
+   like the header title — same font/color, just text, no panel. One line
+   per session: "Session N/4: <date>" if picked, "Session N/4: must …" for
+   the next-to-pick session, "Session N/4:" for not-yet-pickable rows.
+   Hidden on single-session bookings; populated by renderCycleProgress. */
 .cycle-progress-header {
   margin: 0;
   flex: 1;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--color-blue);
   line-height: 1.4;
 }
 .cycle-progress-header.hidden { display: none; }
+.cycle-progress-header .cycle-session-label {
+  font-weight: 700;
+  /* Tiny right-edge align gap so labels stay flush even when values vary. */
+  margin-right: 0.25rem;
+}
 
 /* Legal footer (Impressum / AGB / Datenschutz) — points at studio.palavara.com.
    Mirrors the studio-site SiteFooter styling. § 5 TMG: legal links must be

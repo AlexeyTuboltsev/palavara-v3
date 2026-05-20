@@ -494,6 +494,14 @@ function escapeText(s) {
     .replace(/>/g, '&gt;');
 }
 
+/** Short, locale-aware date format for the per-session cycle lines —
+ *  e.g. "Thu 21 May" / "Do. 21. Mai". Year omitted to keep each line tight. */
+function formatDateCompact(isoDate) {
+  return new Date(isoDate + 'T12:00:00Z').toLocaleDateString(uiLocale(), {
+    weekday: 'short', month: 'short', day: 'numeric',
+  });
+}
+
 function renderCycleProgress() {
   if (!isInCycleMode()) {
     cycleProgressText.classList.add('hidden');
@@ -505,25 +513,35 @@ function renderCycleProgress() {
   const lt = selectedLessonType();
   const N = lt.sessionCount;
   const picked = selectedSlots.length;
+  const nextIdx = picked + 1;  // 1-based; > N once everything is picked
+
   cycleProgressText.classList.remove('hidden');
   cycleClearBtn.classList.remove('hidden');
   if (picked < N) {
-    const nextIdx = picked + 1;
-    const hint = nextIdx === N
-      ? t('datePicker.cycleHintFinal', {
-          n: nextIdx, total: N, days: MIN_CYCLE_GAP_DAYS,
-        })
-      : t('datePicker.cycleHintMid', {
-          n: nextIdx, total: N,
-        });
-    cycleProgressText.textContent = t('datePicker.cycleProgress', {
-      picked, total: N, hint,
-    });
     cycleContinueBtn.classList.add('hidden');
   } else {
-    cycleProgressText.textContent = t('datePicker.cycleProgressFull', { total: N });
     cycleContinueBtn.classList.remove('hidden');
   }
+
+  // One line per session, label + (picked date | constraint hint for the
+  // next-to-pick session | empty for not-yet-pickable). Constraints use the
+  // same phrasing as the dropped "Pick session N/M — ..." copy, minus the
+  // prefix (the line already carries the session number).
+  const lines = [];
+  for (let i = 1; i <= N; i++) {
+    const label = t('datePicker.cycleSessionLabel', { n: i, total: N });
+    let value = '';
+    const picked_slot = selectedSlots[i - 1];
+    if (picked_slot) {
+      value = `${formatDateCompact(picked_slot.date)} · ${picked_slot.start}–${picked_slot.end}`;
+    } else if (i === nextIdx) {
+      value = i === N
+        ? t('datePicker.cycleConstraintFinal', { days: MIN_CYCLE_GAP_DAYS })
+        : t('datePicker.cycleConstraintMid');
+    }
+    lines.push(`<span class="cycle-session-label">${escapeText(label)}</span> ${escapeText(value)}`);
+  }
+  cycleProgressText.innerHTML = lines.join('<br/>');
 }
 
 cycleClearBtn.addEventListener('click', clearCycleSelection);
