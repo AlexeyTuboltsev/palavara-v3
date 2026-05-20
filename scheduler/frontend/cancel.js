@@ -18,7 +18,10 @@
 
 const API_BASE = window.SCHEDULER_CONFIG?.API_BASE_URL || '';
 
-const REFUND_WINDOW_MS = 48 * 60 * 60 * 1000;
+// Must match scheduler/backend/src/utils/cancelLogic.js's REFUND_WINDOW_DAYS
+// and the calendar-day arithmetic. Anything else and the cancel page promises
+// a refund the backend then refuses (or vice versa).
+const REFUND_WINDOW_DAYS = 7;
 
 const t = (...args) => window.i18next ? window.i18next.t(...args) : args[0];
 
@@ -61,11 +64,35 @@ function formatRange(start, end) {
   return `${start} – ${end}`;
 }
 
+/** Calendar-day diff between "today in Europe/Berlin" and a YYYY-MM-DD
+ * session date. Returns sessionDate - today in whole days, ignoring
+ * time-of-day. Mirrors cancelLogic.daysUntilSessionDate on the backend. */
+function daysUntilSessionDate(dateYmd, nowMs = Date.now()) {
+  if (!dateYmd) return NaN;
+  const parts = dateYmd.split('-').map(Number);
+  if (parts.length !== 3 || parts.some((n) => !Number.isInteger(n))) return NaN;
+  const [y, m, d] = parts;
+  const sessionUtc = Date.UTC(y, m - 1, d);
+  const todayYmd = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' })
+    .format(new Date(nowMs));
+  const [ty, tm, td] = todayYmd.split('-').map(Number);
+  const todayUtc = Date.UTC(ty, tm - 1, td);
+  return Math.round((sessionUtc - todayUtc) / 86_400_000);
+}
+
 function isLikelyRefundEligible(booking) {
-  if (!booking?.date || !booking?.timeSlot) return false;
-  const startMs = Date.parse(`${booking.date}T${booking.timeSlot}:00+02:00`);
-  if (isNaN(startMs)) return false;
-  return startMs - Date.now() > REFUND_WINDOW_MS;
+  if (!booking?.date) return false;
+  // Cycles: eligibility is measured against the EARLIEST session, not the
+  // row the user happened to click on. cycleSiblings is included in the
+  // GET /bookings/{id} response when cycleId is set.
+  let targetDate = booking.date;
+  if (booking.cycleId && Array.isArray(booking.cycleSiblings) && booking.cycleSiblings.length > 0) {
+    targetDate = booking.cycleSiblings
+      .map((s) => s.date)
+      .filter(Boolean)
+      .sort()[0] || booking.date;
+  }
+  return daysUntilSessionDate(targetDate) >= REFUND_WINDOW_DAYS;
 }
 
 function renderBookingDetails(booking) {
