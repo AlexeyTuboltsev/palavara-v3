@@ -37,8 +37,7 @@
     "errorLoading": "Could not load workshop dates. Please refresh the page.",
     "errorAvailability": "Failed to load availability. Please try again.",
     "cycleSessionLabel": "Session {{n}}/{{total}}:",
-    "cycleConstraintMid": "must be a later date than the previous session and not the same day",
-    "cycleConstraintFinal": "must be at least {{days}} days after the previous session",
+    "cycleConstraintFinal": "Choose a date at least a week after session {{prev}}.",
     "cycleClear": "Clear selections",
     "cycleContinue": "Continue"
   },
