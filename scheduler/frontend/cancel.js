@@ -102,10 +102,25 @@ function renderBookingDetails(booking) {
     ? `${baseLabel} · ${t('confirm.personsSuffix', { count: booking.numPersons })}`
     : baseLabel;
 
+  const isCycle = Array.isArray(booking.cycleSiblings) && booking.cycleSiblings.length > 0;
+  // For cycle bookings the GET /bookings/{id} response inlines every session
+  // via cycleSiblings; mirror confirm.js by rendering one row per session
+  // instead of a single "date / time" pair tied to the clicked row.
+  const dateTimeRows = isCycle
+    ? booking.cycleSiblings.map((s) => ({
+        label: t('confirm.details.sessionOfTotal', {
+          n: s.sessionIndex, total: booking.cycleSiblings.length,
+        }),
+        value: `${formatDate(s.date)} · ${formatRange(s.timeSlot, s.slotEnd)}`,
+      }))
+    : [
+        { label: t('confirm.details.date'), value: formatDate(booking.date) },
+        { label: t('confirm.details.time'), value: formatRange(booking.timeSlot, booking.slotEnd) },
+      ];
+
   const rows = [
     { label: t('confirm.details.lessonType'), value: detailsLabel },
-    { label: t('confirm.details.date'),       value: formatDate(booking.date) },
-    { label: t('confirm.details.time'),       value: formatRange(booking.timeSlot, booking.slotEnd) },
+    ...dateTimeRows,
     { label: t('confirm.details.paid'),       value: price },
     { label: t('confirm.details.bookingId'),  value: `<code>${booking.bookingId}</code>` },
   ];
