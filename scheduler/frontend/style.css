@@ -750,6 +750,13 @@ body {
 .refund-notice.refund-eligible { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
 .refund-notice.refund-late     { background: #fff7ed; color: #92400e; border-color: #fed7aa; }
 
+.refund-policy-link {
+  font-size: 0.8rem;
+  margin: -0.75rem 0 1.25rem;
+  text-align: right;
+}
+.refund-policy-link a { color: var(--color-muted); }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .slots-grid { grid-template-columns: repeat(3, 1fr); }
