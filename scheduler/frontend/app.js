@@ -73,6 +73,11 @@ let selectedEnd   = '';
 // Filled in chronological order; rules are enforced at click time.
 let selectedSlots = []; // [{date, start, end}, ...]
 
+// Which date drawer is open in the mobile/list view. Persisted across
+// renderDateList() calls so that picking a session in cycle mode (which
+// re-renders the whole list) doesn't collapse the user's current day.
+let expandedDateIso = null;
+
 const MIN_CYCLE_GAP_DAYS = 7;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -271,6 +276,22 @@ function renderDateList() {
     li.appendChild(drawer);
     dateList.appendChild(li);
   }
+
+  // Restore the previously-open drawer if its date is still in the list
+  // (after a cycle slot pick, renderDateList runs again — we want the user
+  // to stay on the same day so they can pick another session).
+  if (expandedDateIso && availableDates.includes(expandedDateIso)) {
+    const head   = dateList.querySelector(`.date-list-item[data-iso="${expandedDateIso}"]`);
+    const drawer = head?.nextElementSibling;
+    if (head && drawer && drawer.classList.contains('date-drawer')) {
+      renderDrawerSlots(drawer, expandedDateIso);
+      drawer.classList.add('open');
+      head.classList.add('expanded');
+      head.setAttribute('aria-expanded', 'true');
+    }
+  } else {
+    expandedDateIso = null;
+  }
 }
 
 function renderDrawerSlots(drawer, iso) {
@@ -317,12 +338,16 @@ function toggleDrawer(head, drawer, iso) {
     b.classList.remove('expanded');
     b.setAttribute('aria-expanded', 'false');
   });
-  if (isOpen) return;
+  if (isOpen) {
+    expandedDateIso = null;
+    return;
+  }
 
   renderDrawerSlots(drawer, iso);
   drawer.classList.add('open');
   head.classList.add('expanded');
   head.setAttribute('aria-expanded', 'true');
+  expandedDateIso = iso;
 }
 
 calPrev.addEventListener('click', () => {
