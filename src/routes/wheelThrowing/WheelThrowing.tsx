@@ -10,8 +10,8 @@ export const WheelThrowing: FC<{
 }> = ({state}) => {
   return <Section state={state} anchorMenu={
     <div className={styles.anchorMenu}>
-      <a href="#four-session-wheel-throwing" className={styles.anchorMenuItem}>✦ 4-session Wheel Throwing Classes</a>
-      <a href="#one-session-wheel-intensive" className={styles.anchorMenuItem}>✦ 1-session Wheel Throwing Workshop – Wheel Intensive</a>
+      <a href="#four-session-wheel-throwing" className={styles.anchorMenuItem}>4-session Wheel Throwing Classes</a>
+      <a href="#one-session-wheel-intensive" className={styles.anchorMenuItem}>1-session Wheel Throwing Workshop – Wheel Intensive</a>
     </div>
   }>
 
@@ -19,7 +19,7 @@ export const WheelThrowing: FC<{
 
     {/* ── 4-session course ────────────────────────────────────────────────── */}
     <div className={styles.mainText}>
-      <h2 id="four-session-wheel-throwing">✦ 4-session Wheel Throwing Classes</h2>
+      <h2 id="four-session-wheel-throwing">4-session Wheel Throwing Classes</h2>
 
       <h3>Who is this course intended for?</h3>
       <p>This course is designed both for complete beginners and for those who already have some experience with wheel throwing but would like to strengthen their skills and gain more confidence.</p>
@@ -44,15 +44,14 @@ export const WheelThrowing: FC<{
         <li>4-session Wheel Throwing class (3 persons) — €700</li>
       </ul>
 
-      <p><a href={BOOK_URL}>Book now</a></p>
+      <p><a href={BOOK_URL} className={styles.bookNow}>Book now</a></p>
 
-      <h3>FAQ</h3>
+      <h3 className={styles.faqHeading}>FAQ</h3>
       <p><strong>Are there any additional fees?</strong></p>
       <p>No. The course fee includes all materials, glazing, and firing.</p>
       <p><strong>When can I pick up the pieces?</strong></p>
       <p>The finished pieces will be ready for pickup approximately two weeks after the course ends.</p>
-
-      <h3>Cancellation policy</h3>
+      <p><strong>What is the cancellation policy?</strong></p>
       <p>Full refund for cancellations made at least 7 days before the workshop (the first session, for multi-session lessons).</p>
 
       <p><em>The class can be taught in Russian or English.</em></p>
@@ -62,7 +61,7 @@ export const WheelThrowing: FC<{
 
     {/* ── 1-session intensive ──────────────────────────────────────────────── */}
     <div className={styles.mainText}>
-      <h2 id="one-session-wheel-intensive">✦ 1-session Wheel Throwing Workshop – Wheel Intensive</h2>
+      <h2 id="one-session-wheel-intensive">1-session Wheel Throwing Workshop – Wheel Intensive</h2>
 
       <h3>Who is this course intended for?</h3>
       <p>A personalised 2-hour pottery wheel session tailored to your individual needs and skill level.</p>
@@ -85,15 +84,14 @@ export const WheelThrowing: FC<{
         <li>1-session Wheel Throwing class (3 persons) — €230</li>
       </ul>
 
-      <p><a href={BOOK_URL}>Book now</a></p>
+      <p><a href={BOOK_URL} className={styles.bookNow}>Book now</a></p>
 
-      <h3>FAQ</h3>
+      <h3 className={styles.faqHeading}>FAQ</h3>
       <p><strong>Are there any additional fees?</strong></p>
       <p>The course fee includes clay, glaze, and firing of two pieces. Each additional piece is charged separately at €5 per piece. Finished pieces will be coated with a transparent glaze. You’re also welcome to glaze them yourself during an open studio session.</p>
       <p><strong>When can I pick up the pieces?</strong></p>
       <p>The finished pieces will be ready for pickup approximately two weeks after the workshop ends.</p>
-
-      <h3>Cancellation policy</h3>
+      <p><strong>What is the cancellation policy?</strong></p>
       <p>Full refund for cancellations made at least 7 days before the workshop.</p>
 
       <p><em>The class can be taught in Russian or English.</em></p>
