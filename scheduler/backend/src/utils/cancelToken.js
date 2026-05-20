@@ -6,7 +6,10 @@
  * The token in the cancellation link is a HMAC-SHA256 of `cancel.<bookingId>`
  * keyed by CANCEL_TOKEN_SECRET. The token is permanent (no expiry) — it
  * doesn't need one because:
- *   - Booking IDs are UUIDs (unguessable on their own).
+ *   - Booking IDs (UUIDs for pre-2026-05-20 rows, 6-char base32-ish codes
+ *     for new ones) carry enough entropy to be unguessable in practice
+ *     when paired with this signature, especially behind API Gateway's
+ *     per-IP throttling. 28^6 ≈ 482M possibilities for the short codes.
  *   - A successfully cancelled booking has status='cancelled' and the
  *     conditional update on cancel rejects double-cancels.
  *   - The refund-eligibility check (7-day window) is time-of-use, so re-using

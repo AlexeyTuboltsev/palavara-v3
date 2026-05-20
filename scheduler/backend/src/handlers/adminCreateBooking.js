@@ -30,7 +30,7 @@ const { ok, badRequest, serverError } = require('../utils/response');
 const { findSlot, isValidDateString } = require('../utils/slots');
 const { sendBookingConfirmation, sendOwnerNotification } = require('../email');
 const { insertBookingEvent } = require('../utils/googleCalendar');
-const { v4: uuidv4 } = require('uuid');
+const { generateBookingId } = require('../utils/bookingId');
 const crypto = require('crypto');
 
 const TABLE         = process.env.BOOKINGS_TABLE;
@@ -125,7 +125,7 @@ exports.handler = async (event) => {
     }
 
     // ── Persist as confirmed (no PayPal involvement) ────────────────────────
-    const bookingId = uuidv4();
+    const bookingId = generateBookingId();
     const now       = new Date().toISOString();
 
     const item = {

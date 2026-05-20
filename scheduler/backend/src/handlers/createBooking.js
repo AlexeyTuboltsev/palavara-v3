@@ -36,6 +36,7 @@ const { findSlot, isValidDateString } = require('../utils/slots');
 const { resolveLessonTypeAndPrice } = require('../utils/lessonTypes');
 const { validateCycleSlots } = require('../utils/cycleLogic');
 const { createOrder } = require('../utils/paypal');
+const { generateBookingId } = require('../utils/bookingId');
 const { v4: uuidv4 } = require('uuid');
 
 const TABLE             = process.env.BOOKINGS_TABLE;
@@ -162,7 +163,7 @@ async function createSingleBooking({
     return badRequest('This time slot is no longer available. Please choose another.');
   }
 
-  const bookingId = uuidv4();
+  const bookingId = generateBookingId();
   const returnUrl = appendQuery(PAYPAL_RETURN_URL, { bookingId });
   const cancelUrl = appendQuery(PAYPAL_CANCEL_URL, { bookingId });
 
@@ -261,8 +262,9 @@ async function createCycleBooking({
   // One PayPal order for the bundle. custom_id is the FIRST session's
   // bookingId — the webhook handler uses it to look up the row, then
   // propagates the confirmation across cycle siblings.
+  // cycleId stays a UUID — internal-only, never surfaced to the user.
   const cycleId   = uuidv4();
-  const bookingIds = resolvedSlots.map(() => uuidv4());
+  const bookingIds = resolvedSlots.map(() => generateBookingId());
   const firstBookingId = bookingIds[0];
 
   const returnUrl = appendQuery(PAYPAL_RETURN_URL, { bookingId: firstBookingId });

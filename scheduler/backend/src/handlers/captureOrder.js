@@ -28,13 +28,14 @@ const {
 } = require('../email');
 const { insertBookingEvent } = require('../utils/googleCalendar');
 const { findCycleSiblings, transactUpdateAll } = require('../utils/cycleLogic');
+const { isValidBookingId } = require('../utils/bookingId');
 
 const TABLE = process.env.BOOKINGS_TABLE;
 
 exports.handler = async (event) => {
   try {
     const id = event.pathParameters?.id;
-    if (!id || !/^[0-9a-f-]{36}$/.test(id)) {
+    if (!isValidBookingId(id)) {
       return badRequest('Invalid booking ID');
     }
 

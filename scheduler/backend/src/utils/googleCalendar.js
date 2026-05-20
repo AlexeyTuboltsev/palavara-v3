@@ -133,10 +133,15 @@ async function getAccessToken() {
 
 
 /**
- * Convert a booking UUID to a Calendar event id. Calendar IDs allow
- * a-v0-9 (32 chars) and 5–1024 chars long. UUID hex (0-9, a-f) is a
- * subset, so just strip dashes and lowercase. Result is exactly 32
- * chars — well within the limit.
+ * Convert a booking id to a Calendar event id. Calendar event ids allow
+ * a-v0-9, length 5–1024.
+ *
+ * Old UUID ids (e.g. "550e8400-e29b-41d4-a716-446655440000"): strip dashes,
+ * lowercase — yields 32 hex chars, all valid.
+ *
+ * New short ids (e.g. "ABC234"): lowercase — yields 6 chars from
+ * [a-v0-9] (the booking-id alphabet is picked specifically to fall inside
+ * this set; see utils/bookingId.js).
  */
 function eventIdFromBookingId(bookingId) {
     return bookingId.replace(/-/g, '').toLowerCase();

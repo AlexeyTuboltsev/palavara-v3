@@ -20,6 +20,7 @@ const { GetCommand } = require('@aws-sdk/lib-dynamodb');
 const { ddb } = require('../utils/dynamo');
 const { ok, badRequest, notFound, serverError } = require('../utils/response');
 const { processCancellation } = require('../utils/cancelLogic');
+const { isValidBookingId } = require('../utils/bookingId');
 const crypto = require('crypto');
 
 const TABLE        = process.env.BOOKINGS_TABLE;
@@ -28,7 +29,7 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET;
 exports.handler = async (event) => {
   try {
     const id = event.pathParameters?.id;
-    if (!id || !/^[0-9a-f-]{36}$/.test(id)) {
+    if (!isValidBookingId(id)) {
       return badRequest('Invalid booking ID');
     }
 

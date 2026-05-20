@@ -107,6 +107,7 @@ function renderBookingDetails(booking) {
     { label: t('confirm.details.date'),       value: formatDate(booking.date) },
     { label: t('confirm.details.time'),       value: formatRange(booking.timeSlot, booking.slotEnd) },
     { label: t('confirm.details.paid'),       value: price },
+    { label: t('confirm.details.bookingId'),  value: `<code>${booking.bookingId}</code>` },
   ];
   bookingDetails.innerHTML = rows.map((r) =>
     `<div class="confirm-row"><span class="label">${r.label}</span><span class="value">${r.value}</span></div>`
