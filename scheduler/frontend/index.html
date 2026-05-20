@@ -10,6 +10,7 @@
 <body>
   <div class="page-wrapper">
     <header class="site-header">
+      <p class="cycle-progress-header hidden" id="cycleProgressText"></p>
       <a href="https://studio.palavara.com/" class="logo-link" aria-label="Palavara Studio">
         <img src="logo.svg" alt="Palavara" class="logo" />
       </a>
@@ -39,13 +40,6 @@
       <!-- ── Step 2: Pick a date ────────────────────────────────────────── -->
       <section id="step-date" class="step hidden" data-step="2">
         <div class="step-body">
-          <!-- Cycle-mode progress + clear; hidden for single-session bookings. -->
-          <div class="cycle-progress hidden" id="cycleProgress">
-            <p class="cycle-progress-text" id="cycleProgressText"></p>
-            <button type="button" class="cycle-clear-btn" id="cycleClearBtn"
-                    data-i18n="datePicker.cycleClear">Clear selections</button>
-          </div>
-
           <!-- Desktop: month calendar with slots inside each day -->
           <div class="calendar-view">
             <div class="calendar-header">
@@ -76,6 +70,8 @@
         <div class="step-actions">
           <button type="button" class="btn btn-ghost" data-action="back"
                   data-i18n="common.back">Back</button>
+          <button type="button" class="btn btn-ghost hidden" id="cycleClearBtn"
+                  data-i18n="datePicker.cycleClear">Clear selections</button>
           <button type="button" class="btn btn-paypal hidden" id="cycleContinueBtn"
                   data-i18n="datePicker.cycleContinue">Continue</button>
           <button type="button" class="btn btn-ghost" data-action="cancel"

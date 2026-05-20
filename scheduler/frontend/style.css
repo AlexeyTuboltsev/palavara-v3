@@ -78,6 +78,10 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
 }
 .site-header .logo-link { display: inline-flex; line-height: 0; flex-shrink: 0; }
 /* Same logo sizing as the studio site — 124 px desktop, 60 px mobile. */
@@ -104,6 +108,19 @@ body {
 @media (min-width: 601px) {
   .header-title { display: none; }
 }
+
+/* Cycle-mode progress: sits LEFT of the logo (flex source order), styled
+   like the header title — same font/color, just text, no panel. Hidden on
+   single-session bookings; populated by renderCycleProgress in app.js. */
+.cycle-progress-header {
+  margin: 0;
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-blue);
+  line-height: 1.4;
+}
+.cycle-progress-header.hidden { display: none; }
 
 /* Legal footer (Impressum / AGB / Datenschutz) — points at studio.palavara.com.
    Mirrors the studio-site SiteFooter styling. § 5 TMG: legal links must be
@@ -412,37 +429,6 @@ body {
   opacity: 0.35;
   cursor: not-allowed;
 }
-
-/* Cycle-progress banner at the top of step-date. */
-.cycle-progress {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 10px 14px;
-  margin-bottom: 0.75rem;
-  background: color-mix(in srgb, var(--color-blue) 5%, white);
-  border: 1px solid color-mix(in srgb, var(--color-blue) 20%, white);
-  border-radius: var(--radius);
-}
-.cycle-progress-text {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-text);
-  line-height: 1.4;
-}
-.cycle-clear-btn {
-  flex-shrink: 0;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
-  font-size: 0.8rem;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: inherit;
-}
-.cycle-clear-btn:hover { background: var(--color-slot-hover); }
 
 /* Mobile date list with drawer-style slot reveal */
 .date-list { list-style: none; padding: 0; margin: 0; }
