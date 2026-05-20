@@ -508,6 +508,7 @@ function renderCycleProgress() {
     cycleProgressText.textContent = '';
     cycleClearBtn.classList.add('hidden');
     cycleContinueBtn.classList.add('hidden');
+    cycleContinueBtn.disabled = true;
     return;
   }
   const lt = selectedLessonType();
@@ -517,11 +518,10 @@ function renderCycleProgress() {
 
   cycleProgressText.classList.remove('hidden');
   cycleClearBtn.classList.remove('hidden');
-  if (picked < N) {
-    cycleContinueBtn.classList.add('hidden');
-  } else {
-    cycleContinueBtn.classList.remove('hidden');
-  }
+  // Continue is always visible in cycle mode so the user sees the next step
+  // exists — but greyed-out (disabled) until all N sessions are picked.
+  cycleContinueBtn.classList.remove('hidden');
+  cycleContinueBtn.disabled = picked < N;
 
   // One line per session, label + (picked date | constraint hint | empty).
   // Only the FINAL session carries a constraint hint, and only when it's
