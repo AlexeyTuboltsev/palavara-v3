@@ -220,6 +220,24 @@
     font-style: italic;
   }
 
+  // "Book now" CTA inside a Section. Uses h2's font size/weight + the brand
+  // blue, with breathing room so it doesn't crowd the surrounding paragraphs.
+  .bookNow {
+    display: inline-block;
+    color: $color-blue;
+    font-weight: 700;
+    font-size: 17px;
+    text-transform: uppercase;
+    text-decoration: underline;
+    margin: 1.25rem 0;
+  }
+
+  // FAQ heading needs a bit of air over it to set the Q&A block apart from
+  // the preceding price list.
+  .faqHeading {
+    margin-top: 1.25rem;
+  }
+
   @media (max-width: $breakpoint-mobile) {
     grid-column: 1;
     padding: 0;
