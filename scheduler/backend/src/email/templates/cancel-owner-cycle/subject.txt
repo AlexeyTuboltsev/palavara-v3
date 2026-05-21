@@ -1,1 +1,0 @@
-Cycle booking cancelled — {{studentName}}

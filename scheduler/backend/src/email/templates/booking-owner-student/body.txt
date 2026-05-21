@@ -1,9 +1,0 @@
-A new {{lessonLabelLower}} booking has been confirmed.
-
-  Booker:     {{studentName}} <{{studentEmail}}>{{phoneBlockText}}
-  Date:       {{dateLine}}
-  Time:       {{timeLine}}{{priceLineIndented}}{{paymentNoteIndented}}
-  Booking ID: {{bookingId}}{{commentBlockText}}
-
-Reply to this email to contact the booker directly.
-{{impressumText}}

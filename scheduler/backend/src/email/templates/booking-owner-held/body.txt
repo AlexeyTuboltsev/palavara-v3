@@ -1,8 +1,0 @@
-A slot has been held in the schedule{{paymentNoteDashed}}.
-
-  Date:       {{dateLine}}
-  Time:       {{timeLine}}{{paymentNoteIndented}}
-  Booking ID: {{bookingId}}
-
-A calendar invite is attached to this email.
-{{impressumText}}
