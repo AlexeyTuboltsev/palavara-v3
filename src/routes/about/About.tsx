@@ -1,4 +1,5 @@
 import { FC } from 'react'
+import { Trans, useTranslation } from 'react-i18next';
 import { TReadyAppState } from "../../types";
 import { Images } from "../../components/Images";
 import styles from "./About.module.scss";
@@ -37,8 +38,10 @@ export const About: FC<{
 const Content: FC<{
   state: TReadyAppState
 }> = ({ state }) => {
+  const { t } = useTranslation();
   const hasImages = (state as any).currentImage;
   const manifest = getImageManifest();
+  const intro = t('routes.about.intro', { returnObjects: true }) as string[];
 
   return <>
     {hasImages &&
@@ -56,21 +59,31 @@ const Content: FC<{
       </div>
     }
     <div className={styles.text}>
-        <h1>ABOUT ME</h1>
-        <p>My name is Varvara Polyakova,</p>
-        <p>I am a diverse visual artist working across the fields of graphic design, illustration and ceramics.</p>
-        <p>I graduated from the Moscow State University of Printing Arts. After graduation, I worked successfully for a
-          long time in the field of magazine and book illustration and design.</p>
+        <h1>{t('routes.about.title')}</h1>
+        {intro.map((p, i) => <p key={i}>{p}</p>)}
+        <h2>
+          <Trans i18nKey="routes.about.instagramLine">
+            See my ceramics on Instagram: <a href="https://www.instagram.com/palavara_ceramics/" target="_blank" rel="noopener noreferrer">palavara_ceramics</a>
+          </Trans>
+        </h2>
+        <h2>
+          <Trans i18nKey="routes.about.websiteLine">
+            See my other work on <a href="https://palavara.com/" target="_blank" rel="noopener noreferrer">palavara.com</a>
+          </Trans>
+        </h2>
+        <p>{t('routes.about.studioBlurb')}</p>
+        <h2>
+          <Trans i18nKey="routes.about.etsyLine">
+            You can buy my ceramics in my Etsy shop: <a href="https://www.etsy.com/shop/PALAVARA" target="_blank" rel="noopener noreferrer">www.etsy.com/shop/PALAVARA</a>
+          </Trans>
+        </h2>
+        <p>{t('routes.about.collabBlurb')}</p>
 
-        <p>In 2012 I moved from Moscow to Berlin and I also started creating ceramics under the brand name Palavara.</p>
-        <h2>See my ceramics on Instagram: <a href="https://www.instagram.com/palavara_ceramics/" target="_blank" rel="noopener noreferrer">palavara_ceramics</a></h2>
-        <h2>See my other work on <a href="https://palavara.com/" target="_blank" rel="noopener noreferrer">palavara.com</a></h2>
-        <p>A few years ago I opened a Palavara-studio in Wedding, where I produce my ceramics and run workshops for
-          children and adults.</p>
-        <h2>You can buy my ceramics in my Etsy shop: <a href="https://www.etsy.com/shop/PALAVARA" target="_blank" rel="noopener noreferrer">www.etsy.com/shop/PALAVARA</a></h2>
-        <p>I'd be more than happy to discuss any potential projects or collaborations.</p>
-
-        <p>Please contact me via e-mail: <a href="mailto:varya@palavara.com">varya@palavara.com</a></p>
+        <p>
+          <Trans i18nKey="routes.about.emailLine">
+            Please contact me via e-mail: <a href="mailto:varya@palavara.com">varya@palavara.com</a>
+          </Trans>
+        </p>
       </div>
     </>
 }

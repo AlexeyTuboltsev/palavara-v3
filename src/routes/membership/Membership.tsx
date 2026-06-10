@@ -1,4 +1,5 @@
 import React, {FC} from 'react'
+import {useTranslation} from 'react-i18next';
 import {TReadyAppState} from "../../types";
 import {Section} from "../../components/Section";
 import styles from "../../components/Section.module.scss";
@@ -6,38 +7,30 @@ import styles from "../../components/Section.module.scss";
 export const Membership: FC<{
   state: TReadyAppState
 }> = ({state}) => {
-  // const {t} = useTranslation();
+  const {t} = useTranslation();
+
+  const paragraphs = t('routes.membership.paragraphs', {returnObjects: true}) as string[];
+  const fullItems = t('routes.membership.full.items', {returnObjects: true}) as string[];
+  const flexibleItems = t('routes.membership.flexible.items', {returnObjects: true}) as string[];
 
   return <Section state={state}>
     <div className={styles.mainText}>
 
-      <h1>MEMBERSHIP</h1>
-      <p>We welcome ceramists to our studio.</p>
-      <p>We have a wonderful space, tools and materials so you can work independently on your own projects.</p>
-      <p>If you have the knowledge, skills and ability to work with clay, but don't have your own equipped pottery
-        studio, we offer membership to our ceramic co-working space!</p>
-      <p>You will have your own shelf to store your personal materials, access to the pottery wheels and kilns. You may
-        also bring and work with your own masses and glazes, as long as they match the characteristics of our firing
-        regimes.</p>
+      <h1>{t('routes.membership.title')}</h1>
+      {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
 
-      <p>Contact us and we'll send you the details: palavarastudio@gmail.com</p>
+      <p>{t('routes.membership.contact')}</p>
 
       <br/>
-      <h3>Full Membership</h3>
+      <h3>{t('routes.membership.full.heading')}</h3>
       <ul>
-        <li>Unlimited check-ins</li>
-        <li>Cancellation period: until the end of the current month + 1 full calendar month</li>
-        <li>Price: €180 per month</li>
-        <li>Material fee: €5 per kg of raw clay (this includes the clay itself, access to all studio glazes, and kiln firing)</li>
+        {fullItems.map((item, i) => <li key={i}>{item}</li>)}
       </ul>
 
       <br/>
-      <h3>Flexible Membership</h3>
+      <h3>{t('routes.membership.flexible.heading')}</h3>
       <ul>
-        <li>4 check-ins per month (you choose the days)</li>
-        <li>Cancellation period: until the end of the current month + 1 full calendar month</li>
-        <li>Price: €100 per month</li>
-        <li>Material fee: €5 per kg of raw clay (this includes the clay itself, access to all studio glazes, and kiln firing)</li>
+        {flexibleItems.map((item, i) => <li key={i}>{item}</li>)}
       </ul>
     </div>
   </Section>

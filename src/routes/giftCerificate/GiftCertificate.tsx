@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+import { Trans, useTranslation } from 'react-i18next';
 import { TReadyAppState } from "../../types";
 import { Section } from "../../components/Section";
 import styles from "../../components/Section.module.scss";
@@ -6,33 +7,38 @@ import styles from "../../components/Section.module.scss";
 export const GiftCertificate: FC<{
   state: TReadyAppState
 }> = ({ state }) => {
+  const { t } = useTranslation();
+  const openStudioItems = t('routes.giftCertificate.openStudio.items', { returnObjects: true }) as string[];
+  const familySaturdayItems = t('routes.giftCertificate.familySaturday.items', { returnObjects: true }) as string[];
+  const howToPurchaseParagraphs = t('routes.giftCertificate.howToPurchase.paragraphs', { returnObjects: true }) as string[];
+
   return <Section state={state}>
     <div className={styles.mainText}>
 
-      <h1>GIFT CERTIFICATES</h1>
+      <h1>{t('routes.giftCertificate.title')}</h1>
 
-      <h2>Certificate for Open Studio</h2>
-      <p>For 1 session (3 hours) – €30</p>
-      <p>Open Studio is held every Friday from 17:00 to 20:00.</p>
-      <p>The certificate is for one person.</p>
-      <p>Firing costs are €10 per kilo; items are weighed before glazing and firing.</p>
-      <p className={styles.italic}>Please note that Open Studio is not a lesson.</p>
+      <h2>{t('routes.giftCertificate.openStudio.heading')}</h2>
+      {openStudioItems.map((item, i) => <p key={i}>{item}</p>)}
+      <p className={styles.italic}>{t('routes.giftCertificate.openStudio.note')}</p>
 
-      <h2>Certificate for Family Saturday – €30</h2>
-      <p>Duration: 2 hours</p>
-      <p>Classes are held on Saturdays from 12:00 to 14:00.</p>
-      <p>The certificate is for one adult and one child.</p>
-      <p>It is possible to attend with additional children and adults for an extra fee.</p>
-      <p>Firing costs are €10 per kilo; items are weighed before glazing and firing.</p>
+      <h2>{t('routes.giftCertificate.familySaturday.heading')}</h2>
+      {familySaturdayItems.map((item, i) => <p key={i}>{item}</p>)}
 
-      <h2>Certificate for Pottery Wheel Class</h2>
-      <p>You can purchase a gift certificate for any wheel throwing course from the <strong>Classes / Wheel Throwing</strong> section.</p>
+      <h2>{t('routes.giftCertificate.wheel.heading')}</h2>
+      <p>
+        <Trans i18nKey="routes.giftCertificate.wheel.body">
+          You can purchase a gift certificate for any wheel throwing course from the <strong>Classes / Wheel Throwing</strong> section.
+        </Trans>
+      </p>
 
-      <p><strong>How to purchase:</strong></p>
-      <p>Please send me an email with the type of gift certificate you would like to buy and the name of the recipient. I will then send you the payment details.</p>
-      <p>After the payment has been received, you will receive the gift certificate as a PDF file.</p>
+      <p><strong>{t('routes.giftCertificate.howToPurchase.label')}</strong></p>
+      {howToPurchaseParagraphs.map((p, i) => <p key={i}>{p}</p>)}
 
-      <p><strong>email: <a href="mailto:palavarastudio@gmail.com">palavarastudio@gmail.com</a></strong></p>
+      <p><strong>
+        <Trans i18nKey="routes.giftCertificate.howToPurchase.emailLine">
+          email: <a href="mailto:palavarastudio@gmail.com">palavarastudio@gmail.com</a>
+        </Trans>
+      </strong></p>
 
     </div>
   </Section>

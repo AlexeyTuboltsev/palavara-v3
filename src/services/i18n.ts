@@ -6,6 +6,7 @@ import { initReactI18next } from 'react-i18next';
 export enum ELang {
   EN = 'en',
   RU = 'ru',
+  DE = 'de',
 }
 
 function initI18n(i18n:I18n, lng: ELang){

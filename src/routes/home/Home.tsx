@@ -1,4 +1,5 @@
 import {FC, ReactNode, useEffect, useRef, useState} from 'react'
+import {Trans} from 'react-i18next';
 import styles from "../../components/App.module.scss";
 import {TReadyAppState} from "../../types";
 import {LogoHome} from "../../components/Logo";
@@ -96,7 +97,9 @@ export const Home: FC<{ state: TReadyAppState }> = ({state}) => {
     <div className={styles.header}>
       <LogoHome/>
       <h1 className={styles.title}>
-        Pottery classes <br/> for kids and adults
+        <Trans i18nKey="routes.home.title">
+          Pottery classes <br/> for kids and adults
+        </Trans>
       </h1>
       <HomeHeader state={state}/>
 

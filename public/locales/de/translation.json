@@ -1,0 +1,366 @@
+{
+  "menu": {
+    "classes": "Kurse",
+    "familySaturday": "Familien-Samstag",
+    "openStudio": "Offenes Atelier",
+    "firingService": "Brennservice",
+    "giftCertificate": "Gutschein",
+    "membership": "Mitgliedschaft",
+    "kidsClass": "Kinderkurs",
+    "wheelThrowing": "Drehscheibe",
+    "eventWorkshops": "Event-Workshops",
+    "teamEvents": "Team-Events",
+    "birthdayParties": "Geburtstagsfeier"
+  },
+  "footer": {
+    "impressum": "Impressum",
+    "agb": "AGB",
+    "datenschutz": "Datenschutzerklärung"
+  },
+  "routes": {
+    "home": {
+      "title": "Töpferkurse <0/> für Kinder und Erwachsene"
+    },
+    "kidsClass": {
+      "title": "Kindertöpferkurs",
+      "subtitle": "Für Kinder von 6 bis 12 Jahren",
+      "paragraphs": [
+        "Im Unterricht lernen wir verschiedene Tonarten kennen — ob weißen, schwarzen oder roten.",
+        "Wir probieren unterschiedliche Techniken aus: Kneten, Ausrollen, Stempeln und Schneiden.",
+        "Wir gestalten Geschirr, bauen Städte, machen Spielzeug, Fliesen und vieles mehr!",
+        "Nur eine begrenzte Anzahl an Plätzen verfügbar!"
+      ],
+      "where": { "label": "Wo?", "value": "13359 Berlin, Steegerstr. 1A" },
+      "when": { "label": "Wann?", "value": "Mittwochs 16:30—18:00" },
+      "cost": {
+        "label": "Kosten",
+        "items": ["4 Stunden – 80 €", "Probestunde – 20 €"],
+        "missedClassNote": "Sollte eine Stunde verpasst werden, können wir diese leider nicht erstatten.",
+        "holidaysNote": "In den Schulferien finden keine Kurse statt."
+      },
+      "howToBook": {
+        "label": "Anmeldung",
+        "emailLine": "<0>palavarastudio+kp@gmail.com</0>"
+      }
+    },
+    "wheelThrowing": {
+      "title": "Töpferkurse an der Drehscheibe in Berlin",
+      "anchorMenu": {
+        "fourSession": "4-teiliger Drehscheibenkurs",
+        "oneSession": "1-stündiger Drehscheiben-Workshop – Wheel Intensive"
+      },
+      "fourSession": {
+        "heading": "4-teiliger Drehscheibenkurs",
+        "whoFor": {
+          "label": "Für wen ist dieser Kurs geeignet?",
+          "paragraphs": [
+            "Dieser Kurs richtet sich sowohl an absolute Anfänger:innen als auch an Teilnehmende, die bereits erste Erfahrungen an der Drehscheibe gesammelt haben und ihre Fähigkeiten und Sicherheit ausbauen möchten.",
+            "In 4 Einheiten durchläufst du alle wesentlichen Schritte der Keramikherstellung an der Drehscheibe. Der Kurs deckt Tonvorbereitung, Zentrieren, Hochziehen, Formgebung, Abdrehen, Oberflächengestaltung, Schrühbrand, Glasieren und Glasurbrand ab.",
+            "Am Ende des Kurses nimmst du deine eigenen einzigartigen und gebrauchsfertigen Keramikstücke mit nach Hause.",
+            "Wenn du dich für individuelle Vier-Sitzungs-Kurse entscheidest, kann der Kurs auch auf deine persönlichen Bedürfnisse zugeschnitten werden — mit stärkerem Fokus auf die Schritte, in denen du dich noch unsicher fühlst.",
+            "Und wenn du nach diesem Einführungskurs nicht mehr aufhören möchtest zu töpfern, kannst du deine keramische Reise gern in unserem Atelier fortsetzen."
+          ]
+        },
+        "where": { "label": "Wo?", "value": "13359 Berlin, Steegerstr. 1A" },
+        "when": { "label": "Wann?", "value": "Verschiedene Terminoptionen verfügbar." },
+        "duration": { "label": "Dauer", "value": "4 Einheiten × 2 Stunden (insgesamt 8 Stunden)" },
+        "cost": {
+          "label": "Kosten",
+          "items": [
+            "4-teiliger Drehscheibenkurs (1 Person) — 365 €",
+            "4-teiliger Drehscheibenkurs (2 Personen) — 480 €",
+            "4-teiliger Drehscheibenkurs (3 Personen) — 700 €"
+          ]
+        },
+        "bookNow": "Jetzt buchen",
+        "faq": {
+          "label": "FAQ",
+          "items": [
+            { "q": "Gibt es zusätzliche Kosten?", "a": "Nein. Die Kursgebühr enthält alle Materialien, das Glasieren und den Brand." },
+            { "q": "Wann kann ich die Stücke abholen?", "a": "Die fertigen Stücke können etwa zwei Wochen nach Kursende abgeholt werden." },
+            { "q": "Wie sind die Stornobedingungen?", "a": "Volle Rückerstattung bei Stornierung mindestens 7 Tage vor dem Workshop (bzw. vor der ersten Einheit bei mehrteiligen Kursen)." }
+          ]
+        },
+        "languageNote": "Der Kurs kann auf Russisch oder Englisch unterrichtet werden."
+      },
+      "oneSession": {
+        "heading": "1-stündiger Drehscheiben-Workshop – Wheel Intensive",
+        "whoFor": {
+          "label": "Für wen ist dieser Kurs geeignet?",
+          "paragraphs": [
+            "Eine individuell auf dich zugeschnittene 2-stündige Einheit an der Drehscheibe — passend zu deinen Bedürfnissen und deinem Erfahrungsstand.",
+            "Dieser Workshop eignet sich sowohl für absolute Anfänger:innen, die die Drehscheibe zum ersten Mal ausprobieren möchten, als auch für Teilnehmende mit ersten Erfahrungen, die ihre Technik verfeinern und mehr Sicherheit gewinnen wollen.",
+            "Der individuelle Workshop ist besonders geeignet, wenn du an einem bestimmten Punkt des Drehens nicht weiterkommst. Schwierigkeiten beim Zentrieren? Schalen schwieriger als Zylinder? Du bekommst den Ton zentriert, verlierst aber beim Hochziehen die Kontrolle? Diese intensive Einheit ist genau für solche Situationen gedacht. Wir konzentrieren uns auf deine spezifischen Fragen und Schwierigkeiten — verständlicher erklären, häufige Fehler korrigieren, mehr Kontrolle über den Prozess gewinnen."
+          ]
+        },
+        "where": { "label": "Wo?", "value": "13359 Berlin, Steegerstr. 1A" },
+        "when": { "label": "Wann?", "value": "Verschiedene Terminoptionen verfügbar." },
+        "duration": { "label": "Dauer", "value": "2 Stunden" },
+        "cost": {
+          "label": "Kosten",
+          "items": [
+            "1-stündiger Drehscheiben-Workshop (1 Person) — 95 €",
+            "1-stündiger Drehscheiben-Workshop (2 Personen) — 170 €",
+            "1-stündiger Drehscheiben-Workshop (3 Personen) — 230 €"
+          ]
+        },
+        "bookNow": "Jetzt buchen",
+        "faq": {
+          "label": "FAQ",
+          "items": [
+            { "q": "Gibt es zusätzliche Kosten?", "a": "Die Kursgebühr enthält Ton, Glasur und den Brand von zwei Stücken. Jedes weitere Stück wird mit 5 € berechnet. Die fertigen Stücke werden mit einer transparenten Glasur überzogen. Du kannst sie auch gern in einer Offenes-Atelier-Einheit selbst glasieren." },
+            { "q": "Wann kann ich die Stücke abholen?", "a": "Die fertigen Stücke können etwa zwei Wochen nach dem Workshop abgeholt werden." },
+            { "q": "Wie sind die Stornobedingungen?", "a": "Volle Rückerstattung bei Stornierung mindestens 7 Tage vor dem Workshop." }
+          ]
+        },
+        "languageNote": "Der Kurs kann auf Russisch oder Englisch unterrichtet werden."
+      }
+    },
+    "familySaturday": {
+      "title": "Familien-Samstag",
+      "paragraphs": [
+        "Ein Keramik-Workshop ist eine wunderbare Samstagsbeschäftigung für die ganze Familie!",
+        "Hier kannst du gemeinsam mit deinen Kindern eigenständig an deinem eigenen Projekt arbeiten. Wir stellen alle nötigen Werkzeuge und Materialien zur Verfügung und helfen dir natürlich gern dabei, deine Ideen umzusetzen.",
+        "Bitte rechtzeitig anmelden.",
+        "Nur eine begrenzte Anzahl an Plätzen verfügbar!"
+      ],
+      "when": { "label": "Wann", "value": "Samstags von 12:00 bis 14:00 geöffnet." },
+      "where": { "label": "Wo", "value": "Steegerstr. 1a, 13359 Berlin" },
+      "cost": {
+        "label": "Kosten",
+        "familyTicket": "Familienticket:",
+        "base": "1 Erwachsener + 1 Kind (unter 12): 30 €",
+        "addChild": "• +1 Kind: + 10 €",
+        "addAdult": "• +1 Erwachsener (ab 13): + 25 €",
+        "alternative": "Du kannst auch ohne Kinder kommen oder Freund:innen mitbringen",
+        "soloPrice": "Der Preis für 1 Erwachsenen beträgt 30 €",
+        "firingFee": "• Brennkosten (10 € pro Kilo) werden zusätzlich berechnet",
+        "firingNote": "(Die Stücke werden vor dem Glasieren und Brennen gewogen)"
+      },
+      "howToBook": { "label": "Anmeldung", "email": "palavarastudio@gmail.com" },
+      "faq": {
+        "label": "FAQ",
+        "items": [
+          { "q": "Was soll ich mitbringen und anziehen?", "a": "Wir stellen Schürzen bereit, aber du kannst gern Kleidung tragen, die schmutzig werden darf." },
+          { "q": "Gibt es zusätzliche Kosten?", "a": "Brennkosten (10 € pro Kilo) werden zusätzlich berechnet." },
+          { "q": "Wann kann ich die Stücke abholen?", "a": "Die Stücke können etwa zwei Wochen nach dem Kurs abgeholt werden." }
+        ]
+      }
+    },
+    "openStudio": {
+      "title": "Offenes Atelier",
+      "paragraphs": [
+        "Unser Offenes Atelier richtet sich an alle, die eigenständig an ihren Projekten und Ideen arbeiten möchten — auch an der Drehscheibe. Vorkenntnisse in Keramik sind willkommen, aber nicht erforderlich.",
+        "Im Atelier stehen drei Drehscheiben zur Verfügung. Wenn du bereits Erfahrung an der Drehscheibe hast, kannst du sie gern nutzen. Eine Reservierung im Voraus ist leider nicht möglich — die Scheiben werden nach dem Prinzip „Wer zuerst kommt, dreht zuerst\" vergeben.",
+        "Die Teilnehmenden des Offenen Ateliers haben vollen Zugang zu allen Materialien und Werkzeugen sowie zum Brennen.",
+        "Bei deinem ersten Besuch geben wir dir eine Einführung ins Atelier und unsere Ausstattung und erklären dir die Studio-Regeln. Außerdem ist immer ein:e erfahrene:r Keramiker:in vor Ort, der/die deine Fragen beantwortet und dich unterstützt, falls du noch keine Erfahrung mit Keramik hast.",
+        "Nur eine begrenzte Anzahl an Plätzen verfügbar!"
+      ],
+      "where": { "label": "Wo?", "value": "13359 Berlin, Steegerstr. 1A" },
+      "cost": {
+        "label": "Kosten",
+        "base": "30 € — unabhängig davon, wie viel Zeit du im Atelier verbringst",
+        "firingFee": "Brennkosten (10 € pro Kilo) werden zusätzlich berechnet",
+        "firingNote": "(Die Stücke werden vor dem Glasieren und Brennen gewogen)"
+      },
+      "when": {
+        "label": "Wann?",
+        "fridays": "Freitags 17:00 – 20:00 (Erwachsene und Kinder ab 13)",
+        "saturdays": "Samstags 12:00 – 14:00 (alle Altersgruppen)"
+      },
+      "howToBook": {
+        "label": "Anmeldung",
+        "email": "palavarastudio@gmail.com",
+        "note": "Bitte mindestens 12 Stunden im Voraus per E-Mail anmelden!"
+      }
+    },
+    "firingService": {
+      "title": "BRENNSERVICE",
+      "bisquePricePerKg": "8 € / kg Schrühbrand",
+      "glazePricePerKg": "10 € / kg Glasurbrand",
+      "kilnCost": {
+        "label": "Komplette Ofenbelegung:",
+        "bisqueNote": "(Schrühbrand)",
+        "bisquePrice": "80 € großer Ofen (100 l) / 60 € kleiner Ofen (66 l)",
+        "glazeNote": "(Glasurbrand 1130° oder 1235°)",
+        "glazePrice": "95 € großer Ofen (100 l) / 75 € kleiner Ofen (66 l)"
+      }
+    },
+    "giftCertificate": {
+      "title": "GUTSCHEINE",
+      "openStudio": {
+        "heading": "Gutschein fürs Offene Atelier",
+        "items": [
+          "Für 1 Einheit (3 Stunden) – 30 €",
+          "Das Offene Atelier findet jeden Freitag von 17:00 bis 20:00 statt.",
+          "Der Gutschein gilt für eine Person.",
+          "Brennkosten betragen 10 € pro Kilo; die Stücke werden vor dem Glasieren und Brennen gewogen."
+        ],
+        "note": "Bitte beachte, dass das Offene Atelier kein Unterricht ist."
+      },
+      "familySaturday": {
+        "heading": "Gutschein für Familien-Samstag – 30 €",
+        "items": [
+          "Dauer: 2 Stunden",
+          "Die Kurse finden samstags von 12:00 bis 14:00 statt.",
+          "Der Gutschein gilt für einen Erwachsenen und ein Kind.",
+          "Weitere Kinder und Erwachsene können gegen Aufpreis teilnehmen.",
+          "Brennkosten betragen 10 € pro Kilo; die Stücke werden vor dem Glasieren und Brennen gewogen."
+        ]
+      },
+      "wheel": {
+        "heading": "Gutschein für Drehscheibenkurs",
+        "body": "Du kannst einen Gutschein für jeden Drehscheibenkurs im Bereich <0>Kurse / Drehscheibe</0> erwerben."
+      },
+      "howToPurchase": {
+        "label": "So bestellst du:",
+        "paragraphs": [
+          "Bitte sende mir eine E-Mail mit der Art des gewünschten Gutscheins und dem Namen der beschenkten Person. Du erhältst dann die Zahlungsdetails.",
+          "Nach Zahlungseingang erhältst du den Gutschein als PDF-Datei."
+        ],
+        "emailLine": "E-Mail: <0>palavarastudio@gmail.com</0>"
+      }
+    },
+    "teamEvents": {
+      "title": "Team-Events",
+      "intro": "Bringe dein Team für ein kreatives und entspannendes Erlebnis zusammen.",
+      "option1": {
+        "heading": "OPTION 1. TÖPFER-WORKSHOP",
+        "paragraphs": [
+          "Unser Keramik-Masterclass ist für Gruppen von 5–10 Teilnehmenden konzipiert und dauert ungefähr 2,5 Stunden.",
+          "Du lernst grundlegende Aufbautechniken kennen und gestaltest dein eigenes Keramikstück — perfekt als persönliches Andenken oder fürs Büro."
+        ],
+        "included": {
+          "label": "Im Preis enthalten:",
+          "items": [
+            "Alle Materialien für ein Keramikstück*",
+            "Schritt-für-Schritt-Anleitung und kreative Begleitung während des gesamten Prozesses",
+            "Transparente Glasur und Brand deines fertigen Stücks**"
+          ],
+          "footnoteExtraPiece": "* Jedes zusätzliche Stück wird mit 5 € berechnet.",
+          "footnotePickup": "** Die fertigen Stücke können etwa zwei Wochen nach dem Workshop abgeholt werden."
+        },
+        "price": {
+          "label": "Preis*:",
+          "value": "75 € pro Person (Mindestanzahl 5 Teilnehmende)",
+          "vatNote": "*Bitte beachte, dass auf den Gesamtbetrag 19% MwSt. anfällt."
+        }
+      },
+      "option2": {
+        "heading": "OPTION 2. TEE- UND TÖPFER-WORKSHOP",
+        "paragraphs": [
+          "Unser Keramik-Masterclass ist für Gruppen von 5–10 Teilnehmenden konzipiert und dauert ungefähr 2,5 Stunden.",
+          "Genieße eine entspannende Verbindung aus Tee und Kreativität bei unserem Tee- und Töpfer-Workshop.",
+          "Wir beginnen mit einer geführten Teeverkostung — mit einer kuratierten Auswahl köstlicher Tees — gefolgt von einer praktischen Töpfer-Einheit, in der du deine eigene Teetasse oder Schale gestaltest."
+        ],
+        "included": {
+          "label": "Im Preis enthalten:",
+          "items": [
+            "Eine geführte Teeverkostung",
+            "Alle Materialien für ein Keramikstück*",
+            "Schritt-für-Schritt-Anleitung und kreative Begleitung während des gesamten Prozesses",
+            "Transparente Glasur und Brand deines fertigen Stücks**"
+          ],
+          "footnoteExtraPiece": "* Jedes zusätzliche Stück wird mit 5 € berechnet.",
+          "footnotePickup": "** Die fertigen Stücke können etwa zwei Wochen nach dem Workshop abgeholt werden."
+        },
+        "price": {
+          "label": "Preis*:",
+          "value": "95 € pro Person (Mindestanzahl 5 Teilnehmende)",
+          "vatNote": "*Bitte beachte, dass auf den Gesamtbetrag 19% MwSt. anfällt."
+        }
+      }
+    },
+    "birthdayParties": {
+      "title": "Geburtstagsfeier",
+      "intro": [
+        "Wir laden dich ein, einen Geburtstag (oder einen anderen besonderen Anlass) in unserem Atelier mit einem Keramik-Workshop zu feiern!",
+        "Egal ob Kindergeburtstag oder Feier für Erwachsene — wir bieten ein Töpfer-Thema, das zu jedem Alter passt. Workshops können auf Englisch, Deutsch oder Russisch durchgeführt werden. Schreib uns an palavarastudio@gmail.com"
+      ],
+      "children": {
+        "heading": "Kindergeburtstag — allgemeine Informationen:",
+        "items": [
+          "Dauer des Workshops: 1,5 Stunden (je nach Alter der Teilnehmenden kann die Zeit individuell abgestimmt werden)",
+          "Kosten für eine Gruppe von bis zu 6 Kindern: 250 €",
+          "Jede:r weitere Teilnehmer:in: +35 €",
+          "Im Preis enthalten sind Materialien für ein Stück pro Person, transparente oder weiße Glasur sowie der Brand. Die fertigen Stücke können nach etwa 2 Wochen abgeholt werden",
+          "Das Workshop-Thema ist flexibel und kann an die Wünsche der Teilnehmenden angepasst werden",
+          "Im Preis enthalten ist außerdem eine zusätzliche Stunde nach dem Workshop — für Tee und mitgebrachte Snacks oder Kuchen"
+        ]
+      },
+      "adult": {
+        "heading": "Erwachsenenfeier — allgemeine Informationen:",
+        "items": [
+          "Dauer des Workshops: 2,5 Stunden",
+          "Kosten für eine Gruppe von bis zu 4 Personen: 300 €",
+          "Jede:r weitere Teilnehmer:in: +50 €",
+          "Im Preis enthalten sind Materialien für ein Stück pro Person, transparente oder weiße Glasur sowie der Brand. Die fertigen Stücke können nach etwa 2 Wochen abgeholt werden.",
+          "Das Workshop-Thema ist flexibel und kann an die Wünsche der Teilnehmenden angepasst werden.",
+          "Im Preis enthalten ist außerdem eine zusätzliche Stunde nach dem Workshop — für Tee und mitgebrachte Snacks oder Kuchen."
+        ]
+      }
+    },
+    "membership": {
+      "title": "MITGLIEDSCHAFT",
+      "paragraphs": [
+        "Wir heißen Keramiker:innen in unserem Atelier willkommen.",
+        "Bei uns findest du einen wunderbaren Raum, Werkzeuge und Materialien, um eigenständig an deinen Projekten zu arbeiten.",
+        "Wenn du das Wissen, die Fähigkeiten und die Fertigkeit hast, mit Ton zu arbeiten, aber kein eigenes ausgestattetes Töpferatelier hast, bieten wir dir eine Mitgliedschaft in unserem Keramik-Coworking-Raum an!",
+        "Du bekommst ein eigenes Regal für deine persönlichen Materialien sowie Zugang zu den Drehscheiben und Brennöfen. Du kannst auch eigene Massen und Glasuren mitbringen — solange sie zu unseren Brennregimes passen."
+      ],
+      "contact": "Kontaktiere uns für die Details: palavarastudio@gmail.com",
+      "full": {
+        "heading": "Vollmitgliedschaft",
+        "items": [
+          "Unbegrenzte Besuche",
+          "Kündigungsfrist: bis zum Ende des laufenden Monats + 1 vollen Kalendermonat",
+          "Preis: 180 € pro Monat",
+          "Materialkosten: 5 € pro kg Rohton (umfasst den Ton selbst, Zugang zu allen Studio-Glasuren und den Brand)"
+        ]
+      },
+      "flexible": {
+        "heading": "Flexible Mitgliedschaft",
+        "items": [
+          "4 Besuche pro Monat (du wählst die Tage)",
+          "Kündigungsfrist: bis zum Ende des laufenden Monats + 1 vollen Kalendermonat",
+          "Preis: 100 € pro Monat",
+          "Materialkosten: 5 € pro kg Rohton (umfasst den Ton selbst, Zugang zu allen Studio-Glasuren und den Brand)"
+        ]
+      }
+    },
+    "about": {
+      "title": "ÜBER MICH",
+      "intro": [
+        "Mein Name ist Varvara Polyakova,",
+        "Ich bin eine vielseitige bildende Künstlerin und arbeite in den Bereichen Grafikdesign, Illustration und Keramik.",
+        "Ich habe an der Moskauer Staatlichen Universität der Druckkünste studiert. Nach dem Studium war ich lange Zeit im Bereich Magazin- und Buchillustration sowie Design tätig.",
+        "2012 zog ich von Moskau nach Berlin und begann zudem, unter dem Namen Palavara Keramik zu gestalten."
+      ],
+      "instagramLine": "Meine Keramik auf Instagram: <0>palavara_ceramics</0>",
+      "websiteLine": "Meine weiteren Arbeiten auf <0>palavara.com</0>",
+      "studioBlurb": "Vor einigen Jahren habe ich das Palavara-Atelier in Wedding eröffnet, wo ich meine Keramik herstelle und Workshops für Kinder und Erwachsene anbiete.",
+      "etsyLine": "Meine Keramik kannst du in meinem Etsy-Shop kaufen: <0>www.etsy.com/shop/PALAVARA</0>",
+      "collabBlurb": "Ich freue mich sehr, über mögliche Projekte oder Kooperationen zu sprechen.",
+      "emailLine": "Kontaktiere mich gern per E-Mail: <0>varya@palavara.com</0>"
+    },
+    "rentASpace": {
+      "title": "ATELIER MIETEN",
+      "body": "Kontaktiere uns, wenn du unser Atelier für deine Veranstaltung mieten möchtest — sei es ein Workshop oder eine Geburtstagsfeier."
+    },
+    "contact": {
+      "title": "Kontakt — Palavara Töpferstudio in Berlin",
+      "email": { "label": "E-Mail:", "value": "palavarastudio@gmail.com" },
+      "address": { "label": "Adresse:", "value": "Steegerstr. 1 a, 13359 Berlin" },
+      "instagram": {
+        "label": "Instagram:",
+        "studio": "instagram.com/palavara_potterystudio/",
+        "ceramics": "instagram.com/palavara_ceramics"
+      }
+    },
+    "notFound": {
+      "title": "Seite nicht gefunden",
+      "body": "Diese Seite existiert leider nicht.",
+      "backHome": "Zurück zur Startseite"
+    }
+  }
+}
