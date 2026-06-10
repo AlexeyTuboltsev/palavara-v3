@@ -27,12 +27,30 @@ jobs:
           REACT_APP_IMG_PREFIX: https://be.palavara.com/img/studio
           REACT_APP_USE_OPTIMIZED_IMAGES: true
 
-      - name: Generate per-route prerendered HTML
+      - name: Generate per-route prerendered HTML (meta-only fallback)
         # Writes build/<slug>.html for each non-home route with the
         # route-specific <title>, <meta description>, OG tags, canonical
         # baked in. Crawlers and link-preview scrapers (Telegram, FB, etc.)
         # don't run JS, so without this they all see the home page meta.
+        # The full-body prerender step below overwrites this output for
+        # routes where Playwright succeeds; this step is the fallback
+        # for any route that fails to render.
         run: node scripts/generate-route-html.js
+
+      - name: Install Playwright chromium browser
+        # Browser cache is per-runner; install fresh each deploy. The
+        # @playwright/test version is pinned in package.json so the
+        # downloaded browser matches the host code.
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate full-body prerendered HTML (Playwright)
+        # Walks each route through a headless chromium, captures the
+        # post-hydration HTML (real body content, not the SPA shell),
+        # and overwrites the meta-only files from the previous step.
+        # Soft 404 / "validation failed" indexing issues stem from
+        # crawlers seeing the empty body — this step is what actually
+        # fixes them.
+        run: node scripts/playwright-prerender.js
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
