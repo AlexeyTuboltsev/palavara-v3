@@ -2,7 +2,7 @@ import {BrowserHistory} from "history";
 import {call, fork, put, take} from "redux-saga/effects";
 import {TRoute} from "../router";
 import {locationWatcherSaga} from "./locationWatcherSaga";
-import {getRoute, setupHistory} from "../utils/routerUtils";
+import {getLangFromLocation, getRoute, setupHistory} from "../utils/routerUtils";
 import {Dispatch} from "@reduxjs/toolkit";
 import {setupResizeObserver, TResizeEventPayload} from "../services/resizeObserver";
 import {langWatcherSaga} from "./langWatcherSaga";
@@ -22,11 +22,12 @@ export function* initSaga(dispatch: Dispatch, rootElement: HTMLElement, i18n: an
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [history, stopHistoryListener]: [BrowserHistory, () => void] = yield call(setupHistory, dispatch)
   const initialRoute: TRoute = yield call(getRoute, history.location) //todo extract location to a service for testing etc
+  const initialLang: ELang = yield call(getLangFromLocation, history.location)
   yield fork(locationWatcherSaga, history, initialRoute)
   yield fork(analyticsSaga, initialRoute)
   yield call(setupLinkClickListener)
 
-  yield call(initI18n, i18n, ELang.EN)
+  yield call(initI18n, i18n, initialLang)
   yield fork(langWatcherSaga, i18n)
 
   yield call(loadImageManifest);

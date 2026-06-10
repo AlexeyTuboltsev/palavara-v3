@@ -62,3 +62,32 @@ $instagram-logo-size: 25px;
     grid-column: 2;
   }
 }
+
+// Sits below the Instagram-handle text on desktop, alongside it on
+// mobile. Inherits the parent's grid placement (no explicit grid-row
+// here — it just falls into the next row).
+.lang-switcher {
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+
+  a {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.active-lang {
+  font-weight: 700;
+}
+
+.lang-sep {
+  opacity: 0.5;
+}
