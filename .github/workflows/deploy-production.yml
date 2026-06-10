@@ -27,12 +27,25 @@ jobs:
           REACT_APP_IMG_PREFIX: https://be.palavara.com/img/studio
           REACT_APP_USE_OPTIMIZED_IMAGES: true
 
-      - name: Generate per-route prerendered HTML
-        # Writes build/<slug>.html for each non-home route with the
-        # route-specific <title>, <meta description>, OG tags, canonical
-        # baked in. Crawlers and link-preview scrapers (Telegram, FB, etc.)
-        # don't run JS, so without this they all see the home page meta.
+      - name: Generate per-route prerendered HTML (meta-only fallback)
+        # Writes build/<slug>.html and build/de/<slug>.html for each
+        # route with the route-specific <title>, <meta description>,
+        # canonical, hreflang annotations, and JSON-LD baked in. The
+        # full-body prerender step below overwrites this output for
+        # routes where Playwright succeeds; this step is the fallback
+        # for any route that fails to render.
         run: node scripts/generate-route-html.js
+
+      - name: Install Playwright chromium browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate full-body prerendered HTML (Playwright)
+        # Walks each of the 32 routes (16 EN + 16 DE) through a headless
+        # chromium, captures post-hydration HTML, and overwrites the
+        # meta-only files from the previous step. Soft 404 /
+        # "validation failed" indexing issues stem from crawlers seeing
+        # an empty body; this step is what actually fixes them.
+        run: node scripts/playwright-prerender.js
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -81,10 +94,11 @@ jobs:
             fi
           done
 
-          # 5. Per-route prerendered HTML. Uploaded as s3://.../<slug>
-          #    (no extension) with Content-Type: text/html so CloudFront
-          #    serves it directly for /<slug>. The SPA's normal 404→
-          #    /index.html fallback still handles any unrouted URL.
+          # 5. Per-route prerendered HTML (EN). Uploaded as
+          #    s3://.../<slug> (no extension) with Content-Type: text/html
+          #    so CloudFront serves it directly for /<slug>. The SPA's
+          #    normal 404→/index.html fallback still handles any unrouted
+          #    URL.
           for f in build/*.html; do
             name=$(basename "$f" .html)
             [ "$name" = "index" ] && continue
@@ -93,6 +107,25 @@ jobs:
               --cache-control "public, max-age=300, must-revalidate" \
               --content-type "text/html; charset=utf-8"
           done
+
+          # 6. Per-route prerendered HTML (DE). Uploaded as
+          #    s3://.../de/<slug> with the same Content-Type rules.
+          if [ -d build/de ]; then
+            # /de itself maps to build/de/index.html.
+            if [ -f build/de/index.html ]; then
+              aws s3 cp build/de/index.html s3://studio.palavara.com/de \
+                --cache-control "public, max-age=300, must-revalidate" \
+                --content-type "text/html; charset=utf-8"
+            fi
+            for f in build/de/*.html; do
+              [ -f "$f" ] || continue
+              name=$(basename "$f" .html)
+              [ "$name" = "index" ] && continue
+              aws s3 cp "$f" "s3://studio.palavara.com/de/$name" \
+                --cache-control "public, max-age=300, must-revalidate" \
+                --content-type "text/html; charset=utf-8"
+            done
+          fi
 
       - name: Invalidate CloudFront cache
         run: |

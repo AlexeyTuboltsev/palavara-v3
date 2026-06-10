@@ -1,4 +1,5 @@
 import React, {FC} from 'react'
+import {useTranslation} from 'react-i18next';
 import {TReadyAppState} from "../../types";
 import {Section} from "../../components/Section";
 import styles from '../../components/Section.module.scss'
@@ -8,93 +9,93 @@ const BOOK_URL = 'https://book.palavara.com/'
 export const WheelThrowing: FC<{
   state: TReadyAppState
 }> = ({state}) => {
+  const {t} = useTranslation();
+
+  const fourSessionWhoForParagraphs = t('routes.wheelThrowing.fourSession.whoFor.paragraphs', {returnObjects: true}) as string[];
+  const fourSessionCostItems = t('routes.wheelThrowing.fourSession.cost.items', {returnObjects: true}) as string[];
+  const fourSessionFaqItems = t('routes.wheelThrowing.fourSession.faq.items', {returnObjects: true}) as Array<{q: string; a: string}>;
+
+  const oneSessionWhoForParagraphs = t('routes.wheelThrowing.oneSession.whoFor.paragraphs', {returnObjects: true}) as string[];
+  const oneSessionCostItems = t('routes.wheelThrowing.oneSession.cost.items', {returnObjects: true}) as string[];
+  const oneSessionFaqItems = t('routes.wheelThrowing.oneSession.faq.items', {returnObjects: true}) as Array<{q: string; a: string}>;
+
   return <Section state={state} anchorMenu={
     <div className={styles.anchorMenu}>
-      <a href="#four-session-wheel-throwing" className={styles.anchorMenuItem}>4-session Wheel Throwing Classes</a>
-      <a href="#one-session-wheel-intensive" className={styles.anchorMenuItem}>1-session Wheel Throwing Workshop – Wheel Intensive</a>
+      <a href="#four-session-wheel-throwing" className={styles.anchorMenuItem}>{t('routes.wheelThrowing.anchorMenu.fourSession')}</a>
+      <a href="#one-session-wheel-intensive" className={styles.anchorMenuItem}>{t('routes.wheelThrowing.anchorMenu.oneSession')}</a>
     </div>
   }>
 
-    <h1 className={styles.h1Highlighted}>Wheel Throwing Classes in Berlin</h1>
+    <h1 className={styles.h1Highlighted}>{t('routes.wheelThrowing.title')}</h1>
 
     {/* ── 4-session course ────────────────────────────────────────────────── */}
     <div className={styles.mainText}>
-      <h2 id="four-session-wheel-throwing">4-session Wheel Throwing Classes</h2>
+      <h2 id="four-session-wheel-throwing">{t('routes.wheelThrowing.fourSession.heading')}</h2>
 
-      <h3>Who is this course intended for?</h3>
-      <p>This course is designed both for complete beginners and for those who already have some experience with wheel throwing but would like to strengthen their skills and gain more confidence.</p>
-      <p>Over the course of 4 sessions, you will go through all the essential stages of creating ceramic pieces on the pottery wheel. The course covers clay preparation, centering, pulling walls, shaping forms, trimming, surface decoration, bisque firing, glazing, and glaze firing.</p>
-      <p>By the end of the course, you will be able to take home your own unique and functional ceramic pieces.</p>
-      <p>If you choose individual four-session classes, the course can also be adapted to your personal needs and interests, with a stronger focus on the stages of the process where you feel less confident and would like more practice.</p>
-      <p>And if, after this introductory course, you find yourself unable to stop making pottery, you will always be welcome to continue your ceramic journey in our studio.</p>
+      <h3>{t('routes.wheelThrowing.fourSession.whoFor.label')}</h3>
+      {fourSessionWhoForParagraphs.map((p, i) => <p key={i}>{p}</p>)}
 
-      <h3>Where?</h3>
-      <p>13359 Berlin, Steegerstr. 1A</p>
+      <h3>{t('routes.wheelThrowing.fourSession.where.label')}</h3>
+      <p>{t('routes.wheelThrowing.fourSession.where.value')}</p>
 
-      <h3>When?</h3>
-      <p>Various scheduling options are available.</p>
+      <h3>{t('routes.wheelThrowing.fourSession.when.label')}</h3>
+      <p>{t('routes.wheelThrowing.fourSession.when.value')}</p>
 
-      <h3>Duration</h3>
-      <p>4 sessions × 2 hours (total: 8 hours)</p>
+      <h3>{t('routes.wheelThrowing.fourSession.duration.label')}</h3>
+      <p>{t('routes.wheelThrowing.fourSession.duration.value')}</p>
 
-      <h3>Cost</h3>
+      <h3>{t('routes.wheelThrowing.fourSession.cost.label')}</h3>
       <ul>
-        <li>4-session Wheel Throwing class (1 person) — €365</li>
-        <li>4-session Wheel Throwing class (2 persons) — €480</li>
-        <li>4-session Wheel Throwing class (3 persons) — €700</li>
+        {fourSessionCostItems.map((c, i) => <li key={i}>{c}</li>)}
       </ul>
 
-      <p><a href={BOOK_URL} className={styles.bookNow}>Book now</a></p>
+      <p><a href={BOOK_URL} className={styles.bookNow}>{t('routes.wheelThrowing.fourSession.bookNow')}</a></p>
 
-      <h3 className={styles.faqHeading}>FAQ</h3>
-      <p><strong>Are there any additional fees?</strong></p>
-      <p>No. The course fee includes all materials, glazing, and firing.</p>
-      <p><strong>When can I pick up the pieces?</strong></p>
-      <p>The finished pieces will be ready for pickup approximately two weeks after the course ends.</p>
-      <p><strong>What is the cancellation policy?</strong></p>
-      <p>Full refund for cancellations made at least 7 days before the workshop (the first session, for multi-session lessons).</p>
+      <h3 className={styles.faqHeading}>{t('routes.wheelThrowing.fourSession.faq.label')}</h3>
+      {fourSessionFaqItems.map((item, i) => (
+        <React.Fragment key={i}>
+          <p><strong>{item.q}</strong></p>
+          <p>{item.a}</p>
+        </React.Fragment>
+      ))}
 
-      <p><em>The class can be taught in Russian or English.</em></p>
+      <p><em>{t('routes.wheelThrowing.fourSession.languageNote')}</em></p>
     </div>
 
     <br/>
 
     {/* ── 1-session intensive ──────────────────────────────────────────────── */}
     <div className={styles.mainText}>
-      <h2 id="one-session-wheel-intensive">1-session Wheel Throwing Workshop – Wheel Intensive</h2>
+      <h2 id="one-session-wheel-intensive">{t('routes.wheelThrowing.oneSession.heading')}</h2>
 
-      <h3>Who is this course intended for?</h3>
-      <p>A personalised 2-hour pottery wheel session tailored to your individual needs and skill level.</p>
-      <p>This workshop is perfect both for complete beginners who want to try the pottery wheel for the first time and for those who already have some experience but would like to refine their technique and gain more confidence.</p>
-      <p>The individual workshop is especially suitable for anyone who feels stuck at a certain stage of wheel throwing. Struggling with centering? Finding bowls more difficult than cylinders? Managing to center the clay but losing control while shaping? This intensive session is designed exactly for these situations. We focus on your specific questions and difficulties, helping you understand the key stages of wheel throwing more clearly, correct common mistakes, and gain better control over the process.</p>
+      <h3>{t('routes.wheelThrowing.oneSession.whoFor.label')}</h3>
+      {oneSessionWhoForParagraphs.map((p, i) => <p key={i}>{p}</p>)}
 
-      <h3>Where?</h3>
-      <p>13359 Berlin, Steegerstr. 1A</p>
+      <h3>{t('routes.wheelThrowing.oneSession.where.label')}</h3>
+      <p>{t('routes.wheelThrowing.oneSession.where.value')}</p>
 
-      <h3>When?</h3>
-      <p>Various scheduling options are available.</p>
+      <h3>{t('routes.wheelThrowing.oneSession.when.label')}</h3>
+      <p>{t('routes.wheelThrowing.oneSession.when.value')}</p>
 
-      <h3>Duration</h3>
-      <p>2 hours</p>
+      <h3>{t('routes.wheelThrowing.oneSession.duration.label')}</h3>
+      <p>{t('routes.wheelThrowing.oneSession.duration.value')}</p>
 
-      <h3>Cost</h3>
+      <h3>{t('routes.wheelThrowing.oneSession.cost.label')}</h3>
       <ul>
-        <li>1-session Wheel Throwing class (1 person) — €95</li>
-        <li>1-session Wheel Throwing class (2 persons) — €170</li>
-        <li>1-session Wheel Throwing class (3 persons) — €230</li>
+        {oneSessionCostItems.map((c, i) => <li key={i}>{c}</li>)}
       </ul>
 
-      <p><a href={BOOK_URL} className={styles.bookNow}>Book now</a></p>
+      <p><a href={BOOK_URL} className={styles.bookNow}>{t('routes.wheelThrowing.oneSession.bookNow')}</a></p>
 
-      <h3 className={styles.faqHeading}>FAQ</h3>
-      <p><strong>Are there any additional fees?</strong></p>
-      <p>The course fee includes clay, glaze, and firing of two pieces. Each additional piece is charged separately at €5 per piece. Finished pieces will be coated with a transparent glaze. You’re also welcome to glaze them yourself during an open studio session.</p>
-      <p><strong>When can I pick up the pieces?</strong></p>
-      <p>The finished pieces will be ready for pickup approximately two weeks after the workshop ends.</p>
-      <p><strong>What is the cancellation policy?</strong></p>
-      <p>Full refund for cancellations made at least 7 days before the workshop.</p>
+      <h3 className={styles.faqHeading}>{t('routes.wheelThrowing.oneSession.faq.label')}</h3>
+      {oneSessionFaqItems.map((item, i) => (
+        <React.Fragment key={i}>
+          <p><strong>{item.q}</strong></p>
+          <p>{item.a}</p>
+        </React.Fragment>
+      ))}
 
-      <p><em>The class can be taught in Russian or English.</em></p>
+      <p><em>{t('routes.wheelThrowing.oneSession.languageNote')}</em></p>
     </div>
 
   </Section>

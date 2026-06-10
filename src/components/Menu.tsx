@@ -1,6 +1,7 @@
 import styles from "./Menu.module.scss";
 import secondaryMenuStyles from "./SectionMenu.module.scss";
 import React, { FC } from "react";
+import { useTranslation } from "react-i18next";
 import { EMenuType, TChildMenuItem, TMenuItem, TReadyAppState, TRootMenuItem, TSimpleMenuItem } from "../types";
 import { useDispatch } from "react-redux";
 import cn from 'classnames'
@@ -53,6 +54,7 @@ const MenuItem: FC<{
   type,
   className
 }) => {
+    const { t } = useTranslation();
     const menuItem = menu[menuItemId]
 
     switch (menuItem.type) {
@@ -64,7 +66,7 @@ const MenuItem: FC<{
             action={menuItem.action}
             className={cn(menuItem.isActive ? styles.parentMenuItem : styles.menuItem, className, type === 'blue' ? styles.menuBlue : styles.menuYellow)}
           >
-            {menuItem.label}{menuItem.isActive ? ":" : ''}
+            {t(menuItem.label)}{menuItem.isActive ? ":" : ''}
           </MenuItemWrapper>
           {menuItem.isActive && menuItem.children.map((menuItemId: string) =>
             <ChildMenuItem key={menuItemId} menuItem={menu[menuItemId] as TChildMenuItem} type={type} className={className}/>
@@ -83,11 +85,12 @@ const SimpleMenuItem: FC<{
   type: 'blue' | 'yellow',
   className?: string
 }> = ({ menuItem, type, className }) => {
+  const { t } = useTranslation();
   return <MenuItemWrapper
     action={menuItem.action}
     className={cn(styles.menuItem, { [styles.menuItemActive]: menuItem.isActive }, className, type === 'blue' ? styles.menuBlue : styles.menuYellow)}
   >
-    {menuItem.label}
+    {t(menuItem.label)}
   </MenuItemWrapper>
 }
 
@@ -96,11 +99,12 @@ const ChildMenuItem: FC<{
   type: 'blue' | 'yellow',
   className?:string
 }> = ({ menuItem, type, className }) => {
+  const { t } = useTranslation();
   return <MenuItemWrapper
     action={menuItem.action}
     className={cn(styles.childMenuItem, { [styles.childMenuItemActive]: menuItem.isActive }, type === 'blue' ? styles.menuBlue : styles.menuYellow, className)}
   >
-    {menuItem.label}
+    {t(menuItem.label)}
   </MenuItemWrapper>
 }
 

@@ -21,7 +21,7 @@ export function menu(activeMenuId?: string): {
     'classes': {
       id: 'classes',
       type: EMenuType.PARENT as const,
-      label: 'classes',
+      label: 'menu.classes',
       isActive: false,
       children: ['kidsClass', 'wheelThrowing'],
       action: actions.toggleOpen('classes')
@@ -29,35 +29,35 @@ export function menu(activeMenuId?: string): {
     'familySaturday': {
       id: 'familySaturday',
       type: EMenuType.SIMPLE,
-      label: 'family saturday',
+      label: 'menu.familySaturday',
       isActive: activeMenuId === ERoute.FAMILY_SATURDAY,
       action: actions.requestRouteChange({routeName: ERoute.FAMILY_SATURDAY})
     },
     'openStudio': {
       id: 'openStudio',
       type: EMenuType.SIMPLE,
-      label: 'open studio',
+      label: 'menu.openStudio',
       isActive: activeMenuId === ERoute.OPEN_STUDIO,
       action: actions.requestRouteChange({routeName: ERoute.OPEN_STUDIO})
     },
     'firingService': {
       id: 'firingService',
       type: EMenuType.SIMPLE,
-      label: 'firing service',
+      label: 'menu.firingService',
       isActive: activeMenuId === ERoute.FIRING_SERVICE,
       action: actions.requestRouteChange({routeName: ERoute.FIRING_SERVICE})
     },
     'giftCertificate': {
       id: 'giftCertificate',
       type: EMenuType.SIMPLE,
-      label: 'gift certificate',
+      label: 'menu.giftCertificate',
       isActive: activeMenuId === ERoute.GIFT_CERTIFICATE,
       action: actions.requestRouteChange({routeName: ERoute.GIFT_CERTIFICATE})
     },
     'membership': {
       id: "membership",
       type: EMenuType.SIMPLE,
-      label: 'membership',
+      label: 'menu.membership',
       isActive: activeMenuId === ERoute.MEMBERSHIP,
       action: actions.requestRouteChange({routeName: ERoute.MEMBERSHIP})
     },
@@ -65,7 +65,7 @@ export function menu(activeMenuId?: string): {
       id: 'kidsClass',
       type: EMenuType.CHILD,
       parentId: 'classes',
-      label: 'kids class',
+      label: 'menu.kidsClass',
       isActive: activeMenuId === ERoute.KIDS_CLASS,
       action: actions.requestRouteChange({
         routeName: ERoute.KIDS_CLASS
@@ -75,14 +75,14 @@ export function menu(activeMenuId?: string): {
       id: 'wheelThrowing',
       type: EMenuType.CHILD,
       parentId: 'classes',
-      label: 'wheel-throwing',
+      label: 'menu.wheelThrowing',
       isActive: activeMenuId === ERoute.WHEEL_THROWING,
       action: actions.requestRouteChange({routeName: ERoute.WHEEL_THROWING})
     },
     'eventWorkshops': {
       id: 'eventWorkshops',
       type: EMenuType.PARENT as const,
-      label: 'event workshops',
+      label: 'menu.eventWorkshops',
       isActive: false,
       children: ['teamEvents', 'birthdayParties'],
       action: actions.toggleOpen('eventWorkshops')
@@ -91,7 +91,7 @@ export function menu(activeMenuId?: string): {
       id: 'teamEvents',
       type: EMenuType.CHILD,
       parentId: 'eventWorkshops',
-      label: 'team events',
+      label: 'menu.teamEvents',
       isActive: activeMenuId === ERoute.TEAM_EVENTS,
       action: actions.requestRouteChange({routeName: ERoute.TEAM_EVENTS})
     },
@@ -99,7 +99,7 @@ export function menu(activeMenuId?: string): {
       id: 'birthdayParties',
       type: EMenuType.CHILD,
       parentId: 'eventWorkshops',
-      label: 'birthday parties',
+      label: 'menu.birthdayParties',
       isActive: activeMenuId === ERoute.BIRTHDAY_PARTIES,
       action: actions.requestRouteChange({routeName: ERoute.BIRTHDAY_PARTIES})
     },
