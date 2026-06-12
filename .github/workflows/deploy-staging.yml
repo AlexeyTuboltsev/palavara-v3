@@ -1,6 +1,7 @@
 name: Deploy to Staging
 
 on:
+  # Reusable from pr-staging.yml (auto-deploy on green PR tests).
   workflow_call:
     inputs:
       pr_number:
@@ -21,6 +22,24 @@ on:
         required: true
       STAGING_CLOUDFRONT_DISTRIBUTION_ID:
         required: true
+
+  # Manual escape hatch — Actions UI → "Deploy to Staging" → Run workflow.
+  # Use this to deploy a PR whose visual regression failed for an
+  # intentional reason (UI change, content rewrite, new component, etc.)
+  # so you can eyeball it on a real subdomain before refreshing baselines.
+  # Secrets are pulled from the repo's standard secret store automatically
+  # under workflow_dispatch; no re-declaration needed.
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number — used as the staging URL slug (pr-<N>.staging.studio.palavara.com) and the S3 prefix. Required.'
+        required: true
+        type: string
+      ref:
+        description: 'Git branch, tag, or commit SHA to deploy. Defaults to the branch the workflow was run from.'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   deploy:
