@@ -1,0 +1,102 @@
+name: Watchdog — studio.palavara.com
+
+# Synthetic health check. Every 15 minutes fetches the live homepage,
+# extracts the referenced `main.<hash>.js` bundle URL, fetches that
+# URL, and verifies the response is actually JavaScript (not the
+# CloudFront 404-fallback HTML masquerading as JS with a 200 status).
+#
+# Motivation: an S3 bucket lifecycle rule silently deleted the current
+# main.js on 2026-07-15 when no deploy had refreshed the object for
+# 30+ days. The site returned HTML for the JS request, every route
+# broke, and Sentry couldn't report because its own SDK loads from the
+# broken bundle. There's no server-side error to alert on (CloudFront
+# gladly returns 200) — only the client-side bundle load failure
+# would surface, and Sentry itself was inside the broken bundle.
+#
+# The rule has since been removed and a warning added to
+# deploy-production.yml so it's not reintroduced. This watchdog is
+# defence-in-depth against ANY future artefact-missing scenario:
+# CloudFront config drift, a partial deploy, a bucket-policy screw-up,
+# etc. If it fires, someone gets a "workflow failed" email from GitHub
+# and can act.
+#
+# Runs against the default branch, so cadence isn't affected by feature
+# branches or PRs (per GitHub docs, scheduled workflows only run on
+# the default branch's HEAD).
+
+on:
+  schedule:
+    # Every 15 minutes. GitHub Actions cron granularity is 5 min minimum
+    # and can drift under load; 15 min is a good trade-off between
+    # detection latency and Actions-minute budget (private repo tier).
+    # Adjust freely — the job takes <10s.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+# One in-flight run at a time; if a check takes longer than 15 min
+# (shouldn't happen), skip the next one rather than piling up.
+concurrency:
+  group: watchdog-studio
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify studio.palavara.com serves a working JS bundle
+        run: |
+          set -euo pipefail
+
+          fail() { echo "::error::$*"; exit 1; }
+
+          # 1. Fetch the homepage. -f fails on 4xx/5xx.
+          HTML=$(curl -sSfL --max-time 15 https://studio.palavara.com/) \
+            || fail "Homepage unreachable / non-2xx"
+
+          # 2. Extract the main.<hash>.js reference from the HTML shell.
+          MAIN_JS=$(printf '%s' "$HTML" | grep -oE '/static/js/main\.[a-f0-9]+\.js' | head -1)
+          [ -n "$MAIN_JS" ] || fail "Could not find main.<hash>.js reference in homepage HTML"
+          echo "Referenced JS bundle: $MAIN_JS"
+
+          # 3. HEAD that URL and pull the content-type + size.
+          HDR=$(curl -sSIfL --max-time 15 "https://studio.palavara.com${MAIN_JS}") \
+            || fail "JS bundle HEAD failed (server returned non-2xx for the referenced bundle)"
+          CT=$(printf '%s' "$HDR" | awk -F': *' 'tolower($1)=="content-type"{print tolower($2)}' | tr -d '\r\n')
+          CL=$(printf '%s' "$HDR" | awk -F': *' 'tolower($1)=="content-length"{print $2}' | tr -d '\r\n')
+          echo "Content-Type: $CT"
+          echo "Content-Length: $CL"
+
+          # 4. Content-type MUST be a JS mime — anything else means the
+          #    bundle isn't a real bundle (usually the CloudFront 404
+          #    fallback returning index.html with a 200 status).
+          case "$CT" in
+            text/javascript*|application/javascript*|application/x-javascript*)
+              ;;
+            *)
+              fail "JS bundle URL returned wrong content-type: '$CT' (expected text/javascript). CloudFront is likely serving the SPA fallback because the file is missing on S3."
+              ;;
+          esac
+
+          # 5. Size sanity — the real bundle is ~500 KB minified. If
+          #    it's under 10 KB, something's dropped even if the type
+          #    header lies.
+          if [ -n "$CL" ] && [ "$CL" -lt 10000 ]; then
+            fail "JS bundle suspiciously small ($CL bytes) — expected ~500 KB. Bundle may be truncated or a stub."
+          fi
+
+          echo "OK."
+
+      - name: Verify a per-route prerendered page renders
+        # A route we know to be prerendered by scripts/generate-route-html.js.
+        # If the homepage passes but a specific route 404s, something
+        # narrower is broken (missed sync, stale distribution config).
+        run: |
+          set -euo pipefail
+          for route in wheel-throwing gift-certificate; do
+            if ! curl -sSIfL --max-time 10 "https://studio.palavara.com/${route}" >/dev/null; then
+              echo "::error::/${route} returned non-2xx"
+              exit 1
+            fi
+            echo "OK: /${route}"
+          done

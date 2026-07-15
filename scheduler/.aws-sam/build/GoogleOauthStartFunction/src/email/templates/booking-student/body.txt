@@ -1,0 +1,28 @@
+Hi {{studentName}},
+
+Your wheel-throwing workshop is confirmed.
+
+  Date:     {{dateLine}}
+  Time:     {{timeLine}}{{priceLineIndented}}
+  Location: {{studioAddress}}
+
+Add to Google Calendar: {{gcalUrl}}
+A calendar invite is also attached to this email.
+
+A few practical things:
+  - Please arrive a few minutes early so we can start on time.
+  - Wear clothes you don't mind getting clay on. Aprons are provided.
+  - The workshop can be conducted in English or Russian — tell us on arrival.
+
+Need to cancel? Use this link:
+  {{cancelUrl}}
+Cancellations more than 48 hours before the workshop receive a full refund;
+later than that, no refund is possible.
+
+For anything else, reply to this email or write to palavarastudio@gmail.com.
+
+Looking forward to seeing you.
+Palavara Studio
+
+---
+Booking ID: {{bookingId}}

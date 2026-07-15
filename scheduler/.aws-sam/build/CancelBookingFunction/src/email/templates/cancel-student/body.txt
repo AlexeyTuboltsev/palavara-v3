@@ -1,0 +1,17 @@
+Hi {{studentName}},
+
+{{lead}}
+
+  Date: {{dateLine}}
+  Time: {{timeLine}}
+
+{{refundLine}}
+
+{{closing}}
+
+A calendar update is attached so the event is removed from your calendar.
+
+Palavara Studio
+
+---
+Booking ID: {{bookingId}}

@@ -1,0 +1,11 @@
+A booking has been cancelled by the {{cancelledBy}}.
+
+  Booker:     {{studentName}} <{{studentEmail}}>
+  Date:       {{dateLine}}
+  Time:       {{timeLine}}
+  Booking ID: {{bookingId}}
+
+{{refundLine}}
+
+The slot is now available for other bookings.
+A calendar update is attached so the event is removed from your calendar.
