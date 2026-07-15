@@ -48,10 +48,23 @@ jobs:
           #    will still be lazy-loading those old hashed chunks via
           #    React.lazy. Deleting them on every deploy was producing
           #    "Loading CSS chunk N failed" errors in Sentry (161 events
-          #    over 30d before this fix). Old chunks accumulate slowly;
-          #    a separate S3 lifecycle rule on the bucket can clean
-          #    them up after 30 days, by which point the HTML pointing
-          #    at them has long since aged out of any cache.
+          #    over 30d before this fix). Old chunks accumulate slowly.
+          #
+          # DO NOT add a bucket lifecycle rule to expire objects under
+          # `static/`. We tried that (`expire-old-static-chunks`, 30-day
+          # Expiration) and it silently killed the CURRENT main.js
+          # bundle on 2026-07-15 when no deploy had refreshed the
+          # objects for over 30 days. Result: `main.js` URL returned
+          # index.html via the CloudFront 404-fallback, browsers parsed
+          # HTML as JavaScript, every route errored, Sentry couldn't
+          # report because its SDK loads *from* the same broken bundle.
+          # The rule was removed the same day; the accumulation problem
+          # is small enough (~0.5MB per deploy, deploys are infrequent)
+          # that letting old chunks pile up costs pennies and eliminates
+          # the entire failure mode. If manual cleanup ever becomes
+          # necessary, do it by reading asset-manifest.json to find the
+          # currently-referenced chunks and only deleting hashes NOT in
+          # that list AND older than N days.
           aws s3 sync build/static/ s3://studio.palavara.com/static/ \
             --cache-control "public, max-age=31536000, immutable"
 
