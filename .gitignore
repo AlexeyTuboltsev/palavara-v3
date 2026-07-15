@@ -38,4 +38,4 @@ yarn-error.log*
 .firecrawl/
 
 # Playwright MCP
-.playwright-mcp/
+.playwright-mcp/scheduler/
