@@ -19,6 +19,13 @@ export function initSentry(){
 
     // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
     tracePropagationTargets: ["localhost", /^https:\/\/yourserver\.io\/api/],
+
+    // Synthetic `unhandledrejection` CustomEvent dispatched by browser
+    // extensions (isTrusted:false, no real promise reason). Sentry's
+    // global handler wraps it as an error with no stack. Not an app bug.
+    ignoreErrors: [
+      /Event `?CustomEvent`? \(type=unhandledrejection\) captured as promise rejection/,
+    ],
   });
 }
 
