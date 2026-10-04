@@ -3,6 +3,8 @@ import { TReadyAppState } from "../../types";
 import { Section } from "../../components/Section";
 import styles from "../../components/Section.module.scss";
 
+const GIFT_BUY_URL = 'https://book.palavara.com/gift.html'
+
 export const GiftCertificate: FC<{
   state: TReadyAppState
 }> = ({ state }) => {
@@ -12,27 +14,37 @@ export const GiftCertificate: FC<{
       <h1>GIFT CERTIFICATES</h1>
 
       <h2>Certificate for Open Studio</h2>
-      <p>For 1 session (3 hours) – €30</p>
-      <p>Open Studio is held every Friday from 17:00 to 20:00.</p>
-      <p>The certificate is for one person.</p>
-      <p>Firing costs are €10 per kilo; items are weighed before glazing and firing.</p>
-      <p className={styles.italic}>Please note that Open Studio is not a lesson.</p>
+      <p>1 session (3 hours) — €30 per person / per session</p>
+      <p>
+        This gift certificate is sold without a specific date. To book a specific date,
+        the gift recipient simply needs to contact us by email 2–3 days before their
+        planned visit and let us know which Friday they would like to come.
+      </p>
+      <p>Open Studio takes place every Friday from 17:00 to 20:00.</p>
+      <p>
+        Please note that the material fee is not included in the certificate price.
+        The gift recipient will need to pay for the clay separately at the studio,
+        at a rate of €10 per kilogram. The pieces will be weighed before glazing and firing.
+      </p>
+      <p className={styles.italic}>Please note that Open Studio is not a guided class. It is a self-directed session.</p>
+      <p>
+        More information about Open Studio:{' '}
+        <a href="/open-studio">studio.palavara.com/open-studio</a>
+      </p>
 
-      <h2>Certificate for Family Saturday – €30</h2>
-      <p>Duration: 2 hours</p>
-      <p>Classes are held on Saturdays from 12:00 to 14:00.</p>
-      <p>The certificate is for one adult and one child.</p>
-      <p>It is possible to attend with additional children and adults for an extra fee.</p>
-      <p>Firing costs are €10 per kilo; items are weighed before glazing and firing.</p>
+      <h2>Certificate for Wheel Throwing Classes</h2>
+      <p>
+        You can purchase a gift certificate for any wheel-throwing class listed in the
+        Classes / Wheel Throwing section.
+      </p>
+      <p>
+        More information about wheel-throwing classes:{' '}
+        <a href="/wheel-throwing">studio.palavara.com/wheel-throwing</a>
+      </p>
 
-      <h2>Certificate for Pottery Wheel Class</h2>
-      <p>You can purchase a gift certificate for any wheel throwing course from the <strong>Classes / Wheel Throwing</strong> section.</p>
+      <p><strong>All gift certificates are valid for one year from the date of purchase.</strong></p>
 
-      <p><strong>How to purchase:</strong></p>
-      <p>Please send me an email with the type of gift certificate you would like to buy and the name of the recipient. I will then send you the payment details.</p>
-      <p>After the payment has been received, you will receive the gift certificate as a PDF file.</p>
-
-      <p><strong>email: <a href="mailto:palavarastudio@gmail.com">palavarastudio@gmail.com</a></strong></p>
+      <p><a href={GIFT_BUY_URL} className={styles.bookNow}>Buy a Gift Certificate</a></p>
 
     </div>
   </Section>
