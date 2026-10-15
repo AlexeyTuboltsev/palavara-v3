@@ -1,1 +1,33 @@
-aW1wb3J0IFJlYWN0LCB7RkN9IGZyb20gJ3JlYWN0JwppbXBvcnQge1RSZWFkeUFwcFN0YXRlfSBmcm9tICIuLi8uLi90eXBlcyI7CmltcG9ydCB7U2VjdGlvbn0gZnJvbSAiLi4vLi4vY29tcG9uZW50cy9TZWN0aW9uIjsKaW1wb3J0IHN0eWxlcyBmcm9tICIuLi8uLi9jb21wb25lbnRzL1NlY3Rpb24ubW9kdWxlLnNjc3MiOwoKZXhwb3J0IGNvbnN0IFRlYW1FdmVudHM6IEZDPHsKICBzdGF0ZTogVFJlYWR5QXBwU3RhdGUKfT4gPSAoe3N0YXRlfSkgPT4gewogIHJldHVybiA8U2VjdGlvbiBzdGF0ZT17c3RhdGV9PgogICAgPGRpdiBjbGFzc05hbWU9e3N0eWxlcy5tYWluVGV4dH0+CiAgICAgIDxoMT5UZWFtIEV2ZW50czwvaDE+CiAgICAgIDxwPkJyaW5nIHlvdXIgdGVhbSB0b2dldGhlciBmb3IgYSBjcmVhdGl2ZSBhbmQgcmVsYXhpbmcgZXhwZXJpZW5jZS48L3A+CgogICAgICA8aDI+UE9UVEVSWSBXT1JLU0hPUDwvaDI+CiAgICAgIDxwPk91ciBwb3R0ZXJ5IHdvcmtzaG9wIGlzIGRlc2lnbmVkIGZvciBncm91cHMgb2YgNOKAkzEwIHBhcnRpY2lwYW50cyBhbmQgbGFzdHMgYXBwcm94aW1hdGVseSAyLjUgaG91cnMuPC9wPgogICAgICA8cD5Zb3UnbGwgbGVhcm4gYmFzaWMgaGFuZC1idWlsZGluZyB0ZWNobmlxdWVzIGFuZCBjcmVhdGUgeW91ciBvd24gY2VyYW1pYyBwaWVjZSAtLSBhIHBlcmZlY3QgcGVyc29uYWwga2VlcHNha2Ugb3IgZGVjb3JhdGlvbiBmb3IgeW91ciBvZmZpY2UgZGVzay48L3A+CiAgICAgIDxwPlRoZSB0aGVtZSBvZiB0aGUgd29ya3Nob3AgY2FuIGFsc28gYmUgZGlzY3Vzc2VkIGluZGl2aWR1YWxseSBhbmQgdGFpbG9yZWQgdG8geW91ciB0ZWFtJ3MgcHJlZmVyZW5jZXMuPC9wPgoKICAgICAgPGgzPldoYXQncyBJbmNsdWRlZDwvaDM+CiAgICAgIDx1bD4KICAgICAgICA8bGk+QWxsIG1hdGVyaWFscyBuZWVkZWQgdG8gY3JlYXRlIG9uZSBjZXJhbWljIHBpZWNlPC9saT4KICAgICAgICA8bGk+U3RlcC1ieS1zdGVwIGluc3RydWN0aW9uIGFuZCBjcmVhdGl2ZSBzdXBwb3J0IHRocm91Z2hvdXQgdGhlIHdvcmtzaG9wPC9saT4KICAgICAgICA8bGk+R2xhemluZyBhbmQgZmlyaW5nIG9mIHlvdXIgZmluaXNoZWQgcGllY2UqPC9saT4KICAgICAgPC91bD4KICAgICAgPHAgY2xhc3NOYW1lPXtzdHlsZXMuc21hbGx9PiogRWFjaCBhZGRpdGlvbmFsIHBpZWNlIGNvc3RzIOKCrDEwLjwvcD4KICAgICAgPHAgY2xhc3NOYW1lPXtzdHlsZXMuc21hbGx9PkZpbmlzaGVkIHBpZWNlcyB3aWxsIGJlIHJlYWR5IGZvciBwaWNrdXAgYXBwcm94aW1hdGVseSB0d28gd2Vla3MgYWZ0ZXIgdGhlIHdvcmtzaG9wLjwvcD4KCiAgICAgIDxoMz5QcmljZTwvaDM+CiAgICAgIDxwPuKCrDMwMCBmb3IgYSBncm91cCBvZiB1cCB0byA0IHBhcnRpY2lwYW50czwvcD4KICAgICAgPHA+4oKsNzUgZm9yIGVhY2ggYWRkaXRpb25hbCBwYXJ0aWNpcGFudDwvcD4KICAgIDwvZGl2PgogIDwvU2VjdGlvbj4KfQo=
+import React, {FC} from 'react'
+import {TReadyAppState} from "../../types";
+import {Section} from "../../components/Section";
+import styles from "../../components/Section.module.scss";
+
+export const TeamEvents: FC<{
+  state: TReadyAppState
+}> = ({state}) => {
+  return <Section state={state}>
+    <div className={styles.mainText}>
+      <h1>Team Events</h1>
+      <p>Bring your team together for a creative and relaxing experience.</p>
+
+      <h2>POTTERY WORKSHOP</h2>
+      <p>Our pottery workshop is designed for groups of 4–10 participants and lasts approximately 2.5 hours.</p>
+      <p>You'll learn basic hand-building techniques and create your own ceramic piece — a perfect personal keepsake or decoration for your office desk.</p>
+      <p>The theme of the workshop can also be discussed individually and tailored to your team's preferences.</p>
+
+      <h3>What's Included</h3>
+      <ul>
+        <li>All materials needed to create one ceramic piece</li>
+        <li>Step-by-step instruction and creative support throughout the workshop</li>
+        <li>Glazing and firing of your finished piece*</li>
+      </ul>
+      <p className={styles.small}>* Each additional piece costs €10.</p>
+      <p className={styles.small}>Finished pieces will be ready for pickup approximately two weeks after the workshop.</p>
+
+      <h3>Price</h3>
+      <p>€300 for a group of up to 4 participants</p>
+      <p>€75 for each additional participant</p>
+    </div>
+  </Section>
+}
