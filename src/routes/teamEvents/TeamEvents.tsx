@@ -6,49 +6,28 @@ import styles from "../../components/Section.module.scss";
 export const TeamEvents: FC<{
   state: TReadyAppState
 }> = ({state}) => {
-  // const {t} = useTranslation();
-
   return <Section state={state}>
     <div className={styles.mainText}>
       <h1>Team Events</h1>
       <p>Bring your team together for a creative and relaxing experience.</p>
-    <br/>
-    <h2>OPTION 1. POTTERY WORKSHOP</h2>
-      <p>Our Ceramic Masterclass is designed for groups of 5–10 participants and lasts approximately 2.5 hours.</p>
-      <p>You’ll learn basic pottery handbuilding techniques and create your own ceramic piece — perfect as a personal keepsake or for your office desk.</p>
-      <br/>
-      <h3>What’s Included:</h3>
+
+      <h2>POTTERY WORKSHOP</h2>
+      <p>Our pottery workshop is designed for groups of 4–10 participants and lasts approximately 2.5 hours.</p>
+      <p>You'll learn basic hand-building techniques and create your own ceramic piece — a perfect personal keepsake or decoration for your office desk.</p>
+      <p>The theme of the workshop can also be discussed individually and tailored to your team's preferences.</p>
+
+      <h3>What's Included</h3>
       <ul>
-        <li>All materials for creating one ceramic piece*</li>
-        <li>Step-by-step instruction and creative support throughout the process</li>
-        <li>Transparent glazing and firing of your finished piece**</li>
+        <li>All materials needed to create one ceramic piece</li>
+        <li>Step-by-step instruction and creative support throughout the workshop</li>
+        <li>Glazing and firing of your finished piece*</li>
       </ul>
-      <p className={styles.small}>* Each additional piece is charged at €5 per item.</p>
-      <p className={styles.small}>** Finished pieces will be ready for pickup approximately two weeks after the workshop.</p>
-      <br/>
-      <h3>Price*:</h3>
-      <p>€75 per person (minimum 5 participants)</p>
-      <p className={styles.small}>*Please note that 19% VAT will be added to the total amount.</p>
-      <br/>
-    <h2>OPTION 2. TEA AND POTTERY WORKSHOP</h2>
-      <p>Our Ceramic Masterclass is designed for groups of 5–10 participants and lasts approximately 2.5 hours.</p>
-      <p>Enjoy a calming blend of tea and creativity with our Tea & Pottery Workshop.</p>
-      <p>We’ll begin with a guided tea tasting — featuring a curated selection of delicious teas — followed by a hands-on pottery session where you’ll craft your own unique tea cup or bowl.</p>
-      <br/>
-      <h3>What’s Included:</h3>
-      <ul>
-        <li>A guided tea tasting experience</li>
-        <li>All materials for creating one ceramic piece*</li>
-        <li>Step-by-step instruction and creative support throughout the process</li>
-        <li>Transparent glazing and firing of your finished piece**</li>
-      </ul>
-      <p className={styles.small}>* Each additional piece is charged at €5 per item.</p>
-      <p className={styles.small}>** Finished pieces will be ready for pickup approximately two weeks after the workshop.</p>
-      <br/>
-      <h3>Price*:</h3>
-      <p>€95 per person (minimum 5 participants)</p>
-      <p className={styles.small}>*Please note that 19% VAT will be added to the total amount.</p>
+      <p className={styles.small}>* Each additional piece costs €10.</p>
+      <p className={styles.small}>Finished pieces will be ready for pickup approximately two weeks after the workshop.</p>
+
+      <h3>Price</h3>
+      <p>€300 for a group of up to 4 participants</p>
+      <p>€75 for each additional participant</p>
     </div>
-    
-    </Section>
+  </Section>
 }
