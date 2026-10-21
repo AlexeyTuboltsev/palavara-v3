@@ -3,7 +3,9 @@ import { TReadyAppState } from "../../types";
 import { Section } from "../../components/Section";
 import styles from "../../components/Section.module.scss";
 
-const GIFT_BUY_URL = 'https://book.palavara.com/gift.html'
+// TODO: point back to https://book.palavara.com/gift.html once the gift-certificate
+// backend (palavara-scheduler#47) is merged and deployed to production.
+const GIFT_BUY_URL = 'https://book-staging.palavara.com/gift.html'
 
 export const GiftCertificate: FC<{
   state: TReadyAppState
